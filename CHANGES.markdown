@@ -10,6 +10,8 @@ Release date: **unreleased**
 
 * Logic analyzer: Captures hold 1364 samples instead of 1024. Samples are packed four to every three longs (24 bits each) instead of one per long, which wasted a quarter of the 4 KB buffer. The maximum sample rate is unchanged. Pre-trigger captures still store one long per sample and stay at 1024.
 
+* Logic analyzer: Added run-length encoding (OLS flag bit 8, as sigrok/PulseView request it). Each value is stored once with a repeat count, so slow or idle signals cover far more time: a 1024-entry capture of a counter changing every ~15 samples decompressed to over 11,000 samples. Up to 500 kHz; the highest enabled channel carries the count flag, as the OLS protocol defines.
+
 
 <a id="idt_1_3"></a>ID Tracker 1.3
 ----

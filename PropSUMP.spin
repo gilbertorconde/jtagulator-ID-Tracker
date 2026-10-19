@@ -21,7 +21,6 @@ and http://dangerousprototypes.com/docs/Logic_Analyzer_core:_Background#2.3_The_
 TODOs:
 * support trigger delays
 * support serial trigger mode
-* support RLE
 
 }}
    
@@ -107,10 +106,14 @@ CON 'offsets of the structure below
   SAMPLEBUFFER_OFF            = 68
   PREPERIODS_OFF              = 72
   SAMPLEREND_OFF              = 76
+  RLEMAX_OFF                  = 80
 
   ' Pre-trigger capture polls the trigger in software, which needs more clocks per
   ' sample than WAITPEQ (worst case ~73), so its sample period is at least this.
   PRE_MIN_CLOCKS_WAIT         = 88
+  ' Run-length encoding stores up to two longs when the value changes (worst case
+  ' ~124 clocks), so its sample period is at least this (500 kHz).
+  RLE_MIN_CLOCKS_WAIT         = 160
 
   
 VAR 'This is a struct used by the sampler cog; its layout and the offsets above must be in sync
@@ -139,9 +142,11 @@ VAR 'This is a struct used by the sampler cog; its layout and the offsets above 
   long sampleBuffer        ' Address of global buffer from top object
   long prePeriods          ' Samples kept from before the trigger (0 = no pre-trigger capture)
   long samplerEnd          ' Pre-trigger capture: address after the last sample written (oldest sample)
+  long rleMax              ' Run-length encoding: largest repeat count (0 = off)
 
 
 VAR
+  long rleOn               ' RLE flag from CMD_FLAGS
   long readReq             ' Counts requested with CMD_CNT
   long delayReq
 
@@ -239,18 +244,25 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
         prePeriods := 0
         if (readReq > delayReq) and (trig1Mask <> 0) and (isTrig1Start <> 0)
           prePeriods := (readReq <# MAX_SAMPLE_PERIODS) - delayReq #> 0
+        rleMax := 0
         if prePeriods
           readPeriods := readReq <# MAX_SAMPLE_PERIODS
           delayPeriods := readPeriods     ' Ring buffer size
           clocksWait #>= PRE_MIN_CLOCKS_WAIT
+        elseif rleOn
+          ' RLE entries are whole longs. A count entry has the top bit of the sent
+          ' sample width set (the highest enabled channel), so counts and values
+          ' use the bits below it.
+          rleMax := (1 << (Groups * 8 - 1)) - 1
+          delayPeriods := delayReq <# MAX_SAMPLE_PERIODS
+          readPeriods := readReq <# delayPeriods
+          clocksWait #>= RLE_MIN_CLOCKS_WAIT
         else
           prePeriods := 0
           delayPeriods := delayReq
           readPeriods := readReq <# delayReq
         u.LEDYellow
-        i:=0
-        repeat while i < MAX_SAMPLE_PERIODS ' Clear buffer before starting capture
-          long[sampleBuffer][i++]:=$00000000
+        longfill(sampleBuffer, 0, MAX_SAMPLE_PERIODS)   ' Clear buffer before starting capture
 
         samplerRunning:=1                   ' Arm the sampler cog
         isSendSamples:=1                    ' Send samples after successful capture
@@ -279,38 +291,23 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
       CMD_CNT:
         if (GetFourMoreParamBytes == -1)
           next
-        larg:=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-        readReq:=(larg+1)*4   'the protocol doesn't indicate the +1 is needed; but sigrok's OLS API does
-        if readReq > DEFAULT_READ_PERIODS
-          readReq:=DEFAULT_READ_PERIODS
-
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        delayReq:=(larg+1)*4  'the protocol doesn't indicate the +1 is needed; but sigrok's OLS API does
-        if delayReq > DEFAULT_DELAY_PERIODS
-          delayReq:=DEFAULT_DELAY_PERIODS
+        ' Read count in the low 16 bits, delay count in the high 16 bits. The protocol
+        ' doesn't say counts are (n+1)*4, but sigrok's OLS driver does.
+        larg:=ParamLong
+        readReq:=((larg & $FFFF) + 1) << 2 <# DEFAULT_READ_PERIODS
+        delayReq:=((larg >> 16) + 1) << 2 <# DEFAULT_DELAY_PERIODS
         ' The read/delay split is resolved when the capture starts (CMD_RUN)
                           
       CMD_DIV:
         if (GetFourMoreParamBytes == -1)
           next
-        larg:=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        clocksWait:=((larg+1)*SR_FACTOR_NUM)/SR_FACTOR_DEN 
-        if clocksWait < DEFAULT_CLOCKS_WAIT    ' set minimum allowable value
-          clocksWait:=DEFAULT_CLOCKS_WAIT
+        clocksWait:=(((ParamLong & $FF_FFFF) + 1) * SR_FACTOR_NUM) / SR_FACTOR_DEN #> DEFAULT_CLOCKS_WAIT
        
       CMD_FLAGS:
         if (GetFourMoreParamBytes == -1)
           next
         disableFlags:=vCmd[1] & DISABLE_FLAGS_MASK
+        rleOn:=vCmd[2] & 1          ' OLS flag bit 8: run-length encoding
 
       ' Trigger stage n (0..3) is in bits 3..2 of the command; the per-stage
       ' masks, values and start flags are consecutive longs in the struct.
@@ -336,20 +333,31 @@ PRI ParamLong
   return vCmd[1] | vCmd[2] << 8 | vCmd[3] << 16 | vCmd[4] << 24
 
 
-PRI GetFourMoreParamBytes : val
-  if (vCmd[1]:=pst.RxTime(MAX_RX_DELAY_MS)) < 0
-    val:=-1  
-  if (vCmd[2]:=pst.RxTime(MAX_RX_DELAY_MS)) < 0
-    val:=-1
-  if (vCmd[3]:=pst.RxTime(MAX_RX_DELAY_MS)) < 0
-    val:=-1
-  if (vCmd[4]:=pst.RxTime(MAX_RX_DELAY_MS)) < 0
-    val:=-1
-  
-                 
+PRI GetFourMoreParamBytes : val | i
+  repeat i from 1 to 4
+    if (vCmd[i] := pst.RxTime(MAX_RX_DELAY_MS)) < 0
+      val := -1
+
+
+PRI Groups : n | g
+  ' Number of enabled channel groups
+  repeat g from 0 to MAX_CH_GROUPS - 1
+    if disableFlags & (%100 << g) == 0
+      n++
+
+
 PRI SendAllSamples | i, e   'NB: OLS sends samples in reverse
   i := 0
-  if prePeriods
+  if rleMax
+    ' Entries are longs in time order: a value, then its repeat count (bit 31 set)
+    ' when it repeated. Sent newest first, a count arrives before its value.
+    repeat while i < readPeriods
+      e := long[sampleBuffer][delayPeriods - 1 - i++]
+      if e < 0
+        SendWord((e & rleMax) | (rleMax + 1))
+      else
+        SendWord(Packed(e) & rleMax)
+  elseif prePeriods
     ' Ring buffer of delayPeriods samples; samplerEnd points at the oldest one
     e := (samplerEnd - sampleBuffer) >> 2
     repeat while i < readPeriods
@@ -364,11 +372,23 @@ PRI SendAllSamples | i, e   'NB: OLS sends samples in reverse
       ++i
 
     
-PRI SendSamples(value) | g
-  ' One byte per enabled channel group, CH0-7 first. Disable flags: %--4321--
+PRI SendSamples(value)
+  SendWord(Packed(value))
+
+
+PRI Packed(value) : w | g, n
+  ' The enabled channel groups' bytes side by side, CH0-7 first, as they are sent
+  n := 0                     ' locals start undefined (only the result is zeroed)
   repeat g from 0 to MAX_CH_GROUPS - 1
     if disableFlags & (%100 << g) == 0
-      pst.Tx((value >> (g << 3)) & $FF)
+      w |= ((value >> (g << 3)) & $FF) << (n++ << 3)
+
+
+PRI SendWord(w)
+  ' One byte per enabled channel group, lowest first
+  repeat Groups
+    pst.Tx(w & $FF)
+    w >>= 8
 
 
 DAT             
@@ -419,6 +439,10 @@ samplerArm              MOVS    samplerTramp,       #samplerArmed
                         ADD     t1,                 #CLOCKSWAIT_OFF
                         RDLONG  samplerWait,        t1
 
+                        MOV     t1,                 PAR
+                        ADD     t1,                 #RLEMAX_OFF
+                        RDLONG  samplerRleMax,      t1
+
                         MOV     samplerStage,       #0
                         CALL    #samplerLoadStage
 
@@ -464,7 +488,9 @@ samplerLoadStage_ret    RET
 ' holds MAX_PACKED_SAMPLES. Sample k lands in bytes 3k..3k+2. Each phase starts
 ' with WAITCNT and reads INA right after it, so samples stay evenly spaced; every
 ' phase runs well under the minimum 66-clock period (longest: ~55 clocks).
-samplerStart            MOV     t1,                 samplerLimitA       ' limit = base + 3 * count
+samplerStart            CMP     samplerRleMax,      #0                  WZ
+              IF_NZ     JMP     #samplerRle
+                        MOV     t1,                 samplerLimitA       ' limit = base + 3 * count
                         SUB     t1,                 samplerTargetA
                         SHR     t1,                 #2
                         MOV     samplerLimitA,      t1
@@ -509,6 +535,36 @@ samplerPh3              WAITCNT samplerStamp,       samplerWait
                         ADD     samplerTargetA,     #4
                         CMP     samplerTargetA,     samplerLimitA       WZ
               IF_NE     JMP     #samplerPh0
+                        JMP     #samplerFinish
+
+' Run-length encoded capture: one long per entry, the value when it changes,
+' followed by its repeat count (bit 31 set) if it repeated.
+samplerRle              MOV     samplerStamp,       CNT
+                        ADD     samplerStamp,       samplerWait
+                        WAITCNT samplerStamp,       samplerWait
+                        MOV     samplerHold,        INA
+                        AND     samplerHold,        samplerMask24
+                        MOV     samplerAcc,         #0                  ' repeats of samplerHold
+
+samplerRleLoop          WAITCNT samplerStamp,       samplerWait
+                        MOV     t1,                 INA
+                        AND     t1,                 samplerMask24
+                        CMP     t1,                 samplerHold         WZ
+              IF_Z      CMP     samplerAcc,         samplerRleMax       WC  ' C = room for more repeats
+              IF_Z_AND_C ADD    samplerAcc,         #1
+              IF_Z_AND_C JMP    #samplerRleLoop
+                        WRLONG  samplerHold,        samplerTargetA      ' changed (or count full): store the run
+                        ADD     samplerTargetA,     #4
+                        CMP     samplerTargetA,     samplerLimitA       WZ
+              IF_E      JMP     #samplerFinish
+                        CMP     samplerAcc,         #0                  WZ
+              IF_NZ     OR      samplerAcc,         samplerBit31
+              IF_NZ     WRLONG  samplerAcc,         samplerTargetA
+              IF_NZ     ADD     samplerTargetA,     #4
+                        MOV     samplerHold,        t1
+                        MOV     samplerAcc,         #0
+                        CMP     samplerTargetA,     samplerLimitA       WZ
+              IF_NE     JMP     #samplerRleLoop
                         JMP     #samplerFinish
 
 samplerCommon           JMP     samplerTramp
@@ -558,6 +614,7 @@ samplerFinish           MOVS    samplerTramp,       #samplerOff
                         JMP     #samplerCommon
 
 samplerMask24           LONG    $00FF_FFFF
+samplerBit31            LONG    $8000_0000
 
 ' VARIABLES stored in cog RAM (uninitialized)
 t1                      RES 1
@@ -575,6 +632,7 @@ samplerPreLeft          RES 1
 samplerPostLeft         RES 1
 samplerHold             RES 1
 samplerStage            RES 1
+samplerRleMax           RES 1
 samplerAcc              RES 1
 
                         FIT   ' make sure all instructions/data fit within the cog's RAM
