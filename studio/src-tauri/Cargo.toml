@@ -1,6 +1,6 @@
 [package]
 name = "jtagulator-studio"
-version = "0.1.0"
+version = "0.1.1"
 description = "Desktop frontend for the JTAGulator"
 edition = "2021"
 

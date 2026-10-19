@@ -2,6 +2,7 @@
   import { app } from "../../stores/app.svelte";
   import Field from "../Field.svelte";
   import Panel from "../Panel.svelte";
+  import { version } from "../../../../package.json";
 
   const SPEEDS = [
     { value: 0.2, label: "Instant (~0.2 s)" },
@@ -58,7 +59,7 @@
 
   <Panel title="About">
     <div class="small">
-      <p><b>JTAGulator Studio</b> 0.1.0 — a desktop frontend for the <a href="https://jtagulator.com" target="_blank" rel="noreferrer">JTAGulator</a> by Joe Grand.</p>
+      <p><b>JTAGulator Studio</b> {version} — a desktop frontend for the <a href="https://jtagulator.com" target="_blank" rel="noreferrer">JTAGulator</a> by Joe Grand.</p>
       <p class="muted">
         It drives the stock firmware's text menu over USB serial (115200 8N1), so it works with the original firmware and with ID Tracker. Manufacturer
         names are decoded locally from the JEP106 table that ships with ID Tracker (1,953 entries), even on firmware without the EEPROM database.
