@@ -193,6 +193,134 @@ export function decodeUart(cap: Capture, o: UartOptions): UartFrame[] {
   return frames;
 }
 
+export interface SpiOptions {
+  sck: number;
+  mosi?: number;
+  miso?: number;
+  /** Chip select; words only count while it is active. */
+  cs?: number;
+  csActiveHigh?: boolean;
+  /** SPI mode 0-3 (CPOL = mode >> 1, CPHA = mode & 1). */
+  mode?: 0 | 1 | 2 | 3;
+  lsbFirst?: boolean;
+  bits?: number;
+}
+
+export interface SpiWord {
+  startSample: number;
+  endSample: number;
+  mosi?: number;
+  miso?: number;
+}
+
+/**
+ * Decode SPI words. Data is sampled on the leading clock edge for CPHA = 0 and
+ * the trailing edge for CPHA = 1, i.e. on the rising edge for modes 0 and 3 and
+ * the falling edge for modes 1 and 2.
+ */
+export function decodeSpi(cap: Capture, o: SpiOptions): SpiWord[] {
+  const s = cap.samples;
+  const mode = o.mode ?? 0;
+  const sampleOnRising = mode === 0 || mode === 3;
+  const nbits = o.bits ?? 8;
+  const bit = (i: number, ch: number) => (s[i] >>> ch) & 1;
+  const active = (i: number) => o.cs === undefined || bit(i, o.cs) === (o.csActiveHigh ? 1 : 0);
+  const words: SpiWord[] = [];
+  let count = 0;
+  let mo = 0;
+  let mi = 0;
+  let first = -1;
+  for (let i = 1; i < s.length; i++) {
+    if (!active(i)) {
+      count = 0;
+      continue;
+    }
+    if (!active(i - 1)) count = 0; // chip select just asserted
+    const prev = bit(i - 1, o.sck);
+    const cur = bit(i, o.sck);
+    if (prev === cur || (cur === 1) !== sampleOnRising) continue;
+    if (count === 0) {
+      mo = mi = 0;
+      first = i;
+    }
+    const shift = o.lsbFirst ? count : nbits - 1 - count;
+    if (o.mosi !== undefined) mo |= bit(i, o.mosi) << shift;
+    if (o.miso !== undefined) mi |= bit(i, o.miso) << shift;
+    if (++count === nbits) {
+      const w: SpiWord = { startSample: first, endSample: i };
+      if (o.mosi !== undefined) w.mosi = mo;
+      if (o.miso !== undefined) w.miso = mi;
+      words.push(w);
+      count = 0;
+    }
+  }
+  return words;
+}
+
+export interface I2cOptions {
+  scl: number;
+  sda: number;
+}
+
+export type I2cEvent =
+  | { kind: "start" | "stop"; startSample: number; endSample: number; repeated?: boolean }
+  | { kind: "byte"; startSample: number; endSample: number; value: number; ack: boolean; address?: { addr: number; read: boolean } };
+
+/** Decode I2C: START/STOP conditions, address bytes (7-bit) and data bytes with ACK/NACK. */
+export function decodeI2c(cap: Capture, o: I2cOptions): I2cEvent[] {
+  const s = cap.samples;
+  const lvl = (i: number, ch: number) => (s[i] >>> ch) & 1;
+  const out: I2cEvent[] = [];
+  let inTx = false;
+  let nbit = 0;
+  let value = 0;
+  let first = -1;
+  let expectAddress = false;
+  // Captures start at the trigger with no pre-trigger samples. Triggering on SDA
+  // going low lands just after a START, so SDA low with SCL high at sample 0 is
+  // taken as one.
+  if (s.length && lvl(0, o.scl) && !lvl(0, o.sda)) {
+    out.push({ kind: "start", startSample: 0, endSample: 0 });
+    inTx = true;
+    expectAddress = true;
+  }
+  for (let i = 1; i < s.length; i++) {
+    const sclPrev = lvl(i - 1, o.scl);
+    const scl = lvl(i, o.scl);
+    const sdaPrev = lvl(i - 1, o.sda);
+    const sda = lvl(i, o.sda);
+    if (sclPrev && scl && sdaPrev !== sda) {
+      // SDA changing while SCL is high is a START (falling) or STOP (rising).
+      if (!sda) {
+        out.push({ kind: "start", startSample: i, endSample: i, repeated: inTx });
+        inTx = true;
+        expectAddress = true;
+      } else {
+        out.push({ kind: "stop", startSample: i, endSample: i });
+        inTx = false;
+      }
+      nbit = 0;
+      value = 0;
+      continue;
+    }
+    if (!inTx || sclPrev || !scl) continue;
+    // SCL rising edge: sample SDA.
+    if (nbit === 0) first = i;
+    if (nbit < 8) value = (value << 1) | sda;
+    if (++nbit === 9) {
+      const ev: I2cEvent = { kind: "byte", startSample: first, endSample: i, value, ack: sda === 0 };
+      if (expectAddress) {
+        ev.address = { addr: value >> 1, read: (value & 1) === 1 };
+        expectAddress = false;
+      }
+      out.push(ev);
+      nbit = 0;
+      value = 0;
+    }
+  }
+  return out;
+}
+
 export const uartSamplesPerBit = (cap: Capture, baud: number) => cap.sampleRateHz / baud;
 
 /** Printable rendering of decoded bytes (C-style escapes for the rest). */

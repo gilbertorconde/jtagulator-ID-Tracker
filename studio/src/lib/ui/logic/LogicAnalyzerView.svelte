@@ -33,12 +33,13 @@
   import {
     UART_MIN_SAMPLES_PER_BIT,
     byteLabel,
+    decodeI2c,
+    decodeSpi,
     decodeUart,
     formatHz,
     formatTime,
     framesToText,
     measureAll,
-    type UartFrame,
   } from "../../logic/decode";
   import { captureFileName, downloadText, toCSV, toVCD } from "../../logic/export";
   import Waveform, { defaultNames, type WaveAnnotation, type WaveMarkers } from "./Waveform.svelte";
@@ -240,23 +241,44 @@
   });
 
   // ------------------------------------------------------------- decoders
-  interface UartDecoder {
+  type DecKind = "uart" | "spi" | "i2c";
+  interface Decoder {
     id: number;
+    kind: DecKind;
+    uart: { channel: number; baud: number; invert: boolean };
+    spi: { sck: number; mosi: number; miso: number; cs: number; mode: 0 | 1 | 2 | 3 };
+    i2c: { scl: number; sda: number };
+  }
+  interface DecItem {
     channel: number;
-    baud: number;
-    invert: boolean;
+    start: number;
+    end: number;
+    label: string;
+    title: string;
+    error?: boolean;
   }
   const BAUDS = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400];
-  let decoders = $state<UartDecoder[]>([]);
-  let newCh = $state(0);
-  let newBaud = $state(9600);
-  let newInvert = $state(false);
+  const NONE = -1;
+  let decoders = $state<Decoder[]>([]);
+  let newKind = $state<DecKind>("uart");
+  let newUart = $state({ channel: 0, baud: 9600, invert: false });
+  let newSpi = $state({ sck: 1, mosi: 2, miso: NONE, cs: 0, mode: 0 as 0 | 1 | 2 | 3 });
+  let newI2c = $state({ scl: 0, sda: 1 });
   let nextId = 1;
   let view = $state<"text" | "hex">("text");
   let tab = $state<"decoders" | "measure" | "history">("decoders");
 
   function addDecoder() {
-    decoders = [...decoders, { id: nextId++, channel: newCh, baud: Math.max(1, Math.round(newBaud)), invert: newInvert }];
+    decoders = [
+      ...decoders,
+      {
+        id: nextId++,
+        kind: newKind,
+        uart: { ...newUart, baud: Math.max(1, Math.round(newUart.baud)) },
+        spi: { ...newSpi },
+        i2c: { ...newI2c },
+      },
+    ];
     tab = "decoders";
   }
 
@@ -264,28 +286,83 @@
     decoders = decoders.filter((d) => d.id !== id);
   }
 
+  function describe(d: Decoder) {
+    if (d.kind === "uart") return `UART ${d.uart.baud} 8N1${d.uart.invert ? " inv" : ""} · ${names[d.uart.channel]}`;
+    if (d.kind === "spi") return `SPI mode ${d.spi.mode} · SCK ${names[d.spi.sck]}`;
+    return `I2C · SCL ${names[d.i2c.scl]} / SDA ${names[d.i2c.sda]}`;
+  }
+
+  function runDecoder(d: Decoder, cap: Capture): { items: DecItem[]; text: string; problem: string | null } {
+    const has = (ch: number) => ch === NONE || !!((cap.channelMask >>> ch) & 1);
+    if (d.kind === "uart") {
+      const u = d.uart;
+      if (!has(u.channel)) return { items: [], text: "", problem: `${names[u.channel]} was not captured (its group was disabled).` };
+      const spb = cap.sampleRateHz / u.baud;
+      if (spb < UART_MIN_SAMPLES_PER_BIT)
+        return { items: [], text: "", problem: `Sample rate too low: ${spb.toFixed(1)} samples per bit. Use at least ${formatHz(u.baud * 4, 3)}.` };
+      const frames = decodeUart(cap, u);
+      return {
+        items: frames.map((f) => ({
+          channel: u.channel,
+          start: f.startSample,
+          end: f.endSample,
+          label: byteLabel(f.byte),
+          title: `0x${hex2(f.byte)}${f.framingError ? " · framing error" : ""}`,
+          error: f.framingError,
+        })),
+        text: framesToText(frames),
+        problem: null,
+      };
+    }
+    if (d.kind === "spi") {
+      const o = d.spi;
+      const missing = [o.sck, o.mosi, o.miso, o.cs].find((c) => !has(c));
+      if (missing !== undefined) return { items: [], text: "", problem: `${names[missing]} was not captured (its group was disabled).` };
+      const opt = (c: number) => (c === NONE ? undefined : c);
+      const words = decodeSpi(cap, { sck: o.sck, mosi: opt(o.mosi), miso: opt(o.miso), cs: opt(o.cs), mode: o.mode });
+      const items: DecItem[] = [];
+      for (const w of words) {
+        if (w.mosi !== undefined) items.push({ channel: o.mosi, start: w.startSample, end: w.endSample, label: hex2(w.mosi), title: `MOSI 0x${hex2(w.mosi)}` });
+        if (w.miso !== undefined) items.push({ channel: o.miso, start: w.startSample, end: w.endSample, label: hex2(w.miso), title: `MISO 0x${hex2(w.miso)}` });
+      }
+      const line = (k: "mosi" | "miso") => words.map((w) => (w[k] === undefined ? "" : hex2(w[k]!))).join(" ");
+      const text = [o.mosi !== NONE ? `MOSI  ${line("mosi")}` : "", o.miso !== NONE ? `MISO  ${line("miso")}` : ""].filter(Boolean).join("\n");
+      return { items, text, problem: null };
+    }
+    const o = d.i2c;
+    if (!has(o.scl) || !has(o.sda)) return { items: [], text: "", problem: "SCL or SDA was not captured (its group was disabled)." };
+    const ev = decodeI2c(cap, o);
+    const items: DecItem[] = ev.map((e) => {
+      if (e.kind !== "byte") {
+        const label = e.kind === "stop" ? "P" : e.repeated ? "Sr" : "S";
+        return { channel: o.sda, start: e.startSample, end: e.endSample, label, title: e.kind === "stop" ? "STOP" : e.repeated ? "Repeated START" : "START" };
+      }
+      const a = e.address;
+      const label = a ? `${hex2(a.addr)} ${a.read ? "R" : "W"}` : hex2(e.value);
+      return {
+        channel: o.sda,
+        start: e.startSample,
+        end: e.endSample,
+        label: e.ack ? label : `${label} N`,
+        title: `${a ? `Address 0x${hex2(a.addr)} ${a.read ? "read" : "write"}` : `Data 0x${hex2(e.value)}`} · ${e.ack ? "ACK" : "NACK"}`,
+        error: !e.ack,
+      };
+    });
+    // One line per transaction: S 50W 00 42 P
+    const text = items.map((i) => i.label.replace(" ", "")).join(" ").replace(/ (S|Sr) /g, "\n$1 ");
+    return { items, text, problem: null };
+  }
+
   const decoded = $derived(
     decoders.map((d) => {
       const cap = current;
-      if (!cap) return { d, frames: [] as UartFrame[], spb: 0, captured: true };
-      const captured = !!((cap.channelMask >>> d.channel) & 1);
-      const spb = cap.sampleRateHz / d.baud;
-      const frames = captured ? decodeUart(cap, { channel: d.channel, baud: d.baud, invert: d.invert }) : [];
-      return { d, frames, spb, captured };
+      if (!cap) return { d, items: [] as DecItem[], text: "", problem: null as string | null };
+      return { d, ...runDecoder(d, cap) };
     }),
   );
 
   const annotations = $derived<WaveAnnotation[]>(
-    decoded.flatMap(({ d, frames }) =>
-      frames.map((f) => ({
-        channel: d.channel,
-        start: f.startSample,
-        end: f.endSample,
-        label: byteLabel(f.byte),
-        title: `0x${f.byte.toString(16).padStart(2, "0")}`,
-        error: f.framingError,
-      })),
-    ),
+    decoded.flatMap(({ items }) => items.map((i) => ({ channel: i.channel, start: i.start, end: i.end, label: i.label, title: i.title, error: i.error }))),
   );
 
   // ---------------------------------------------------------- measurements
@@ -529,43 +606,68 @@
         <div class="tab-body">
           {#if tab === "decoders"}
             <div class="add">
-              <span class="label sub">UART (8N1)</span>
-              <select class="input mono" bind:value={newCh} title="Channel">
-                {#each capturedChannels as ch (ch)}
-                  <option value={ch}>{names[ch]}{names[ch] !== `CH${ch}` ? ` (CH${ch})` : ""}</option>
-                {/each}
+              <select class="input" bind:value={newKind} title="Decoder">
+                <option value="uart">UART (8N1)</option>
+                <option value="spi">SPI</option>
+                <option value="i2c">I2C</option>
               </select>
-              <span class="muted">@</span>
-              <input class="input mono baud" type="number" min="1" list="la-bauds" bind:value={newBaud} title="Baud rate" />
-              <datalist id="la-bauds">
-                {#each BAUDS as b (b)}<option value={b}></option>{/each}
-              </datalist>
-              <span class="muted">baud</span>
-              <label class="switch"><input type="checkbox" bind:checked={newInvert} /><span>Inverted</span></label>
+              {#snippet chSel(label: string, get: () => number, set: (v: number) => void, optional = false)}
+                <label class="chsel">
+                  <span class="muted">{label}</span>
+                  <select class="input mono" value={get()} onchange={(e) => set(+(e.currentTarget as HTMLSelectElement).value)}>
+                    {#if optional}<option value={NONE}>—</option>{/if}
+                    {#each capturedChannels as ch (ch)}
+                      <option value={ch}>{names[ch]}</option>
+                    {/each}
+                  </select>
+                </label>
+              {/snippet}
+              {#if newKind === "uart"}
+                {@render chSel("RX", () => newUart.channel, (v) => (newUart.channel = v))}
+                <input class="input mono baud" type="number" min="1" list="la-bauds" bind:value={newUart.baud} title="Baud rate" />
+                <datalist id="la-bauds">
+                  {#each BAUDS as b (b)}<option value={b}></option>{/each}
+                </datalist>
+                <span class="muted">baud</span>
+                <label class="switch"><input type="checkbox" bind:checked={newUart.invert} /><span>Inverted</span></label>
+              {:else if newKind === "spi"}
+                {@render chSel("SCK", () => newSpi.sck, (v) => (newSpi.sck = v))}
+                {@render chSel("MOSI", () => newSpi.mosi, (v) => (newSpi.mosi = v), true)}
+                {@render chSel("MISO", () => newSpi.miso, (v) => (newSpi.miso = v), true)}
+                {@render chSel("CS#", () => newSpi.cs, (v) => (newSpi.cs = v), true)}
+                <select class="input" bind:value={newSpi.mode} title="SPI mode">
+                  <option value={0}>Mode 0 (idle low, rising)</option>
+                  <option value={1}>Mode 1 (idle low, falling)</option>
+                  <option value={2}>Mode 2 (idle high, falling)</option>
+                  <option value={3}>Mode 3 (idle high, rising)</option>
+                </select>
+              {:else}
+                {@render chSel("SCL", () => newI2c.scl, (v) => (newI2c.scl = v))}
+                {@render chSel("SDA", () => newI2c.sda, (v) => (newI2c.sda = v))}
+              {/if}
               <button class="btn sm primary" onclick={addDecoder}><Plus size={13} /> Add decoder</button>
             </div>
 
             {#if !decoders.length}
               <p class="muted empty">
-                Add a UART decoder to annotate a channel with decoded bytes. Aim for at least
-                {UART_MIN_SAMPLES_PER_BIT * 4}× the baud rate as sample rate (e.g. 9600 baud → ≥ 100 kHz).
+                Add a decoder to annotate the waveform with decoded bytes. For UART, sample at least
+                {UART_MIN_SAMPLES_PER_BIT * 4}× the baud rate (9600 baud → ≥ 100 kHz); for SPI and I2C, at least 4× the clock.
               </p>
             {:else}
               <div class="dec-list">
-                {#each decoded as { d, frames, spb, captured } (d.id)}
+                {#each decoded as { d, items, text, problem } (d.id)}
                   <div class="dec">
                     <div class="dec-head">
                       <Radio size={14} class="faint" />
-                      <strong class="mono">{names[d.channel]}</strong>
-                      <span class="badge info">UART {d.baud} 8N1{d.invert ? " inv" : ""}</span>
-                      {#if current}
-                        <span class="badge">{frames.length} bytes</span>
-                        {#if frames.some((f) => f.framingError)}<span class="badge danger">framing errors</span>{/if}
+                      <span class="badge info">{describe(d)}</span>
+                      {#if current && !problem}
+                        <span class="badge">{items.length} items</span>
+                        {#if items.some((f) => f.error)}<span class="badge danger">{d.kind === "i2c" ? "NACKs" : "framing errors"}</span>{/if}
                       {/if}
                       <span class="spacer"></span>
                       <div class="seg">
                         <button class:active={view === "text"} onclick={() => (view = "text")}>Text</button>
-                        <button class:active={view === "hex"} onclick={() => (view = "hex")}>Hex</button>
+                        <button class:active={view === "hex"} onclick={() => (view = "hex")}>List</button>
                       </div>
                       <button class="btn sm icon ghost" title="Remove decoder" onclick={() => removeDecoder(d.id)}>
                         <Trash2 size={13} />
@@ -573,32 +675,25 @@
                     </div>
                     {#if !current}
                       <p class="muted small">Capture to decode.</p>
-                    {:else if !captured}
-                      <p class="warn-t small">CH{d.channel} was not captured (its group was disabled).</p>
-                    {:else if spb < UART_MIN_SAMPLES_PER_BIT}
-                      <p class="warn-t small">
-                        Sample rate too low: {spb.toFixed(1)} samples per bit. Use at least {formatHz(d.baud * 4, 3)}.
-                      </p>
-                    {:else if !frames.length}
-                      <p class="muted small">No frames found on this channel.</p>
+                    {:else if problem}
+                      <p class="warn-t small">{problem}</p>
+                    {:else if !items.length}
+                      <p class="muted small">Nothing decoded on these channels.</p>
                     {:else if view === "text"}
-                      <pre class="text mono">{framesToText(frames)}</pre>
+                      <pre class="text mono">{text}</pre>
                     {:else}
                       <div class="frames">
-                        {#each frames as f, i (i)}
+                        {#each items as f, i (i)}
                           <button
                             class="frame mono"
-                            class:err={f.framingError}
-                            title="{formatTime(f.startSample / current.sampleRateHz, 5)} · #{f.startSample}{f.framingError
-                              ? ' · framing error'
-                              : ''}"
+                            class:err={f.error}
+                            title="{formatTime(f.start / current.sampleRateHz, 5)} · #{f.start} · {f.title}"
                             onclick={() => {
-                              wave?.centerOn((f.startSample + f.endSample) / 2);
-                              markers = { a: f.startSample, b: f.endSample + 1 };
+                              wave?.centerOn((f.start + f.end) / 2);
+                              markers = { a: f.start, b: f.end + 1 };
                             }}
                           >
-                            <span class="h">{hex2(f.byte)}</span>
-                            <span class="c">{byteLabel(f.byte)}</span>
+                            <span class="h">{f.label}</span>
                           </button>
                         {/each}
                       </div>
@@ -963,6 +1058,11 @@
     overflow: auto;
     padding: 12px;
   }
+  .chsel {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
   .add {
     display: flex;
     align-items: center;
@@ -1058,10 +1158,6 @@
   }
   .frame:hover {
     border-color: var(--info);
-  }
-  .frame .c {
-    font-size: 10.5px;
-    color: var(--text-faint);
   }
   .frame.err {
     border-color: color-mix(in srgb, var(--danger) 60%, transparent);

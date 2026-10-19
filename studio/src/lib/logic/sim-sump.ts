@@ -41,7 +41,15 @@ export const SIM_SIGNALS = {
   noise: 6,
   /** SPI-ish burst every 5 ms: CS# low, 4 bytes at 250 kHz, mode 0. */
   spi: { cs: 20, sck: 21, mosi: 22, miso: 23 },
+  /** I2C write every 4 ms at 100 kHz: START, 0x50 W, 0x00, 0x42 (all ACKed), STOP. */
+  i2c: { scl: 10, sda: 11 },
 } as const;
+
+const I2C_PERIOD = 0.004;
+const I2C_BIT = 10e-6;
+const I2C_LEAD = 20e-6;
+/** Bytes on the wire: address 0x50 + W, then two data bytes. */
+export const SIM_I2C_BYTES = [0xa0, 0x00, 0x42];
 
 const SPI_PERIOD = 0.005;
 const SPI_BIT = 4e-6;
@@ -176,7 +184,32 @@ export class SimSump implements SumpHandler {
     set(sck, clk);
     set(mosi, mo);
     set(miso, mi);
+
+    const [scl, sda] = this.i2cLevel(t);
+    set(S.i2c.scl, scl);
+    set(S.i2c.sda, sda);
     return v >>> 0;
+  }
+
+  /** [SCL, SDA] of the synthesized I2C transaction at signal time t. */
+  private i2cLevel(t: number): [number, number] {
+    const T = I2C_BIT;
+    const p = (t % I2C_PERIOD) - I2C_LEAD;
+    const nbits = SIM_I2C_BYTES.length * 9;
+    if (p < 0) return [1, 1];
+    if (p < T / 2) return [1, 0]; // START: SDA falls while SCL is high
+    const q = p - T / 2;
+    if (q < nbits * T) {
+      const k = Math.floor(q / T);
+      const scl = (q % T) / T >= 0.5 ? 1 : 0;
+      const b = k % 9;
+      const sda = b < 8 ? (SIM_I2C_BYTES[Math.floor(k / 9)] >> (7 - b)) & 1 : 0; // 9th bit: ACK
+      return [scl, sda];
+    }
+    const r = q - nbits * T;
+    if (r < T / 4) return [0, 0];
+    if (r < T / 2) return [1, 0];
+    return [1, 1]; // STOP: SDA rises while SCL is high
   }
 
   private uartLevel(t: number): number {

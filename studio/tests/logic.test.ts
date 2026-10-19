@@ -11,9 +11,9 @@ import {
   planSampleRate,
   unpackSamples,
 } from "../src/lib/logic/sump";
-import { SIM_SIGNALS, SIM_UART_BAUD, SIM_UART_PERIOD, SIM_UART_TEXT, SimSump, installSimSump } from "../src/lib/logic/sim-sump";
+import { SIM_I2C_BYTES, SIM_SIGNALS, SIM_UART_BAUD, SIM_UART_PERIOD, SIM_UART_TEXT, SimSump, installSimSump } from "../src/lib/logic/sim-sump";
 import { SimFirmware } from "../src/lib/sim/firmware";
-import { decodeUart, measure, transitions } from "../src/lib/logic/decode";
+import { decodeI2c, decodeSpi, decodeUart, measure, transitions } from "../src/lib/logic/decode";
 import { toCSV, toVCD } from "../src/lib/logic/export";
 
 let dev: JTAGulator;
@@ -252,5 +252,36 @@ describe("export", () => {
 
   it("lists transitions", () => {
     expect([...transitions(cap, 0)]).toEqual([1, 4]);
+  });
+});
+
+describe("SPI and I2C decoders", () => {
+  it("decodes the simulated SPI burst (mode 0, CS# active low)", async () => {
+    simSump.opts.clock = () => 1 + 1e-7; // just before a burst starts
+    const cap = await sump.capture({ sampleRateHz: 1_200_000, samples: 1024, channels: [20, 21, 22, 23] });
+    const { cs, sck, mosi, miso } = SIM_SIGNALS.spi;
+    const words = decodeSpi(cap, { sck, mosi, miso, cs, mode: 0 });
+    expect(words.map((w) => w.mosi)).toEqual([0x9f, 0x00, 0x00, 0x00]);
+    expect(words.map((w) => w.miso)).toEqual([0xff, 0xef, 0x40, 0x18]);
+  });
+
+  it("decodes the simulated I2C write", async () => {
+    simSump.opts.clock = () => 1 + 1e-7;
+    const cap = await sump.capture({ sampleRateHz: 1_200_000, samples: 1024, channels: [10, 11] });
+    const ev = decodeI2c(cap, SIM_SIGNALS.i2c);
+    expect(ev.map((e) => e.kind)).toEqual(["start", "byte", "byte", "byte", "stop"]);
+    const bytes = ev.filter((e) => e.kind === "byte");
+    expect(bytes.map((b) => b.kind === "byte" && b.value)).toEqual(SIM_I2C_BYTES);
+    expect(bytes.every((b) => b.kind === "byte" && b.ack)).toBe(true);
+    expect(bytes[0].kind === "byte" && bytes[0].address).toEqual({ addr: 0x50, read: false });
+  });
+
+  it("decodes I2C when the capture is triggered on SDA going low", async () => {
+    const full = new SumpClient(session, { fullTriggers: true });
+    simSump.opts.clock = () => 1 + 1e-7;
+    const sda = 1 << SIM_SIGNALS.i2c.sda;
+    const cap = await full.capture({ sampleRateHz: 1_200_000, samples: 1024, channels: [10, 11], trigger: { mask: sda, value: 0 } });
+    const ev = decodeI2c(cap, SIM_SIGNALS.i2c);
+    expect(ev.filter((e) => e.kind === "byte").map((b) => b.kind === "byte" && b.value)).toEqual(SIM_I2C_BYTES);
   });
 });
