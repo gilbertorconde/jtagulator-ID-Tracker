@@ -68,7 +68,7 @@ Studio talks to the JTAGulator's own serial menu. It answers every prompt from y
 | **SWD** | Pinout scan, DPIDR read and decode |
 | **UART** | Active scan, passive TXD scan with baud measurement, and a terminal to the target console |
 | **GPIO** | Read, live monitor with change log, drive outputs |
-| **Logic analyzer** | 24-channel waveform viewer, triggers, pre-trigger capture (1.3), UART/SPI/I2C decoders, markers, VCD/CSV export |
+| **Logic analyzer** | 24-channel waveform viewer, triggers, pre-trigger capture (1.3), UART/SPI/I2C/1-Wire/CAN/JTAG/SWD decoders, markers, VCD/CSV/sigrok export |
 | **Firmware** | Shows the installed version, test-runs firmware from RAM, installs firmware to EEPROM, checks GitHub releases for updates, and checks for or writes the manufacturer database |
 | **Scan all** | Any combination of scans, run one after another |
 | **Chip IDs** | IDCODE and DPIDR decoded in the app against the JEP106 table and about 500 known part numbers, on any firmware |

@@ -10,7 +10,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
 - **SWD**: pinout scan, plus reading and decoding the DPIDR.
 - **UART**: active scan, passive TXD scan that measures the baud rate, and a passthrough terminal.
 - **GPIO**: read all channels, monitor them live with a change log, or drive them as outputs.
-- **Logic analyzer**: OLS/SUMP capture client with a 24-channel waveform viewer, triggers (all 24 channels and pre-trigger capture on ID Tracker 1.3), UART, SPI and I2C decoders, and VCD and CSV export.
+- **Logic analyzer**: OLS/SUMP capture client with a 24-channel waveform viewer, triggers (all 24 channels and pre-trigger capture on ID Tracker 1.3), UART, SPI, I2C, 1-Wire, CAN, JTAG and SWD decoders, and VCD, CSV and sigrok (`.sr`, opens in PulseView) export.
 - **Scan all**: runs any set of scans one after another.
 - **Chip ID decoding**: IDCODE and DPIDR values are decoded in the app against the 1,953-entry JEP106 manufacturer table, plus a list of known part numbers.
 - **Target profile**: stores known pins, channel labels and every finding for the board you're testing. It saves automatically and exports as JSON or a Markdown report.

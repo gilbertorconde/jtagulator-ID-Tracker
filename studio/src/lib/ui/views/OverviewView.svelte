@@ -33,7 +33,7 @@
     { view: "jtag", title: "JTAG", text: "Find the pinout, read IDCODEs, IR/DR, pin mapper", icon: Cpu },
     { view: "swd", title: "SWD", text: "Find SWDIO/SWCLK and decode the DPIDR", icon: Zap },
     { view: "uart", title: "UART", text: "Find the console and open a terminal to it", icon: Cable },
-    { view: "logic", title: "Logic analyzer", text: "Capture 24 channels and decode UART", icon: Waves },
+    { view: "logic", title: "Logic analyzer", text: "Capture 24 channels and decode protocols", icon: Waves },
     { view: "scripts", title: "Scripts", text: "Automate anything, or record a macro", icon: Code2 },
   ];
 </script>

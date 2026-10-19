@@ -41,7 +41,8 @@
     framesToText,
     measureAll,
   } from "../../logic/decode";
-  import { captureFileName, downloadText, toCSV, toVCD } from "../../logic/export";
+  import { captureFileName, downloadText, toCSV, toSigrok, toVCD } from "../../logic/export";
+  import { decodeCan, decodeJtag, decodeOneWire, decodeSwd, type Annotation } from "../../logic/protocols";
   import Waveform, { defaultNames, type WaveAnnotation, type WaveMarkers } from "./Waveform.svelte";
 
   let {
@@ -252,13 +253,17 @@
   });
 
   // ------------------------------------------------------------- decoders
-  type DecKind = "uart" | "spi" | "i2c";
+  type DecKind = "uart" | "spi" | "i2c" | "onewire" | "can" | "jtag" | "swd";
   interface Decoder {
     id: number;
     kind: DecKind;
     uart: { channel: number; baud: number; invert: boolean };
     spi: { sck: number; mosi: number; miso: number; cs: number; mode: 0 | 1 | 2 | 3 };
     i2c: { scl: number; sda: number };
+    onewire: { channel: number };
+    can: { channel: number; bitrate: number };
+    jtag: { tck: number; tms: number; tdi: number; tdo: number };
+    swd: { swclk: number; swdio: number };
   }
   interface DecItem {
     channel: number;
@@ -268,6 +273,7 @@
     title: string;
     error?: boolean;
   }
+  const CAN_RATES = [10_000, 20_000, 50_000, 100_000, 125_000, 250_000, 500_000];
   const BAUDS = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400];
   const NONE = -1;
   let decoders = $state<Decoder[]>([]);
@@ -275,6 +281,10 @@
   let newUart = $state({ channel: 0, baud: 9600, invert: false });
   let newSpi = $state({ sck: 1, mosi: 2, miso: NONE, cs: 0, mode: 0 as 0 | 1 | 2 | 3 });
   let newI2c = $state({ scl: 0, sda: 1 });
+  let newOneWire = $state({ channel: 0 });
+  let newCan = $state({ channel: 0, bitrate: 125_000 });
+  let newJtag = $state({ tck: 0, tms: 1, tdi: 2, tdo: 3 });
+  let newSwd = $state({ swclk: 0, swdio: 1 });
   let nextId = 1;
   let view = $state<"text" | "hex">("text");
   let tab = $state<"decoders" | "measure" | "history">("decoders");
@@ -288,6 +298,10 @@
         uart: { ...newUart, baud: Math.max(1, Math.round(newUart.baud)) },
         spi: { ...newSpi },
         i2c: { ...newI2c },
+        onewire: { ...newOneWire },
+        can: { ...newCan },
+        jtag: { ...newJtag },
+        swd: { ...newSwd },
       },
     ];
     tab = "decoders";
@@ -300,6 +314,10 @@
   function describe(d: Decoder) {
     if (d.kind === "uart") return `UART ${d.uart.baud} 8N1${d.uart.invert ? " inv" : ""} · ${names[d.uart.channel]}`;
     if (d.kind === "spi") return `SPI mode ${d.spi.mode} · SCK ${names[d.spi.sck]}`;
+    if (d.kind === "onewire") return `1-Wire · ${names[d.onewire.channel]}`;
+    if (d.kind === "can") return `CAN ${d.can.bitrate / 1000} kbit/s · ${names[d.can.channel]}`;
+    if (d.kind === "jtag") return `JTAG · TCK ${names[d.jtag.tck]} / TMS ${names[d.jtag.tms]}`;
+    if (d.kind === "swd") return `SWD · SWCLK ${names[d.swd.swclk]} / SWDIO ${names[d.swd.swdio]}`;
     return `I2C · SCL ${names[d.i2c.scl]} / SDA ${names[d.i2c.sda]}`;
   }
 
@@ -339,6 +357,21 @@
       const line = (k: "mosi" | "miso") => words.map((w) => (w[k] === undefined ? "" : hex2(w[k]!))).join(" ");
       const text = [o.mosi !== NONE ? `MOSI  ${line("mosi")}` : "", o.miso !== NONE ? `MISO  ${line("miso")}` : ""].filter(Boolean).join("\n");
       return { items, text, problem: null };
+    }
+    if (d.kind !== "i2c") {
+      const chans = d.kind === "onewire" ? [d.onewire.channel] : d.kind === "can" ? [d.can.channel] : d.kind === "jtag" ? Object.values(d.jtag) : Object.values(d.swd);
+      const missing = chans.find((c) => !has(c));
+      if (missing !== undefined) return { items: [], text: "", problem: `${names[missing]} was not captured (its group was disabled).` };
+      const opt = (c: number) => (c === NONE ? undefined : c);
+      let items: Annotation[];
+      if (d.kind === "onewire") items = decodeOneWire(cap, d.onewire);
+      else if (d.kind === "can") {
+        const spb = cap.sampleRateHz / d.can.bitrate;
+        if (spb < 4) return { items: [], text: "", problem: `Sample rate too low: ${spb.toFixed(1)} samples per bit. Use at least ${formatHz(d.can.bitrate * 4, 3)}.` };
+        items = decodeCan(cap, d.can);
+      } else if (d.kind === "jtag") items = decodeJtag(cap, { tck: d.jtag.tck, tms: d.jtag.tms, tdi: opt(d.jtag.tdi), tdo: opt(d.jtag.tdo) });
+      else items = decodeSwd(cap, d.swd);
+      return { items, text: items.map((i) => i.label).join("\n"), problem: null };
     }
     const o = d.i2c;
     if (!has(o.scl) || !has(o.sda)) return { items: [], text: "", problem: "SCL or SDA was not captured (its group was disabled)." };
@@ -380,11 +413,12 @@
   const measurements = $derived(current ? measureAll(current) : []);
 
   // ---------------------------------------------------------------- export
-  function exportAs(kind: "vcd" | "csv") {
+  function exportAs(kind: "vcd" | "csv" | "sr") {
     if (!current) return;
     const base = captureFileName(current);
     const visible = Array.from({ length: 24 }, (_, i) => i).filter((c) => (current!.channelMask >>> c) & 1);
-    if (kind === "vcd") downloadText(`${base}.vcd`, toVCD(current, { names, channels: visible }), "text/x-vcd");
+    if (kind === "sr") downloadText(`${base}.sr`, toSigrok(current, { names }), "application/zip");
+    else if (kind === "vcd") downloadText(`${base}.vcd`, toVCD(current, { names, channels: visible }), "text/x-vcd");
     else downloadText(`${base}.csv`, toCSV(current, { names, channels: visible }), "text/csv");
   }
 
@@ -625,6 +659,9 @@
         <div class="row tight">
           <button class="btn sm" onclick={() => exportAs("vcd")} disabled={!current}><Download size={13} /> VCD</button>
           <button class="btn sm" onclick={() => exportAs("csv")} disabled={!current}><Download size={13} /> CSV</button>
+          <button class="btn sm" onclick={() => exportAs("sr")} disabled={!current} title="sigrok session: open in PulseView to use its protocol decoders"
+            ><Download size={13} /> sigrok</button
+          >
         </div>
       </div>
       <div class="wave">
@@ -649,6 +686,10 @@
                 <option value="uart">UART (8N1)</option>
                 <option value="spi">SPI</option>
                 <option value="i2c">I2C</option>
+                <option value="onewire">1-Wire</option>
+                <option value="can">CAN</option>
+                <option value="jtag">JTAG</option>
+                <option value="swd">SWD</option>
               </select>
               {#snippet chSel(label: string, get: () => number, set: (v: number) => void, optional = false)}
                 <label class="chsel">
@@ -680,6 +721,21 @@
                   <option value={2}>Mode 2 (idle high, falling)</option>
                   <option value={3}>Mode 3 (idle high, rising)</option>
                 </select>
+              {:else if newKind === "onewire"}
+                {@render chSel("DQ", () => newOneWire.channel, (v) => (newOneWire.channel = v))}
+              {:else if newKind === "can"}
+                {@render chSel("RX", () => newCan.channel, (v) => (newCan.channel = v))}
+                <select class="input" bind:value={newCan.bitrate} title="Bit rate">
+                  {#each CAN_RATES as r (r)}<option value={r}>{r / 1000} kbit/s</option>{/each}
+                </select>
+              {:else if newKind === "jtag"}
+                {@render chSel("TCK", () => newJtag.tck, (v) => (newJtag.tck = v))}
+                {@render chSel("TMS", () => newJtag.tms, (v) => (newJtag.tms = v))}
+                {@render chSel("TDI", () => newJtag.tdi, (v) => (newJtag.tdi = v), true)}
+                {@render chSel("TDO", () => newJtag.tdo, (v) => (newJtag.tdo = v), true)}
+              {:else if newKind === "swd"}
+                {@render chSel("SWCLK", () => newSwd.swclk, (v) => (newSwd.swclk = v))}
+                {@render chSel("SWDIO", () => newSwd.swdio, (v) => (newSwd.swdio = v))}
               {:else}
                 {@render chSel("SCL", () => newI2c.scl, (v) => (newI2c.scl = v))}
                 {@render chSel("SDA", () => newI2c.sda, (v) => (newI2c.sda = v))}
@@ -701,7 +757,7 @@
                       <span class="badge info">{describe(d)}</span>
                       {#if current && !problem}
                         <span class="badge">{items.length} items</span>
-                        {#if items.some((f) => f.error)}<span class="badge danger">{d.kind === "i2c" ? "NACKs" : "framing errors"}</span>{/if}
+                        {#if items.some((f) => f.error)}<span class="badge danger">{d.kind === "i2c" ? "NACKs" : d.kind === "uart" ? "framing errors" : "errors"}</span>{/if}
                       {/if}
                       <span class="spacer"></span>
                       <div class="seg">

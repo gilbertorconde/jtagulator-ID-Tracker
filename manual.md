@@ -253,7 +253,7 @@ Type `G` to enter GPIO mode, then `H` for its commands.
    - Turns the JTAGulator into a 24-channel logic analyzer that speaks the OLS/SUMP protocol.
    - **Leave it** with `Ctrl+X`. The mode survives resets until you leave it.
    - **Capture software:**
-     - **JTAGulator Studio**: Logic analyzer page, with triggers, pre-trigger capture (ID Tracker 1.3), UART/SPI/I2C decoders and VCD/CSV export.
+     - **JTAGulator Studio**: Logic analyzer page, with triggers, pre-trigger capture (ID Tracker 1.3), UART, SPI, I2C, 1-Wire, CAN, JTAG and SWD decoders, and VCD, CSV and sigrok `.sr` export (open the `.sr` in PulseView to use any sigrok decoder).
      - **PulseView** works too. On Linux:
        1. Start PulseView: `pulseview -D`
        2. Choose the driver `Openbench Logic Sniffer & SUMP compatible (ols)`
