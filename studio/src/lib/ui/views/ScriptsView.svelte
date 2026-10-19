@@ -206,6 +206,7 @@
   }
   .main {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 1fr 180px;
     min-height: 0;
     overflow: hidden;
@@ -277,5 +278,24 @@
   }
   .line.info {
     color: var(--info);
+  }
+  @media (max-width: 860px) {
+    .scripts {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+    }
+    .list {
+      max-height: 160px;
+    }
+    .ref {
+      display: none;
+    }
+    .name {
+      width: 100%;
+      min-width: 0;
+    }
+    .toolbar {
+      flex-wrap: wrap;
+    }
   }
 </style>

@@ -34,6 +34,7 @@
 
 <div class="shell">
   <Sidebar />
+  {#if app.navOpen}<div class="scrim" role="presentation" onclick={() => (app.navOpen = false)}></div>{/if}
   <div class="main">
     <TopBar />
     <div class="content" class:fill={app.view === "scripts"}>
@@ -82,6 +83,17 @@
   }
   .content.fill {
     overflow: hidden;
+  }
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 0.45);
+    z-index: 39;
+  }
+  @media (max-width: 860px) {
+    .content {
+      padding: 12px 12px 24px;
+    }
   }
   .empty {
     padding: 40px;

@@ -42,7 +42,7 @@
     flex-direction: column;
     gap: 8px;
     z-index: 50;
-    width: 360px;
+    width: min(360px, calc(100vw - 32px));
   }
   .toast {
     display: flex;
@@ -104,7 +104,7 @@
     }
   }
   .dialog {
-    width: 420px;
+    width: min(420px, calc(100vw - 32px));
     padding: 18px 20px;
     box-shadow: var(--shadow);
   }

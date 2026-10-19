@@ -15,7 +15,7 @@
   ];
 </script>
 
-<nav class="sidebar">
+<nav class="sidebar" class:open={app.navOpen}>
   <div class="brand">
     <div class="logo">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -28,14 +28,14 @@
     </div>
   </div>
   {#each NAV as item, i (item.id)}
-    <button class="nav" class:active={app.view === item.id} onclick={() => (app.view = item.id)} title="Ctrl+{i + 1}">
+    <button class="nav" class:active={app.view === item.id} onclick={() => ((app.view = item.id), (app.navOpen = false))} title="Ctrl+{i + 1}">
       <item.icon size={16} />
       <span>{item.label}</span>
       {#if item.id === "findings" && app.target.findings.length}<span class="count">{app.target.findings.length}</span>{/if}
     </button>
   {/each}
   <div class="grow"></div>
-  <button class="nav" class:active={app.view === "settings"} onclick={() => (app.view = "settings")}>
+  <button class="nav" class:active={app.view === "settings"} onclick={() => ((app.view = "settings"), (app.navOpen = false))}>
     <Settings size={16} /><span>Settings</span>
   </button>
 </nav>
@@ -110,5 +110,19 @@
   }
   .grow {
     flex: 1;
+  }
+  @media (max-width: 860px) {
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 40;
+      width: 250px;
+      transform: translateX(-100%);
+      transition: transform 0.2s var(--ease);
+      box-shadow: var(--shadow);
+    }
+    .sidebar.open {
+      transform: none;
+    }
   }
 </style>

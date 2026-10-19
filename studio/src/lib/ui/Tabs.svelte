@@ -20,6 +20,7 @@
     border-radius: 10px;
     width: fit-content;
     flex-wrap: wrap;
+    max-width: 100%;
   }
   button {
     border: none;

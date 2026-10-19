@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Circle, LogOut, Square, SquareTerminal, Zap } from "@lucide/svelte";
+  import { Circle, LogOut, Menu, Square, SquareTerminal, Zap } from "@lucide/svelte";
   import { app } from "../stores/app.svelte";
 
   const TITLES: Record<string, string> = {
@@ -24,6 +24,7 @@
 </script>
 
 <header class="topbar">
+  <button class="btn ghost icon burger" title="Menu" onclick={() => (app.navOpen = !app.navOpen)}><Menu size={18} /></button>
   <h1>{TITLES[app.view]}</h1>
   <div class="grow"></div>
 
@@ -36,7 +37,7 @@
   {#if app.op}
     <div class="pill op">
       <span class="spin"></span>
-      {app.op.label}{app.op.progress !== null ? ` · ${Math.round(app.op.progress * 100)}%` : ""}
+      <span class="oplabel">{app.op.label}</span>{app.op.progress !== null ? ` ${Math.round(app.op.progress * 100)}%` : ""}
       <button class="btn danger sm" onclick={() => app.stop()} title="Esc"><Square size={11} /> Stop</button>
     </div>
   {/if}
@@ -52,6 +53,20 @@
     <div class="volt" title="Target I/O voltage (VADJ). Match the target's logic level. Scans need it set.">
       <Zap size={14} />
       <span class="vv mono" class:off={app.voltage === null}>{app.voltage === null ? "OFF" : app.voltage.toFixed(1) + " V"}</span>
+      <select
+        class="input vsel"
+        disabled={!canSet}
+        value=""
+        onchange={(e) => {
+          const v = (e.currentTarget as HTMLSelectElement).value;
+          (e.currentTarget as HTMLSelectElement).value = "";
+          if (v !== "") void setV(+v);
+        }}
+      >
+        <option value="" disabled>Set…</option>
+        {#each [1.4, 1.5, 1.8, 2.0, 2.5, 2.8, 3.0, 3.3] as p (p)}<option value={p}>{p.toFixed(1)} V</option>{/each}
+        <option value="0">Off</option>
+      </select>
       {#each PRESETS as p (p)}
         <button class="seg" class:on={app.voltage === p} disabled={!canSet} onclick={() => setV(p)}>{p}</button>
       {/each}
@@ -73,7 +88,7 @@
 
   <div class="conn" class:ok={app.status === "connected"} class:wait={app.status === "connecting"}>
     <span class="led"></span>
-    {app.status === "connected" ? (app.transportKind === "sim" ? "Simulator" : app.portName) : app.status === "connecting" ? "Connecting…" : "Not connected"}
+    <span class="conntext">{app.status === "connected" ? (app.transportKind === "sim" ? "Simulator" : app.portName) : app.status === "connecting" ? "Connecting…" : "Not connected"}</span>
   </div>
   <button
     class="btn ghost icon"
@@ -220,6 +235,46 @@
   }
   .conn.wait .led {
     background: var(--warn);
+  }
+  .burger,
+  .vsel {
+    display: none;
+  }
+  .vsel {
+    height: 26px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+  @media (max-width: 860px) {
+    .topbar {
+      padding: 0 8px;
+      gap: 6px;
+    }
+    .burger {
+      display: inline-flex;
+    }
+    h1 {
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .seg,
+    .vin {
+      display: none;
+    }
+    .vsel {
+      display: block;
+    }
+    .conntext,
+    .oplabel {
+      display: none;
+    }
+    .pill.warn {
+      font-size: 0;
+      gap: 0;
+      padding: 0 4px;
+    }
   }
   .btn.active {
     background: var(--accent-soft);

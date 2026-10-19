@@ -82,6 +82,12 @@
     gap: 10px;
     user-select: none;
   }
+  @media (max-width: 700px) {
+    .header {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
   .bank {
     background: var(--bg);
     border: 1px solid var(--border);

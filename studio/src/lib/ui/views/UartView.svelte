@@ -214,7 +214,7 @@
   }
   .cols {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));
     gap: 14px;
     align-items: start;
   }
@@ -243,7 +243,7 @@
   }
   .ptcfg {
     display: grid;
-    grid-template-columns: 1fr 1fr 130px auto auto;
+    grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
     gap: 8px;
     align-items: center;
   }

@@ -118,6 +118,8 @@ let toastSeq = 1;
 
 class AppState {
   view = $state<View>("overview");
+  /** Sidebar drawer on narrow screens. */
+  navOpen = $state(false);
 
   // connection
   status = $state<"disconnected" | "connecting" | "connected">("disconnected");

@@ -149,7 +149,7 @@
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
-    min-width: 380px;
+    min-width: min(380px, 100%);
   }
   .portrow {
     display: flex;
@@ -227,6 +227,26 @@
     grid-template-columns: 1.4fr 1fr;
     gap: 14px;
     align-items: start;
+  }
+  @media (max-width: 860px) {
+    .hero,
+    .cols {
+      grid-template-columns: 1fr;
+    }
+    .hero {
+      padding: 18px;
+    }
+    .tiles {
+      grid-template-columns: 1fr 1fr;
+    }
+    .device {
+      flex-wrap: wrap;
+    }
+  }
+  @media (max-width: 520px) {
+    .tiles {
+      grid-template-columns: 1fr;
+    }
   }
   .act {
     display: flex;
