@@ -24,8 +24,12 @@ jobs:
           cache: pnpm
           cache-dependency-path: studio/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      # OpenOCD checks the generated .cfg files in tests/openocd.test.ts.
+      - run: sudo apt-get update && sudo apt-get install -y openocd
       - run: pnpm check
       - run: pnpm test
+        env:
+          OPENOCD: /usr/bin/openocd
       - run: pnpm build
 
   rust:

@@ -64,7 +64,7 @@ Studio talks to the JTAGulator's own serial menu. It answers every prompt from y
 
 | Area | What you get |
 | :--- | :--- |
-| **JTAG** | Combined, IDCODE, BYPASS (with known pins) and RTCK scans, device IDs, BYPASS test, IR/DR discovery, EXTEST pin mapper, and an OpenOCD launcher. Load a chip's BSDL file to get instruction names, the EXTEST opcode and package pin names for pin-mapper results |
+| **JTAG** | Combined, IDCODE, BYPASS (with known pins) and RTCK scans, device IDs, BYPASS test, IR/DR discovery, EXTEST pin mapper, an OpenOCD launcher that also saves a ready-to-use `.cfg`, and a GDB console connected to OpenOCD. Load a chip's BSDL file to get instruction names, the EXTEST opcode and package pin names for pin-mapper results |
 | **SWD** | Pinout scan, DPIDR read and decode |
 | **UART** | Active scan, passive TXD scan with baud measurement, and a terminal to the target console |
 | **GPIO** | Read, live monitor with change log, drive outputs |

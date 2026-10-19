@@ -1,9 +1,9 @@
-//! Runs external tools (OpenOCD) and streams their output to the frontend.
+//! Runs external tools (OpenOCD, GDB) and streams their output to the frontend.
 
 use serde::Serialize;
 use std::collections::HashMap;
-use std::io::{BufRead, BufReader, Read};
-use std::process::{Child, Command, Stdio};
+use std::io::{BufRead, BufReader, Read, Write};
+use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -23,6 +23,7 @@ pub enum ProcessEvent {
 pub struct Processes {
     next: AtomicU32,
     running: Mutex<HashMap<u32, Arc<Mutex<Child>>>>,
+    stdin: Mutex<HashMap<u32, ChildStdin>>,
 }
 
 fn pump(stream: impl Read + Send + 'static, ch: Channel<ProcessEvent>, err: bool) {
@@ -38,13 +39,14 @@ fn pump(stream: impl Read + Send + 'static, ch: Channel<ProcessEvent>, err: bool
 }
 
 /// Only these programs can be started from the UI.
-const ALLOWED: &[&str] = &["openocd"];
+const ALLOWED: &[&str] = &["openocd", "gdb-multiarch", "arm-none-eabi-gdb", "gdb"];
 
 #[tauri::command]
 pub fn process_spawn(
     state: State<'_, Processes>,
     program: String,
     args: Vec<String>,
+    interactive: Option<bool>,
     on_event: Channel<ProcessEvent>,
 ) -> Result<u32, String> {
     let name = std::path::Path::new(&program)
@@ -57,7 +59,7 @@ pub fn process_spawn(
     }
     let mut child = Command::new(&program)
         .args(&args)
-        .stdin(Stdio::null())
+        .stdin(if interactive.unwrap_or(false) { Stdio::piped() } else { Stdio::null() })
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
@@ -66,6 +68,9 @@ pub fn process_spawn(
     pump(child.stderr.take().unwrap(), on_event.clone(), true);
 
     let id = state.next.fetch_add(1, Ordering::Relaxed);
+    if let Some(stdin) = child.stdin.take() {
+        state.stdin.lock().unwrap().insert(id, stdin);
+    }
     let child = Arc::new(Mutex::new(child));
     state.running.lock().unwrap().insert(id, child.clone());
     thread::spawn(move || loop {
@@ -85,8 +90,20 @@ pub fn process_spawn(
     Ok(id)
 }
 
+/// Send text to an interactive process's standard input.
+#[tauri::command]
+pub fn process_write(state: State<'_, Processes>, id: u32, data: String) -> Result<(), String> {
+    let mut map = state.stdin.lock().unwrap();
+    let stdin = map.get_mut(&id).ok_or("The process has no input (or has exited)")?;
+    stdin
+        .write_all(data.as_bytes())
+        .and_then(|_| stdin.flush())
+        .map_err(|e| format!("Could not write to the process: {e}"))
+}
+
 #[tauri::command]
 pub fn process_kill(state: State<'_, Processes>, id: u32) -> Result<(), String> {
+    state.stdin.lock().unwrap().remove(&id);
     if let Some(c) = state.running.lock().unwrap().remove(&id) {
         let _ = c.lock().unwrap().kill();
     }

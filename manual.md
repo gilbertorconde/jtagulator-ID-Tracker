@@ -338,7 +338,7 @@ Type `J` to enter JTAG mode, then `H` for its commands.
 
    - With OpenOCD you can debug, read and write memory, and extract firmware.
    - The mode survives resets until you leave it with `Ctrl+X`.
-   - JTAGulator Studio can do all of this from the JTAG page: enter the mode, start OpenOCD with a chosen target, show its output, and return to the menu.
+   - JTAGulator Studio can do all of this from the JTAG page: enter the mode, start OpenOCD with a chosen target, show its output, save the settings as an OpenOCD `.cfg` file, start GDB connected to OpenOCD (port 3333) with a command line in the app, and return to the menu.
 
 ---
 
@@ -437,7 +437,7 @@ JTAGulator Studio (`studio/` in this repository) is a desktop app (Windows, macO
 | :--- | :--- |
 | Overview | Connect, device info, quick links, recent activity |
 | Scan all | Runs any set of scans one after another |
-| JTAG | All JTAG scans and known-pinout tools, plus the OpenOCD launcher |
+| JTAG | All JTAG scans and known-pinout tools, plus the OpenOCD launcher, `.cfg` export and GDB console |
 | SWD | SWD scan and DPIDR decode |
 | UART | Active and passive scans and a terminal to the target |
 | GPIO | Read, monitor and drive the 24 channels |

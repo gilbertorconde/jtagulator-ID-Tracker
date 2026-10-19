@@ -1,13 +1,17 @@
 <script lang="ts">
   // Puts the JTAGulator in OpenOCD (Bus Pirate) mode, hands the serial port to
   // OpenOCD, streams its output, and brings the device back afterwards.
-  import { Play, Square, LogOut, Copy } from "@lucide/svelte";
+  import { Play, Square, LogOut, Copy, FileCode } from "@lucide/svelte";
   import type { JtagPins } from "../core/types";
   import { spawn, splitArgs, which, type ProcessHandle } from "../core/process";
+  import { saveTextAs } from "../files";
+  import { ocdArgs, ocdConfigFile, type OcdOptions, type OcdTap } from "../openocd/config";
   import { app } from "../stores/app.svelte";
   import Field from "./Field.svelte";
+  import GdbConsole from "./GdbConsole.svelte";
   import Panel from "./Panel.svelte";
   import RunButton from "./RunButton.svelte";
+  import { onDestroy } from "svelte";
 
   let { pins, valid }: { pins: JtagPins; valid: boolean } = $props();
 
@@ -25,13 +29,17 @@
   ];
 
   let target = $state("");
-  let speed = $state("100");
+  let speed = $state<"normal" | "fast">("normal");
+  const GDB_PORT = 3333;
   let extra = $state("");
   let program = $state("openocd");
   let found = $state<string | null | undefined>(undefined);
   let proc = $state<ProcessHandle | null>(null);
   let lines = $state<{ text: string; err: boolean }[]>([]);
   let logEl: HTMLDivElement | undefined = $state();
+
+  // A process left behind would keep the serial port or OpenOCD's GDB connection busy.
+  onDestroy(() => void proc?.kill());
   let port = $state(app.portName ?? "/dev/ttyUSB0");
 
   $effect(() => {
@@ -42,36 +50,65 @@
     if (app.tauri && found === undefined) void which("openocd").then((p) => (found = p));
   });
 
-  const args = $derived(
-    [
-      "-f interface/buspirate.cfg",
-      `-c "transport select jtag; buspirate port ${port}; adapter speed ${speed}"`,
-      target ? `-f ${target}` : "",
-      extra,
-    ]
-      .filter(Boolean)
-      .join(" "),
-  );
-  const command = $derived(`${program} ${args}`);
+  /** Devices from the newest JTAG finding on these pins, with IR lengths from loaded BSDL files. */
+  const taps = $derived.by<OcdTap[]>(() => {
+    const f = app.target.findings
+      .map((x) => x.finding)
+      .find((x) => x.kind === "jtag" && x.tdo === pins.tdo && x.tck === pins.tck && x.tms === pins.tms && x.devices.length);
+    if (!f || f.kind !== "jtag") return [];
+    return f.devices.map((d) => {
+      const bsdl = app.bsdlFor(d.idcode.raw)[0]?.file;
+      return { idcode: d.idcode.raw, irLength: bsdl?.irLength ?? null, name: bsdl?.entity ?? d.idcode.part ?? d.idcode.manufacturer ?? undefined };
+    });
+  });
+  const options = $derived<OcdOptions>({ port, speed, target: target || undefined, taps, gdbPort: GDB_PORT });
+  const argv = $derived([...ocdArgs(options), ...splitArgs(extra)]);
+  const quote = (a: string) => (/^[\w./:=-]+$/.test(a) ? a : `"${a.replace(/(["\\$`])/g, "\\$1")}"`);
+  const command = $derived([program, ...argv].map(quote).join(" "));
+
+  async function saveConfig() {
+    const name = (target ? target.replace(/^target\//, "").replace(/\.cfg$/, "") : "jtagulator") + "-jtagulator.cfg";
+    const text = ocdConfigFile(options, { pins, targetName: app.target.name });
+    await saveTextAs(name, text, "cfg").catch((e) => app.error(e, "Save config"));
+  }
   const inOcd = $derived(app.mode === "ocd");
 
   async function enter() {
     await app.run("jtag.openocd", { ...pins });
   }
 
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  /** The Propeller resets when the port's DTR line changes and needs about 1.5 s to boot. */
+  const BOOT_MS = 2000;
+
   async function launch() {
     lines = [];
     const path = port;
-    // OpenOCD needs the port to itself.
-    if (app.status === "connected") await app.disconnect();
+    const push = (text: string, err: boolean) => {
+      lines = [...lines.slice(-2000), { text, err }];
+      queueMicrotask(() => logEl?.scrollTo({ top: logEl.scrollHeight }));
+    };
+    // OpenOCD needs the port to itself. Releasing it resets the board, so let it boot first.
+    if (app.status === "connected") {
+      await app.disconnect();
+      push("Waiting for the JTAGulator to restart…", false);
+      await sleep(BOOT_MS);
+    }
     try {
-      proc = await spawn(program, splitArgs(args), (text, s) => {
-        lines = [...lines.slice(-2000), { text, err: s === "err" }];
-        queueMicrotask(() => logEl?.scrollTo({ top: logEl.scrollHeight }));
-      });
-      lines = [{ text: `$ ${command}`, err: false }];
-      const code = await proc.exited;
-      lines = [...lines, { text: `-- openocd exited (${code ?? "killed"}) --`, err: code !== 0 && code !== null }];
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        let noReply = false;
+        push(`$ ${command}`, false);
+        proc = await spawn(program, argv, (text, s) => {
+          if (/Is binary\/OpenOCD support enabled/i.test(text)) noReply = true;
+          push(text, s === "err");
+        });
+        const code = await proc.exited;
+        push(`-- openocd exited (${code ?? "killed"}) --`, code !== 0 && code !== null);
+        // Opening the port can reset the board too; one retry after it has booted.
+        if (!noReply || attempt === 2) break;
+        push("The JTAGulator didn't answer (it may have been restarting). Trying again…", false);
+        await sleep(BOOT_MS);
+      }
     } catch (e) {
       app.error(e, "Could not start OpenOCD");
     } finally {
@@ -96,7 +133,7 @@
   <ol class="steps">
     <li class:done={inOcd || !!proc}>Enter OpenOCD mode with the pinout above. The mode survives resets until you exit it.</li>
     <li class:done={!!proc}>Launch OpenOCD. The app releases the serial port first.</li>
-    <li>When done, stop OpenOCD and go back to the menu.</li>
+    <li>Optionally start GDB below to debug the target. When done, stop OpenOCD and go back to the menu.</li>
   </ol>
 
   <div class="grid">
@@ -107,9 +144,8 @@
     </Field>
     <Field label="Adapter speed">
       <select class="input" bind:value={speed}>
-        <option value="50">Slow (50 kHz)</option>
-        <option value="100">Normal (100 kHz)</option>
-        <option value="500">Fast (500 kHz)</option>
+        <option value="normal">Normal (about 100 kHz)</option>
+        <option value="fast">Fast (about 1 MHz)</option>
       </select>
     </Field>
     <Field label="Extra arguments" wide>
@@ -120,7 +156,14 @@
   <div class="cmd">
     <code>{command}</code>
     <button class="btn ghost sm icon" title="Copy" onclick={() => navigator.clipboard.writeText(command)}><Copy size={13} /></button>
+    <button class="btn ghost sm" title="Save these settings as an OpenOCD config file (openocd -f file.cfg)" onclick={saveConfig}><FileCode size={13} /> Save .cfg</button>
   </div>
+  {#if !target && taps.length}
+    <div class="faint small">
+      Chain: {taps.map((t) => (t.idcode !== null ? `0x${t.idcode.toString(16).toUpperCase().padStart(8, "0")}` : "BYPASS") + (t.irLength ? ` (IR ${t.irLength})` : "")).join(" → ")}.
+      {#if taps.every((t) => t.irLength)}The config declares these taps.{:else}Load a BSDL file for each device to declare the taps; without it OpenOCD auto-probes the chain.{/if}
+    </div>
+  {/if}
 
   {#if app.tauri && found === null}
     <div class="warn">OpenOCD isn't on your PATH. Install it (Linux: your package manager, macOS: <code>brew install open-ocd</code>, Windows: the xPack build), or run the command above in a terminal.</div>
@@ -133,6 +176,8 @@
       {#each lines as l, i (i)}<div class:err={l.err}>{l.text}</div>{/each}
     </div>
   {/if}
+
+  <GdbConsole port={GDB_PORT} ocdRunning={!!proc} />
 
   {#snippet footer()}
     {#if !inOcd && !proc}

@@ -19,6 +19,7 @@ pub fn run() {
             net::http_get,
             process::process_spawn,
             process::process_kill,
+            process::process_write,
             process::which,
             files::app_dir,
             files::list_dir,

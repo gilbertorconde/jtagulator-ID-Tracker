@@ -6,7 +6,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
 
 ## Features
 
-- **JTAG**: combined, IDCODE, BYPASS (with known pins) and RTCK scans, plus reading device IDs, a BYPASS test, IR/DR discovery, the EXTEST pin mapper and OpenOCD mode.
+- **JTAG**: combined, IDCODE, BYPASS (with known pins) and RTCK scans, plus reading device IDs, a BYPASS test, IR/DR discovery, the EXTEST pin mapper, and OpenOCD: launch it, save the settings as a `.cfg` file (taps declared from the scan and loaded BSDL files), and run GDB (`gdb-multiarch`, `arm-none-eabi-gdb` or `gdb`) against it with a command line in the app.
 - **SWD**: pinout scan, plus reading and decoding the DPIDR.
 - **UART**: active scan, passive TXD scan that measures the baud rate, and a passthrough terminal.
 - **GPIO**: read all channels, monitor them live with a change log, or drive them as outputs.
