@@ -1,308 +1,453 @@
-# Jtagulator 硬件调试器使用手册
+# JTAGulator User Manual
 
-## 0x00 前言
+## 0x00 Introduction
 
-Jtagulator 是由安全研究员 Joe Grand 设计并开源的一款多合一硬件调试工具。它集成了 **接口自动识别**、**逻辑分析仪** 和 **芯片编程/调试** 三大核心功能，特别适用于硬件逆向工程、嵌入式安全测试和固件提取等场景。
+The JTAGulator is an open-source, all-in-one hardware debugging tool designed by security researcher Joe Grand. It combines three core functions:
 
-该设备完全开源，相关设计文件、固件源码及使用说明可在其官网获取：
-- 官方主页：http://www.grandideastudio.com/jtagulator/
-- GitHub 仓库：https://github.com/grandideastudio/jtagulator
-- 由我制作的增强固件：https://github.com/Chaoschaos1024/jtagulator-ID-Tracker
-- 查看中文教程：https://space.bilibili.com/39602674
+- **automatic interface identification**
+- a **logic analyzer**
+- **chip programming and debugging** (through OpenOCD)
 
----
+It is especially useful for hardware reverse engineering, embedded security testing and firmware extraction.
 
-## 0x01 固件更新
+The hardware design, firmware source and documentation are fully open:
 
-### 1. 准备烧录环境
-1.  下载并安装 Propeller 开发工具：
-    - 下载链接：http://www.grandideastudio.com/wp-content/uploads/P8X32A-Setup-Propeller-Tool-v1.3.2.zip
-	![Propeller Tool软件界面](./media/image1.png "软件主界面")
-2.  从 GitHub 仓库下载 Jtagulator 固件源码：
-    - 访问 https://github.com/grandideastudio/jtagulator
-	或者增强版本：https://github.com/Chaoschaos1024/jtagulator-ID-Tracker
-	![官方github页面](./media/image2.png "官方github主页")
-    - 在右侧栏点击 **Releases** 进入发布页面，选择最新版本（或所需版本）的固件压缩包下载并解压。
-	![官方github release页面](./media/image3.png "官方github release")
-### 2. 编译与烧录步骤
-1.  打开 Propeller Tool 软件，通过菜单栏 `File` -> `Open` 加载解压后文件夹中的 `JTAGulator.spin` 文件。
-2.  在软件左侧的文件列表中，右键点击 `JTAGulator.spin` 文件，选择 `Set Top Object File` 将其设为主文件（文件名会变为粗体）。
-	![软件文件栏](./media/image4.png "软件文件栏")
-3.  将 Jtagulator 通过 USB 线连接至电脑。
-4.  按下 **F7** 键，软件将自动检测连接的设备。若识别成功，按下 **Ctrl + F11** 开始烧录固件。
-	![ ](./media/image5.png " ")
-	![ ](./media/image6.png " ")
+- Official page: http://www.grandideastudio.com/jtagulator/
+- Original firmware: https://github.com/grandideastudio/jtagulator
+- ID Tracker (this project, enhanced firmware and the JTAGulator Studio app): see the [README](README.md)
+- Video tutorials (Chinese): https://space.bilibili.com/39602674
 
-### 3. 增强功能固件（可选）
-> 截至2025年11月，原版固件已两年半未更新。为提升使用体验，本人开发了一个增强版固件，主要添加了基于扫描得到的IDCODE反推芯片制造商的功能。
+There are two ways to use the JTAGulator:
 
-- **项目地址**：https://github.com/Chaoschaos1024/jtagulator-ID-Tracker
-- **主要特性**：
-    - 在 JTAG 或 SWD 接口扫描成功后，可自动显示芯片所属公司。
-    - 内置包含1900余家厂商ID的数据库。
-
-#### 数据库烧录（一次性操作）
-增强功能需要将厂商数据库写入 Jtagulator 的 EEPROM 中。
-1.  在 `jtagulator-ID-Tracker` 项目的 `eepromupdate` 文件夹下，将 `EEPROM_Update.spin` 设置为 Top Object File。
-2.  按下 **F11** 将此烧录程序编译并烧录到 Jtagulator。
-3.  使用串口终端连接 Jtagulator，程序将自动运行，依次执行 **清空EEPROM -> 写入数据库 -> 校验数据** 三个步骤，全程约需20分钟。
-4.  烧录成功后，重新烧录主固件 `JTAGulator-ID-Tracker.spin` 即可启用增强功能。
-
-> **注意**：数据库烧录为一次性操作，成功后无需重复。之后可随意烧录不同版本的固件，增强功能在刷回本固件后依然有效。
-> **PS**：很欢迎各位来给这个项目点star。
+1. **JTAGulator Studio**, the graphical app in `studio/`. It drives the device for you and is described in [0x0B](#0x0b-jtagulator-studio).
+2. **A serial terminal**, typing the firmware's single-letter commands. Most of this manual describes these commands, because Studio runs exactly the same commands underneath.
 
 ---
 
-## 0x02 设备连接与配置
+## 0x01 Firmware
 
-### 硬件接口
-Jtagulator 提供以下物理接口：
-- **24个通用I/O通道**：通过三组 2.54mm 间距排针引出。
-- **GND引脚**：用于共地连接。
-- **VADJ引脚**：可调输出电平（1.4V - 3.3V），用于设定I/O通信电压。
-- **USB接口**：Mini USB 型，用于供电和串口通信。
+### Option A: JTAGulator Studio (recommended)
 
-### 与电脑连接
-设备连接电脑后，通常会被识别为一个虚拟串口（CDC设备）。驱动通常在主流操作系统（Windows, Linux, macOS）上可自动安装。
+1. Connect the JTAGulator over USB and open Studio.
+2. Click **Connect**, then open the **Firmware** page.
+3. Under **Install firmware**, choose a source:
+   - the bundled ID Tracker build;
+   - a GitHub release (**Check for updates**);
+   - a `.binary` or `.eeprom` file.
+4. Click **Test run (RAM)** to try it until the next reset, or **Install to EEPROM** to make it permanent.
+
+Studio has its own Propeller loader, so you don't need Propeller Tool. You also can't brick the JTAGulator this way: the Propeller boots from ROM and can always be reloaded over USB.
+
+### Option B: Propeller Tool
+
+#### 1. Prepare the tools
+
+1. Download and install the Propeller development tool:
+   - http://www.grandideastudio.com/wp-content/uploads/P8X32A-Setup-Propeller-Tool-v1.3.2.zip
+
+   ![Propeller Tool main window](./media/image1.png "Propeller Tool main window")
+2. Download the firmware source:
+   - the original firmware: https://github.com/grandideastudio/jtagulator
+   - or ID Tracker: this repository
+
+   ![Official GitHub page](./media/image2.png "Official GitHub page")
+   - On the right side of the GitHub page, click **Releases** and download the archive of the latest (or the version you need), then unpack it.
+
+   ![Official GitHub releases page](./media/image3.png "Official GitHub releases")
+
+#### 2. Compile and flash
+
+1. In Propeller Tool, open `JTAGulator.spin` from the unpacked folder (`File` → `Open`).
+2. In the file list on the left, right-click `JTAGulator.spin` and choose `Set Top Object File`. The name turns bold.
+
+   ![File list](./media/image4.png "File list")
+3. Connect the JTAGulator to the computer with the USB cable.
+4. Press **F7** to detect the device. Once it's found, press **Ctrl + F11** to compile and write the firmware to EEPROM.
+
+   ![ ](./media/image5.png " ")
+   ![ ](./media/image6.png " ")
+
+#### OpenSpin (Linux and macOS)
+
+[OpenSpin](https://github.com/parallaxinc/OpenSpin) compiles the firmware from the command line:
+
+```bash
+openspin -b JTAGulator.spin   # produces JTAGulator.binary
+```
+
+Load the resulting `.binary` with JTAGulator Studio (Firmware → From file) or any Propeller loader.
+
+### ID Tracker firmware
+
+The original firmware hadn't been updated for about two and a half years (as of November 2025). ID Tracker adds:
+
+- **Manufacturer names.** After a successful JTAG or SWD scan, each ID is shown with the company that made the chip. The names come from a database of 1,953 manufacturers.
+- **Logic analyzer fixes (1.3).**
+  - Triggers work on all 24 channels instead of only CH0–7.
+  - Captures can keep samples from before the trigger.
+- **JTAG name lookup fix (1.3).** Earlier versions showed the wrong name for every manufacturer outside JEP106 bank 0.
+
+#### Writing the manufacturer database (once)
+
+The names are stored in the upper half of the JTAGulator's EEPROM, so the database has to be written once.
+
+**With JTAGulator Studio:**
+
+1. Open **Firmware** and click **Check** to see whether the database is already there. The check runs a small program from RAM and writes nothing.
+2. Click **Write database**. The writer runs from RAM, so the installed firmware isn't touched. It takes about 20 minutes and shows progress.
+
+**With Propeller Tool:**
+
+1. In the `eepromupdate` folder, set `EEPROM_Update.spin` as the Top Object File.
+2. Press **F10** to load it into RAM, or **F11** to write it to EEPROM.
+3. Open a serial terminal on the JTAGulator. The writer runs three steps: **clear the database area → write the database → verify**. This takes about 20 minutes. It ends with `Result: Success - Writing completion flag`.
+4. If you used F11, flash `JTAGulator.spin` again afterwards. F11 replaced the main firmware with the writer.
+
+> **Note:** writing the database is a one-time job. Afterwards you can flash any firmware version; the database stays, and the names come back whenever ID Tracker is installed.
+
+---
+
+## 0x02 Connecting and setting up the device
+
+### Hardware interfaces
+
+The JTAGulator has:
+
+- **24 general-purpose I/O channels** on three 2.54 mm pin headers (CH0–7, CH8–15, CH16–23).
+- **GND pins** for the common ground.
+- **VADJ pins**, the adjustable I/O voltage (1.4 V – 3.3 V). The target voltage you set drives this.
+- **A Mini USB port** for power and serial communication.
+
+### Connecting to a computer
+
+The JTAGulator uses an FTDI FT232R USB-to-serial chip and shows up as a serial port: `COMx` on Windows, `/dev/ttyUSB0` on Linux, `/dev/tty.usbserial-*` on macOS. Drivers install automatically on current versions of all three systems.
+
 ![ ](./media/image7.png " ")
 
-#### Windows 平台推荐（Xshell）
-1.  从官网 https://www.netsarang.com/zh/xshell/ 下载并安装 Xshell（免费用于家庭/学校）。
-![ ](./media/image8.png " ")
-2.  新建会话：协议选择 **Serial**。
-![ ](./media/image10.png " ")
-3.  设置串口参数：
-    - 端口：根据设备管理器中的COM口号选择（如 `COM3`）。
-    - 波特率：`115200`
-    - 数据位：`8`
-    - 停止位：`1`
-    - 校验位：`None`
-    - 流控：`None`
-	
-	![ ](./media/image11.png " ")
-4.  连接后，按回车键即可看到 Jtagulator 的字符画启动界面。
-![ ](./media/image13.png " ")
+Serial settings: **115200 baud, 8 data bits, 1 stop bit, no parity, no flow control.**
 
-#### Linux 平台推荐（picocom）
+On Linux your user needs access to serial ports. Add it to the `uucp` group (Arch) or `dialout` group (Debian/Ubuntu), then log in again:
+
 ```bash
-# 安装 picocom（Debian/Ubuntu）
+sudo usermod -aG dialout $USER
+```
+
+#### Windows: Xshell
+
+1. Download and install Xshell from https://www.netsarang.com/xshell/ (free for home and school use).
+
+   ![ ](./media/image8.png " ")
+2. Create a new session and choose the **Serial** protocol.
+
+   ![ ](./media/image10.png " ")
+3. Set the serial parameters:
+   - Port: the COM number shown in Device Manager (e.g. `COM3`)
+   - Baud rate: `115200`
+   - Data bits: `8`
+   - Stop bits: `1`
+   - Parity: `None`
+   - Flow control: `None`
+
+   ![ ](./media/image11.png " ")
+4. After connecting, press Enter to see the JTAGulator's ASCII-art banner.
+
+   ![ ](./media/image13.png " ")
+
+#### Linux: picocom
+
+```bash
+# Install picocom (Debian/Ubuntu)
 sudo apt install picocom
 
-# 连接设备（通常为 /dev/ttyUSB0 或 /dev/ttyACM0）
+# Connect (usually /dev/ttyUSB0)
 picocom -b 115200 /dev/ttyUSB0
 ```
-连接后若未显示字符界面，按回车键即可。
+
+If the banner doesn't appear, press Enter.
+
 ![ ](./media/image14.png " ")
 
-> **提示**：一种高效的用法是在树莓派等Linux设备上接入Jtagulator，然后通过SSH（如使用Xshell）远程操作，可简化软件配置流程。
+> **Tip:** a convenient setup is to plug the JTAGulator into a Raspberry Pi or another Linux box and work over SSH. You can also run JTAGulator Studio's browser version there and reach it through an SSH tunnel.
 
 ---
 
-## 0x03 连接目标板的安全须知
+## 0x03 Safety before connecting a target
 
-在对未知设备进行调试前，必须进行必要的安全检查，以防损坏设备。
+Check the target before you debug an unknown device, or you may damage it.
 
-1.  **确定地线（GND）**：
-    - 使用万用表的通断档，在目标板上寻找与已知地（如电源接口负极、USB外壳、电容负极）直连的测试点。
-    - 将 Jtagulator 的 GND 与目标板的 GND 可靠连接。
+1. **Find ground (GND).**
+   - With a multimeter in continuity mode, find test points connected to a known ground: the negative side of the power jack, a USB shield, or the negative side of a capacitor.
+   - Connect the JTAGulator's GND to the target's GND before anything else.
 
-2.  **确定通信电平**：
-    - **最佳方法**：使用示波器观察疑似通信引脚（如TX、TCK）的电压幅值。
-    - **注意事项**：万用表测量的是平均电压，对于数字通信信号（如50%占空比的时钟）会显示为中间值（如1.65V对于3.3V信号），容易误判。
-    - Jtagulator 的 I/O 口通过串联电阻和TVS二极管进行保护，可承受一定范围的过压，但为安全起见，建议先通过电平转换或分压等方式匹配电平。
+2. **Find the logic level.**
+   - **Best:** measure the voltage swing of suspected signal pins (TX, TCK, …) with an oscilloscope.
+   - **Beware:** a multimeter shows the average voltage. A digital signal with 50 % duty cycle reads about half its real level (around 1.65 V for 3.3 V logic), which is easy to misread.
+   - The JTAGulator's I/O pins are protected by series resistors and TVS diodes and survive some overvoltage. To be safe, match the levels (level shifting or a resistor divider) when you aren't sure.
 
-3.  **关于 VADJ 引脚**：
-    - VADJ 用于设置 Jtagulator I/O 口的高电平电压（输入阈值也随之变化）。
-    - 程序提示不建议外接负载。在实际使用中，需要将其设置为与目标板通信电平一致（如3.3V，1.8V），实际看原理图的话，最多外接150ma。
-	![ ](./media/image15.png " ")
-    - **重要发现**：经测试，即使将 VADJ 设置为 3.3V，Jtagulator 的 I/O 口也能安全地 **耐受并识别 5V TTL 电平的输入信号**。这大大扩展了其使用范围。
+3. **About VADJ.**
+   - VADJ sets the high level of the JTAGulator's outputs and, with it, the input thresholds. Set it to the target's logic level (e.g. 3.3 V or 1.8 V) with the `V` command or Studio's voltage control.
+   - The firmware warns: *"Ensure VADJ is NOT connected to target!"* VADJ is a reference output, not a supply for the target. The original author notes that, according to the schematic, it can source up to about 150 mA. Even so, don't use it to power the board.
 
----
-
-## 0x04 基本操作与指令概览
-
-通过串口终端连接后，输入 `h` 或 `H` 可查看帮助信息。
-
-### 通用指令（在任何模式下均可使用）
-- **`V`**：设置 I/O 通信参考电压（1.4V - 3.3V）。**开始任何操作前应先执行此指令**。
-- **`I`**：显示当前固件版本信息。
-- **`J`**：进入 **JTAG 接口嗅探与交互** 模式。
-- **`U`**：进入 **UART（串口）嗅探与交互** 模式。
-- **`G`**：进入 **GPIO 通用输入输出与逻辑分析仪** 模式。
-- **`S`**：进入 **SWD 接口嗅探** 模式。
-- **`Ctrl+X`**：**强制退出逻辑分析仪或者openocd模式**，返回主命令界面。当设备无响应时，可尝试此操作。
+   ![ ](./media/image15.png " ")
+   - **Original author's observation:** in their tests, with VADJ at 3.3 V, the I/O pins tolerated and correctly read **5 V TTL input signals**. This is outside the official specification, so rely on it only with care.
 
 ---
 
-## 0x05 GPIO 模式详解
+## 0x04 Commands overview
 
-输入 `G` 进入 GPIO 模式，再次输入 `H` 查看该模式下的专用指令。
+In a serial terminal, type `h` or `H` for help in the current menu. Commands are one letter followed by Enter.
+
+### Main menu
+
+- **`J`**: enter the **JTAG** menu (interface discovery and interaction).
+- **`U`**: enter the **UART** menu (serial port discovery and passthrough).
+- **`G`**: enter the **GPIO** menu (inputs, outputs and the logic analyzer).
+- **`S`**: enter the **SWD** menu (Serial Wire Debug discovery).
+- **`A`**: run all scans (GPIO, JTAG, SWD and UART) one after another.
+- **`V`**: set the target I/O voltage (1.4 V – 3.3 V). **Do this before any scan**; scans refuse to run without it.
+- **`I`**: show the firmware version.
+- **`H`**: show the available commands.
+
+### In every submenu
+
+- **`V`**: set the target I/O voltage.
+- **`H`**: show the commands of this menu.
+- **`M`**: return to the main menu.
+
+### Special keys
+
+- **Any key** stops a running scan.
+- **`Ctrl+X`** leaves UART passthrough, logic analyzer mode and OpenOCD mode. Logic analyzer and OpenOCD mode survive resets and power cycles, so if the device seems unresponsive, press `Ctrl+X` first.
+
+---
+
+## 0x05 GPIO mode
+
+Type `G` to enter GPIO mode, then `H` for its commands.
+
 ![ ](./media/image20.png " ")
 
-### 专用指令
-1.  **`R` - 单次读取**
-    - 读取所有24个通道的当前电平状态，并以二进制和十六进制格式显示。
-	![ ](./media/image21.png " ")
-    - **注意**：Jtagulator 的 I/O 口内部被上拉，未连接时显示为高电平（1）。
+### Commands
 
-2.  **`C` - 持续监视**
-    - 持续读取所有通道电平，任何变化都会实时刷新显示。
-	![ ](./media/image22.png " ")
-    - 按任意键退出监视模式。
+1. **`R` – read once**
+   - Reads the level of all 24 channels and shows it in binary and hexadecimal.
 
-3.  **`W` - 写入输出**
-    - 向指定通道输出高低电平。
-    - 需要输入一个6位的十六进制数（如 `FFFFFF`），对应24个通道（24 bits）。从最低位（bit 0）对应 CH0，最高位（bit 23）对应 CH23。
-	
-	   ![ ](./media/image24.png " ")
-    - **示例**：欲使 CH2 输出低电平（0），其余为高电平（1），则二进制为 `11111111 11111111 11111011`，转换为十六进制为 `FFFFFB`。
+   ![ ](./media/image21.png " ")
+   - **Note:** the I/O pins read high (1) when nothing is connected.
 
-4.  **`L` - 逻辑分析仪模式**
-    - 将 Jtagulator 变为一个24通道的逻辑分析仪。
-    - **退出**：在终端中输入 `Ctrl+X`。
-    - **上位机软件**：推荐使用 **PulseView**。
-        - **Linux 下配置**：
-            1.  启动 PulseView：`pulseview -D`
-            2.  选择驱动：`Demo Device` -> `Openbench Logic Sniffer & SUMP compatible (ols)`
-            3.  选择端口：Jtagulator 对应的串口（如 `/dev/ttyUSB0`），波特率 `115200`。
-            4.  点击 `Scan for devices using the driver above`，应识别出 `JTAGulator with 24 channels`。
-		![ ](./media/image25.png " ")
-        - **注意**：由于设备内部缓冲区有限，此模式适合捕捉低频或短时突发信号，用于初步判断引脚活动。
+2. **`C` – monitor continuously**
+   - Keeps reading all channels and prints a new line whenever any level changes.
+
+   ![ ](./media/image22.png " ")
+   - Press any key to stop.
+
+3. **`W` – write outputs**
+   - Drives all 24 channels as outputs.
+   - Enter a 6-digit hexadecimal value (e.g. `FFFFFF`), one bit per channel. Bit 0 (lowest) is CH0; bit 23 (highest) is CH23.
+
+   ![ ](./media/image24.png " ")
+   - **Example:** to drive CH2 low and every other channel high, the binary value is `11111111 11111111 11111011`, which is `FFFFFB` in hexadecimal.
+   - The outputs stay driven until you press a key. Only drive pins that are inputs on the target.
+
+4. **`L` – logic analyzer mode**
+   - Turns the JTAGulator into a 24-channel logic analyzer that speaks the OLS/SUMP protocol.
+   - **Leave it** with `Ctrl+X`. The mode survives resets until you leave it.
+   - **Capture software:**
+     - **JTAGulator Studio**: Logic analyzer page, with triggers, pre-trigger capture (ID Tracker 1.3), UART/SPI/I2C decoders and VCD/CSV export.
+     - **PulseView** works too. On Linux:
+       1. Start PulseView: `pulseview -D`
+       2. Choose the driver `Openbench Logic Sniffer & SUMP compatible (ols)`
+       3. Choose the JTAGulator's serial port (e.g. `/dev/ttyUSB0`) at `115200` baud.
+       4. Click `Scan for devices using the driver above`. It should find `JTAGulator with 24 channels`.
+
+       ![ ](./media/image25.png " ")
+   - **Limits** (set by the firmware):
+     - up to 1024 samples per capture;
+     - up to 1.2 MHz, or 909 kHz when keeping pre-trigger samples;
+     - level triggers only.
+
+     This makes it best for short bursts or slow signals, e.g. to see which pins are active.
 
 ---
 
-## 0x06 JTAG 接口嗅探与调试
+## 0x06 JTAG discovery and debugging
 
-JTAG（IEEE 1149.1）标准最初用于边界扫描测试（Boundary Scan Test, BST），现已广泛用于芯片调试、编程和逆向工程。其核心是一个由 **TMS** 信号控制的状态机，通过 **TCK** 时钟同步，在 **TDI** 和 **TDO** 线上进行数据交换。可选信号 **TRST#** 用于异步复位JTAG状态机。
+JTAG (IEEE 1149.1) was created for boundary scan testing and is now widely used for chip debugging, programming and reverse engineering. At its core is a state machine:
+
+- **TMS** controls the state machine, clocked by **TCK**.
+- Data goes in on **TDI** and comes out on **TDO**.
+- The optional **TRST#** signal resets the state machine asynchronously.
 
 ![ ](./media/image26.jpeg " ")
 
-输入 `J` 进入 JTAG 模式，输入 `H` 查看指令。
+Type `J` to enter JTAG mode, then `H` for its commands.
 
 ![ ](./media/image27.png " ")
 
-### 扫描指令详解
-1.  **`J` - 基础 JTAG 扫描**
-![ ](./media/image28.png " ")
+### Discovery commands
 
-	![ ](./media/image30.png " ")
-    - 最通用的扫描方法，通过穷举可能的引脚排列组合，尝试建立 JTAG 通信。
-    - 操作流程：
-        1.  设置开始通道和结束通道（建议将目标板引脚集中连接到连续的通道上，以减少组合数）。
-        2.  选择是否在每次尝试前将通道置低（建议 **启用**，以复位可能存在的 TRST# 信号）。
-    - 本质是发送一系列 JTAG 指令序列，观察 TDO 是否有符合预期的响应。
+1. **`J` – combined scan**
 
-2.  **`I` - IDCODE 扫描**
-	![ ](./media/image32.png " ")
-    - 专门扫描能读出 `IDCODE` 的 JTAG 接口。`IDCODE` 是 JTAG 标准中一个必选的设备标识寄存器。
-    - **成功标志**：当扫描到正确的引脚组合时，会显示一个或多个32位的 `IDCODE` 值。
-    - **增强固件功能**：使用 `jtagulator-ID-Tracker` 固件，会直接在 `IDCODE` 旁显示芯片制造商名称。
+   ![ ](./media/image28.png " ")
+   ![ ](./media/image30.png " ")
+   - The best general method. It finds TDO, TCK and TMS with an IDCODE scan, then TDI with a BYPASS test, and looks for TRST#.
+   - Steps:
+     1. Set the start and end channel. Wire the target's candidate pins to consecutive channels to keep the number of combinations small.
+     2. Choose whether to pull the channels low before each attempt. Enable it when the target may have a reset line (such as TRST#) that needs toggling.
+   - Underneath, it sends JTAG sequences on each pin combination and checks for the expected response on TDO.
 
-3.  **`B` - BYPASS 扫描**
+2. **`I` – IDCODE scan**
 
-	![ ](./media/image33.png " ")
-    - 尝试将链路上的所有芯片置于 `BYPASS` 模式。在此模式下，每个芯片仅作为一个1位移位寄存器。
-    - **用途**：可用于判断 JTAG 链路上串联的芯片数量（通过移位数据的延迟）。
+   ![ ](./media/image32.png " ")
+   - Looks for JTAG interfaces that return an `IDCODE`, the device identification register most chips select after reset. It's fast, but it can't find TDI.
+   - **Success:** for the correct pin combination it prints one or more 32-bit `IDCODE` values.
+   - **With ID Tracker**, the manufacturer name appears next to each `IDCODE`. JTAGulator Studio shows the name on any firmware.
 
-4.  **`R` - RTCK 扫描**
-    - 寻找 **自适应时钟（RTCK）** 引脚。某些 ARM 内核支持此功能，目标芯片通过 RTCK 引脚反馈时钟就绪信号，调试器据此调整 TCK 频率。
-    - 使用场景较少。
+3. **`B` – BYPASS scan**
 
-### 交互指令（扫描成功后使用）
-1.  **`D` - 读取 IDCODE**
-    - 从已识别的 JTAG 链路上读取所有芯片的 `IDCODE`。
+   ![ ](./media/image33.png " ")
+   - Puts every chip in the chain into `BYPASS`, where each acts as a 1-bit shift register, and finds all four pins. It reports the number of devices in the chain.
+   - Slower than the IDCODE scan. Entering pins you already know shortens it a lot.
 
-2.  **`T` - BYPASS 测试**
-    - 验证 BYPASS 模式功能，并可用于估算链路上芯片的数量。
+4. **`R` – RTCK scan**
+   - Finds the **adaptive clocking (RTCK)** pin. Some ARM cores return the clock on RTCK so the debugger can match the TCK speed.
+   - Rarely needed.
 
-3.  **`Y` - 指令/数据寄存器探测**
-    - 尝试探测指令寄存器（IR）和数据寄存器（DR）的长度。这对于后续使用自定义指令进行深度调试至关重要。
+### Commands for a known pinout
 
-4.  **`P` - EXTEST 测试**
-    - 使用 JTAG 的 `EXTEST` 指令控制芯片的边界扫描单元，从而控制其外部引脚电平。可用于点亮LED、驱动蜂鸣器等简单验证。
+1. **`D` – read IDCODEs**
+   - Reads the `IDCODE` of every chip in the chain. TDI isn't needed.
 
-5.  **`O` - 启动 OpenOCD**
-    - 将 Jtagulator 配置为 **Bus Pirate** 兼容模式，并生成启动 OpenOCD 的命令。
-    - **使用示例（Linux）**：
-        ```bash
-        # 假设扫描到的JTAG接口映射为：TMS=CH2, TCK=CH3, TDI=CH4, TDO=CH5
-        # Jtagulator 会输出类似以下的命令：
-        openocd -f interface/buspirate.cfg -c "transport select jtag; buspirate port /dev/ttyUSB0" -f target/stm32f1x.cfg
-        ```
-    - 这允许你使用强大的 OpenOCD 框架进行后续的调试、内存读写和固件提取。
+2. **`T` – BYPASS test**
+   - Shifts a random pattern from TDI to TDO through BYPASS and checks it comes back. This confirms the pinout and counts the chips in the chain.
 
----
+3. **`Y` – instruction/data register discovery**
+   - Finds the instruction register (IR) length and the data register (DR) length behind every instruction. Needs a single chip in the chain. Essential for working with undocumented instructions.
 
-## 0x07 UART 串口嗅探与交互
+4. **`P` – pin mapper (EXTEST)**
+   - Uses the JTAG `EXTEST` instruction to walk a bit through the boundary scan register. It reports which register bit drives which JTAGulator channel, which helps map a chip's pins on a board.
 
-UART 是最常见的调试接口。Jtagulator 可以自动识别 TX、RX 引脚和波特率。
+5. **`O` – OpenOCD mode**
+   - Makes the JTAGulator act as a **Bus Pirate**-compatible adapter for OpenOCD and prints an example command.
+   - **Example (Linux):**
 
-输入 `U` 进入 UART 模式，输入 `H` 查看指令。
+     ```bash
+     # With the pinout found by the scan:
+     openocd -f interface/buspirate.cfg -c "transport select jtag; buspirate port /dev/ttyUSB0" -f target/stm32f1x.cfg
+     ```
 
-### 专用指令
-1.  **`U` - 完整 UART 扫描**
-	![ ](./media/image34.png " ")
-    - 在指定通道范围内，穷举所有两两组合（一个作TX，一个作RX），并尝试多种常见波特率。
-	![ ](./media/image35.png " ")
-    - 需要设置一个“诱饵字符串”，默认是回车符（`\r`）。设备会发送该字符串，并监听是否有包含此字符串的回应。
-    - 可以设置是否忽略不可打印字符，用于过滤纯二进制数据流。
-
-2.  **`T` - 仅扫描 TX 引脚**
-    - 持续监听所有通道，任何出现符合 UART 起始位-数据位-停止位规律的信号都会被捕获，并估计其波特率。
-    - 适合用于发现“只发送”的日志输出端口。
-	![ ](./media/image36.png " ")
-
-3.  **`P` - 直连通信**
-    - 与已发现的 UART 接口建立双向通信。
-    - 需要指定 RX、TX 通道和波特率。
-	![ ](./media/image37.png " ")
-    - **本地回显（Local Echo）**：建议在与交互式终端（如Linux Shell）通信时关闭（`N`），在与单片机等需要回显验证的设备通信时开启（`Y`）。
-    - **退出**：`Ctrl+X`
+   - With OpenOCD you can debug, read and write memory, and extract firmware.
+   - The mode survives resets until you leave it with `Ctrl+X`.
+   - JTAGulator Studio can do all of this from the JTAG page: enter the mode, start OpenOCD with a chosen target, show its output, and return to the menu.
 
 ---
 
-## 0x08 SWD 接口嗅探
+## 0x07 UART discovery and passthrough
 
-SWD（Serial Wire Debug）是 ARM Cortex 内核常用的两线调试协议，比 JTAG 引脚更少。
+UART is the most common debug interface. The JTAGulator can find the TX and RX pins and the baud rate automatically.
 
-输入 `S` 进入 SWD 模式，输入 `H` 查看指令。
+> Pin names are from the **target's** point of view: TXD is where the target transmits.
+
+Type `U` to enter UART mode, then `H` for its commands.
+
+### Commands
+
+1. **`U` – full UART scan**
+
+   ![ ](./media/image34.png " ")
+   - Tries every pair of channels in the range (one as TXD, one as RXD) at each of 21 standard baud rates.
+
+   ![ ](./media/image35.png " ")
+   - You set a "bait" string to send, a carriage return (`\r`) by default. The JTAGulator sends it and shows any reply.
+   - You can ignore replies with non-printable characters, to filter out binary noise.
+
+2. **`T` – TXD-only scan**
+   - Listens on all channels. Any signal that looks like UART (start bit, data bits, stop bit) is reported with its measured baud rate.
+   - Nothing is transmitted, so this is a safe first try, and ideal for transmit-only log ports. Power-cycle the target during the scan to catch its boot log.
+
+   ![ ](./media/image36.png " ")
+
+3. **`P` – passthrough**
+   - Opens a two-way connection to the UART you found.
+   - Enter the TXD and RXD channels and the baud rate.
+
+   ![ ](./media/image37.png " ")
+   - **Local echo:** turn it off (`N`) for interactive shells (e.g. a Linux console), which echo by themselves. Turn it on (`Y`) for devices that don't echo.
+   - **Leave** with `Ctrl+X`.
+   - In JTAGulator Studio, the UART page has a full terminal for this. Its scripts can wait for target output with `uart.expect()`, e.g. to stop U-Boot's autoboot.
+
+---
+
+## 0x08 SWD discovery
+
+SWD (Serial Wire Debug) is ARM Cortex's two-wire debug protocol. It needs fewer pins than JTAG.
+
+Type `S` to enter SWD mode, then `H` for its commands.
+
 ![ ](./media/image38.png " ")
-### 专用指令与硬件优化
-1.  **`I` - SWD 接口扫描**
-    - 扫描 SWDIO 和 SWCLK 引脚。由于 SWD 协议对时序和信号完整性要求较高，原版 Jtagulator 串联的电阻（~470Ω）可能导致扫描失败率上升。
-    - **硬件优化建议**：将 I/O 口上的串联电阻（R1-R24）更换为更小的阻值（如 22Ω - 100Ω），可显著提高 SWD 扫描成功率，且对 JTAG 功能影响甚微。
 
-2.  **`D` - 读取 SWD ID**
-    - 从已识别的 SWD 接口读取目标芯片的调试访问端口（DP）ID。
-    - **增强固件功能**：使用 `jtagulator-ID-Tracker` 固件，可尝试根据 ID 反推制造商。
-    - **注意**：许多芯片公司使用 ARM 提供的 Cortex 内核，其 SWD-ID 中的制造商字段可能仍显示为“ARM”，而非芯片公司本身（如某些 STM32 型号）。
+### Commands and hardware tuning
 
----
+1. **`I` – SWD scan**
+   - Finds the SWDIO and SWCLK pins by reading the debug port ID on every pair.
+   - SWD is sensitive to timing and signal integrity. The firmware itself warns that the JTAGulator's front-end circuitry is incompatible with many SWD targets. The original author found the series resistors on the I/O channels (~470 Ω) to be the cause.
+   - **Hardware tuning:** replacing the series resistors (R1–R24) with smaller values (around 22–100 Ω) greatly improves SWD detection, with little effect on JTAG. See also the official [hardware modifications](https://github.com/grandideastudio/jtagulator/wiki/Hardware-Modifications) page.
 
-## 0x09 常见故障排解
-
-1.  **设备无响应**：
-    - **首要尝试**：在串口终端中按下 `Ctrl+X`。设备可能处于逻辑分析仪或 OpenOCD 等挂起模式，此快捷键可强制退回主界面。
-    - 检查 USB 线是否连接牢固，检查数据线是否带数据传输功能，尝试更换 USB 数据线或电脑。
-    - 检查串口终端软件的波特率是否正确设置为 `115200`。
-
-2.  **扫描无结果**：
-    - **确认电平**：务必先使用 `V` 指令设置正确的通信电平，并使用示波器验证。
-    - **检查连接**：确保 GND 可靠连接，信号线接触良好。
-    - **尝试不同模式**：JTAG 扫描可依次尝试 `J`、`I`、`B` 指令。
-    - **缩小范围**：尽可能将目标板引脚连接到连续的通道，减少组合数。
-    - **硬件修改**：对于 SWD 扫描，考虑减小 I/O 串联电阻。
-
-3.  **逻辑分析仪/PulseView 无法连接**：
-    - 在 Linux 下使用 `pulseview -D` 启动，并确保选择了正确的驱动和设备。
-    - 在 Windows 下，FTDI 驱动可能将设备识别为标准串口而非通用驱动，可能需要手动安装或配置 libusb 驱动，这相对复杂，因此更推荐在 Linux 下使用此功能。
+2. **`D` – read the SWD ID**
+   - Reads the debug port ID register (DPIDR) of the target.
+   - **With ID Tracker**, the designer's name is shown as well.
+   - **Note:** many chip makers license ARM's Cortex cores. The designer field of the DPIDR then says "ARM" rather than the chip maker (for example on some STM32 parts).
 
 ---
 
-## 0x0A 结语
+## 0x09 Troubleshooting
 
-Jtagulator 不仅是一个强大的开源安全工具，其本身的设计也极具参考价值。其采用的高压隔离设计、ESD保护电路和简洁的布局，体现了 Joe Grand 在硬件安全设计上的深厚功底。尽管其核心功能已定型，但通过社区的努力（如增强固件的开发）和硬件的简单改造（如调整串联电阻），仍能不断挖掘和提升其潜力，使其在硬件安全分析领域持续发挥作用。
+1. **The device doesn't respond**
+   - **Try first:** press `Ctrl+X` in the terminal. The device may be in logic analyzer or OpenOCD mode, which survives resets; `Ctrl+X` returns to the menu. JTAGulator Studio detects these modes when it connects and offers **Exit mode**.
+   - Check the USB cable: it must carry data, not just power. Try another cable or port.
+   - Check that the terminal is set to `115200` baud.
+   - On Linux, check you have permission to open the port (see [0x02](#0x02-connecting-and-setting-up-the-device)).
+
+2. **Scans find nothing**
+   - **Set the voltage first** with `V` and confirm the target's level with an oscilloscope.
+   - **Check the wiring:** a solid ground and good contact on every signal.
+   - **Try other scans:** for JTAG, try `J`, `I` and `B` in turn.
+   - **Narrow the range:** wire the candidate pins to consecutive channels.
+   - **Pull channels low** before each permutation if the target may hold a reset line.
+   - **For SWD,** consider smaller series resistors.
+
+3. **The logic analyzer or PulseView won't connect**
+   - Make sure the device is in logic analyzer mode (`G`, then `L`) and nothing else has the serial port open.
+   - On Linux, start PulseView with `pulseview -D` and pick the right driver and port.
+   - On Windows, PulseView needs the right driver for the FTDI device, which can be fiddly. JTAGulator Studio's logic analyzer works on every platform without extra drivers.
 
 ---
-*文档整理与补充：Chaoschaos1024*  
-*最后更新：2025年12月*
+
+## 0x0A Closing notes
+
+The JTAGulator is a powerful open-source security tool, and its design is worth studying in its own right: the input protection, ESD circuitry and clean layout show Joe Grand's experience in hardware security design. Its core functions are mature, but the community keeps extending it, through enhanced firmware like ID Tracker, apps like JTAGulator Studio, and simple hardware changes such as smaller series resistors.
+
+---
+
+## 0x0B JTAGulator Studio
+
+JTAGulator Studio (`studio/` in this repository) is a desktop app (Windows, macOS, Linux) that also runs in Chrome or Edge. Everything in this manual is available there with forms instead of typed commands:
+
+| Page | What it does |
+| :--- | :--- |
+| Overview | Connect, device info, quick links, recent activity |
+| Scan all | Runs any set of scans one after another |
+| JTAG | All JTAG scans and known-pinout tools, plus the OpenOCD launcher |
+| SWD | SWD scan and DPIDR decode |
+| UART | Active and passive scans and a terminal to the target |
+| GPIO | Read, monitor and drive the 24 channels |
+| Logic analyzer | Captures, triggers, pre-trigger, decoders, export |
+| Scripts | Automate any of the above in JavaScript, or record a macro |
+| Target & findings | Known pins, channel labels and results per board; Markdown reports |
+| Firmware | Installed version, test-run or install firmware, updates, manufacturer database |
+
+It also has a built-in simulator, a software JTAGulator with a fake target, so you can learn the tool without hardware. See the [README](README.md) for installation.
+
+---
+*Manual written by Chaoschaos1024; translated to English and updated for ID Tracker 1.3 and JTAGulator Studio.*
+*Last updated: October 2026*

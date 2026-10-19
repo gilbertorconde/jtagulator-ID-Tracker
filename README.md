@@ -4,6 +4,8 @@ Enhanced firmware for the [JTAGulator](https://github.com/grandideastudio/jtagul
 
 *Hardware security testing · JTAG/SWD/UART interface discovery · Chip manufacturer identification*
 
+For step-by-step use of every command, wiring and troubleshooting, see the **[user manual](manual.md)**.
+
 ---
 
 ## Contents
