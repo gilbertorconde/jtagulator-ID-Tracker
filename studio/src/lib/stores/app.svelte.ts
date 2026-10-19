@@ -9,6 +9,7 @@ import { hasWebSerial, WebSerialTransport } from "../core/transports/webserial";
 import type { DeviceMode, Finding, Menu, OpContext, OpEvent } from "../core/types";
 import { CALLS, callToCode, type CallName } from "../scripting/api";
 import { DEFAULT_TARGET } from "../sim/firmware";
+import { untrack } from "svelte";
 
 export type View = "overview" | "jtag" | "swd" | "uart" | "gpio" | "logic" | "all" | "scripts" | "findings" | "settings";
 
@@ -52,6 +53,8 @@ export interface Toast {
 
 /** What we know about the board under test, prefilled into forms. */
 export interface TargetProfile {
+  id: string;
+  updatedAt: number;
   name: string;
   notes: string;
   voltage: number | null;
@@ -75,7 +78,11 @@ export interface Settings {
   wiringHidden: Record<string, boolean>;
 }
 
+const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+
 const blankTarget = (): TargetProfile => ({
+  id: newId(),
+  updatedAt: Date.now(),
   name: "Untitled target",
   notes: "",
   voltage: null,
@@ -93,6 +100,15 @@ function load<T>(key: string, fallback: T): T {
     return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
   } catch {
     return fallback;
+  }
+}
+
+function loadList(key: string): TargetProfile[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(key) ?? "[]");
+    return Array.isArray(v) ? v : [];
+  } catch {
+    return [];
   }
 }
 
@@ -150,6 +166,8 @@ class AppState {
   recorded = $state<string[]>([]);
 
   target = $state<TargetProfile>(load("jts.target", blankTarget()));
+  /** Every saved target, including the current one (kept in sync). */
+  targets = $state<TargetProfile[]>(loadList("jts.targets"));
   settings = $state<Settings>(
     load("jts.settings", {
       theme: "dark",
@@ -169,9 +187,18 @@ class AppState {
   readonly webSerial = hasWebSerial();
 
   constructor() {
+    if (!this.target.id) this.target.id = newId();
     $effect.root(() => {
       $effect(() => {
-        localStorage.setItem("jts.target", JSON.stringify(this.target));
+        const json = JSON.stringify(this.target);
+        localStorage.setItem("jts.target", json);
+        untrack(() => {
+          const copy = JSON.parse(json) as TargetProfile;
+          copy.updatedAt = Date.now();
+          const i = this.targets.findIndex((t) => t.id === copy.id);
+          this.targets = i >= 0 ? this.targets.map((t, k) => (k === i ? copy : t)) : [copy, ...this.targets];
+          localStorage.setItem("jts.targets", JSON.stringify(this.targets));
+        });
       });
       $effect(() => {
         localStorage.setItem("jts.settings", JSON.stringify(this.settings));
@@ -468,6 +495,27 @@ class AppState {
 
   newTarget() {
     this.target = blankTarget();
+  }
+
+  switchTarget(id: string) {
+    const t = this.targets.find((x) => x.id === id);
+    if (t) this.target = structuredClone($state.snapshot(t));
+  }
+
+  /** Remove a saved target. Deleting the current one switches to another (or a blank one). */
+  deleteTarget(id: string) {
+    this.targets = this.targets.filter((t) => t.id !== id);
+    localStorage.setItem("jts.targets", JSON.stringify(this.targets));
+    if (this.target.id === id) {
+      const next = this.targets[0];
+      this.target = next ? structuredClone($state.snapshot(next)) : blankTarget();
+    }
+  }
+
+  /** Add or replace a target from an imported file, then switch to it. */
+  importTarget(t: TargetProfile) {
+    const known = this.targets.some((x) => x.id === t.id);
+    this.target = { ...blankTarget(), ...t, id: t.id && !known ? t.id : newId() };
   }
 
   // ------------------------------------------------------------------ recorder

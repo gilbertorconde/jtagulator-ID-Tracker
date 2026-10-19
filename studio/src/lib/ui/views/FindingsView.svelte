@@ -42,15 +42,18 @@
       if (!text) return;
       const data = JSON.parse(text) as TargetProfile;
       if (!data.jtag || !Array.isArray(data.findings)) throw new Error("Not a JTAGulator Studio target file");
-      app.target = data;
+      app.importTarget(data);
       app.toast("ok", "Target loaded", data.name);
     } catch (e) {
       app.error(e, "Import");
     }
   }
-  async function newTarget() {
-    if (t.findings.length && !(await app.ask("New target", "Start a new target? Export this one first if you want to keep it.", "Start new", true))) return;
+  function newTarget() {
     app.newTarget();
+  }
+  async function removeTarget() {
+    if (!(await app.ask("Delete target", `Delete “${t.name}” and its ${t.findings.length} findings? Export it first if you want to keep it.`, "Delete", true))) return;
+    app.deleteTarget(t.id);
   }
 </script>
 
@@ -58,10 +61,21 @@
   <Panel title="Target" subtitle="Everything learned about the board under test. Saved automatically.">
     {#snippet aside()}
       <button class="btn sm" onclick={newTarget}><FilePlus2 size={13} /> New</button>
+      <button class="btn sm ghost icon" title="Delete this target" onclick={removeTarget}><Trash2 size={13} /></button>
       <button class="btn sm" onclick={importJson}><Upload size={13} /> Open</button>
       <button class="btn sm" onclick={exportJson}><FileJson size={13} /> Save</button>
       <button class="btn sm primary" onclick={exportMd}><Download size={13} /> Report</button>
     {/snippet}
+    {#if app.targets.length > 1}
+      <div class="switch">
+        <span class="label">Saved targets</span>
+        <select class="input" value={t.id} onchange={(e) => app.switchTarget((e.currentTarget as HTMLSelectElement).value)}>
+          {#each [...app.targets].sort((a, b) => b.updatedAt - a.updatedAt) as x (x.id)}
+            <option value={x.id}>{x.name} · {x.findings.length} findings · {new Date(x.updatedAt).toLocaleDateString()}</option>
+          {/each}
+        </select>
+      </div>
+    {/if}
     <input class="input title" bind:value={app.target.name} />
     <textarea class="input" rows="3" placeholder="Notes: board, test points, what you tried…" bind:value={app.target.notes}></textarea>
     <PinHeader {roles} names={t.channelNames} onpin={(ch) => (editing = ch)} />
@@ -114,6 +128,15 @@
     grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr));
     gap: 14px;
     align-items: start;
+  }
+  .switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .switch select {
+    flex: 1;
+    min-width: 0;
   }
   .title {
     font-size: 16px;
