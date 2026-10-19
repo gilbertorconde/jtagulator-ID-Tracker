@@ -14,7 +14,7 @@ describe("OpenOCD config", () => {
       "buspirate port /dev/ttyUSB0",
       "buspirate speed normal",
       "transport select jtag",
-      "gdb port 3333",
+      "gdb_port 3333",
       "source [find target/stm32f4x.cfg]",
     ]);
   });
@@ -37,7 +37,7 @@ describe("OpenOCD config", () => {
 
   it("quotes odd port names for Tcl and joins commands for the command line", () => {
     expect(ocdCommands({ ...base, port: "/dev/serial/by-id/usb-FTDI JTAGulator" })[1]).toBe("buspirate port {/dev/serial/by-id/usb-FTDI JTAGulator}");
-    expect(ocdArgs(base)).toEqual(["-c", "adapter driver buspirate; buspirate port /dev/ttyUSB0; buspirate speed normal; transport select jtag; gdb port 3333"]);
+    expect(ocdArgs(base)).toEqual(["-c", "adapter driver buspirate; buspirate port /dev/ttyUSB0; buspirate speed normal; transport select jtag; gdb_port 3333"]);
   });
 
   it("writes a commented file", () => {

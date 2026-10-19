@@ -30,8 +30,9 @@ const tclWord = (s: string) => (/^[\w./:\\-]+$/.test(s) ? s : `{${s.replace(/[{}
 /** OpenOCD commands, one per line, without comments. */
 export function ocdCommands(o: OcdOptions): string[] {
   const out = ["adapter driver buspirate", `buspirate port ${tclWord(o.port)}`, `buspirate speed ${o.speed}`, "transport select jtag"];
-  if (o.gdbPort !== undefined) out.push(`gdb port ${o.gdbPort}`);
-  if (o.telnetPort !== undefined) out.push(`telnet port ${o.telnetPort}`);
+  // OpenOCD 0.12 only knows the underscore forms; later versions accept them with a deprecation notice.
+  if (o.gdbPort !== undefined) out.push(`gdb_port ${o.gdbPort}`);
+  if (o.telnetPort !== undefined) out.push(`telnet_port ${o.telnetPort}`);
   if (o.target) out.push(`source [find ${o.target}]`);
   else {
     // Declare the chain only when every IR length is known; otherwise let OpenOCD probe it.
