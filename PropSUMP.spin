@@ -291,11 +291,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig1Mask:=larg & TRIGGER_CH_MASK            
 
@@ -304,11 +304,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig2Mask:=larg & TRIGGER_CH_MASK
 
@@ -317,11 +317,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig3Mask:=larg & TRIGGER_CH_MASK
 
@@ -330,11 +330,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig4Mask:=larg & TRIGGER_CH_MASK
 
@@ -343,11 +343,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig1Val:=larg & TRIGGER_CH_MASK            
 
@@ -356,11 +356,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig2Val:=larg & TRIGGER_CH_MASK
 
@@ -369,11 +369,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig3Val:=larg & TRIGGER_CH_MASK
 
@@ -382,11 +382,11 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         larg:=vCmd[4]
         larg<<=8
-        larg:=vCmd[3]
+        larg|=vCmd[3]
         larg<<=8
-        larg:=vCmd[2]
+        larg|=vCmd[2]
         larg<<=8
-        larg:=vCmd[1]
+        larg|=vCmd[1]
 
         trig4Val:=larg & TRIGGER_CH_MASK
 
