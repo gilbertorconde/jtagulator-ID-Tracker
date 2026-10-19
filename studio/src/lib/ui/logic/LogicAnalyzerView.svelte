@@ -49,9 +49,10 @@
     session,
     onError,
     fullTriggers = false,
-  }: { dev: JTAGulator; session: Session; onError?: (e: unknown) => void; fullTriggers?: boolean } = $props();
+    longCaptures = false,
+  }: { dev: JTAGulator; session: Session; onError?: (e: unknown) => void; fullTriggers?: boolean; longCaptures?: boolean } = $props();
 
-  const sump = $derived(new SumpClient(session, { fullTriggers, preTrigger: fullTriggers }));
+  const sump = $derived(new SumpClient(session, { fullTriggers, preTrigger: fullTriggers, longCaptures }));
 
   // ------------------------------------------------------------------ mode
   let mode = $state<DeviceMode>("unknown");
@@ -129,7 +130,9 @@
   const trigChannels = $derived(fullTriggers ? 24 : 8);
 
   const plan = $derived(planSampleRate(rateHz));
-  const nClamped = $derived(clampSamples(samplesN));
+  // Pre-trigger captures keep one long per sample in the firmware: at most 1024.
+  const maxN = $derived(trigOn && preFraction > 0 ? SUMP_LIMITS.maxSamples : longCaptures ? SUMP_LIMITS.packedMaxSamples : SUMP_LIMITS.maxSamples);
+  const nClamped = $derived(clampSamples(samplesN, maxN));
   const groupMask = $derived(groups.reduce((m, g, i) => m | (g ? 1 << i : 0), 0));
   const windowMs = $derived(captureDurationMs(rateHz, nClamped));
   const xferMs = $derived(transferDurationMs(nClamped, groupMask));
@@ -419,7 +422,7 @@
           {#if deviceInfo}
             {deviceInfo.meta.deviceName ?? "SUMP device"} · ID <span class="mono">{deviceInfo.id}</span>
             {#if deviceInfo.meta.numProbes}· {deviceInfo.meta.numProbes} probes{/if}
-            · up to {formatHz(SUMP_LIMITS.maxSampleRateHz, 3)}, {SUMP_LIMITS.maxSamples} samples. Persists across resets until you exit.
+            · up to {formatHz(SUMP_LIMITS.maxSampleRateHz, 3)}, {maxN} samples. Persists across resets until you exit.
           {:else}
             Speaking SUMP at 115200 baud. Persists across resets until you exit.
           {/if}
@@ -465,12 +468,12 @@
               class="input mono"
               type="number"
               min={SUMP_LIMITS.minSamples}
-              max={SUMP_LIMITS.maxSamples}
+              max={maxN}
               step={SUMP_LIMITS.sampleStep}
               bind:value={samplesN}
               onblur={() => (samplesN = nClamped)}
             />
-            <button class="btn sm ghost" onclick={() => (samplesN = SUMP_LIMITS.maxSamples)}>Max</button>
+            <button class="btn sm ghost" onclick={() => (samplesN = maxN)}>Max</button>
           </div>
           <span class="hint">
             {nClamped} samples = {formatTime(windowMs / 1000)} window · ~{formatTime(xferMs / 1000, 2)} transfer

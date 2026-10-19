@@ -10,4 +10,6 @@ mkdir -p "$out"
 "$OPENSPIN" -q -b -o "$out/jtagulator.binary" "$root/JTAGulator.spin"
 "$OPENSPIN" -q -b -o "$out/eeprom-update.binary" "$root/eepromupdate/EEPROM_Update.spin"
 "$OPENSPIN" -q -b -L "$root" -o "$out/eeprom-probe.binary" "$here/firmware/EEPROM_Probe.spin"
+
+"$OPENSPIN" -q -b -L "$root" -o "$out/sump-selftest.binary" "$here/firmware/SUMP_Selftest.spin"
 ls -l "$out"

@@ -10,7 +10,7 @@ import firmwareUrl from "./assets/jtagulator.binary?url";
 
 export const BUNDLED = { firmware: firmwareUrl, updater: updaterUrl, probe: probeUrl };
 /** Version of the bundled ID Tracker firmware (built from this repository). */
-export const BUNDLED_VERSION = "1.3";
+export const BUNDLED_VERSION = "1.4";
 
 export async function fetchAsset(url: string): Promise<Uint8Array> {
   const r = await fetch(url);

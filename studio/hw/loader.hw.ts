@@ -26,7 +26,7 @@ afterAll(async () => {
 
 describe("Propeller loader (RAM only)", () => {
   it("describes bundled images", () => {
-    expect(describeImage(asset("jtagulator.binary"))).toMatchObject({ idTracker: true, version: "1.3" });
+    expect(describeImage(asset("jtagulator.binary"))).toMatchObject({ idTracker: true, version: "1.4" });
   });
 
   it("runs the EEPROM probe from RAM", async () => {
@@ -50,6 +50,6 @@ describe("Propeller loader (RAM only)", () => {
     expect(await dev.sync()).toBe("normal");
     const info = await dev.info();
     console.log("RAM firmware:", info.firmware);
-    expect(info.version).toBe("1.3");
+    expect(info.version).toBe("1.4");
   });
 });

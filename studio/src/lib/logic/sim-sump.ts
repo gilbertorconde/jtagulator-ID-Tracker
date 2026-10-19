@@ -5,7 +5,8 @@ import type { SimFirmware, SumpHandler } from "../sim/firmware";
 
 const CAN = 0x18;
 const CLK = 80_000_000;
-const MAX_PERIODS = 1024;
+const MAX_PERIODS = 1364; // ID Tracker 1.4 packs samples; pre-trigger captures stay at 1024
+const MAX_PRE_PERIODS = 1024;
 const DEFAULT_CLOCKS_WAIT = 66;
 const DISABLE_FLAGS_MASK = 0b0011_1100;
 const MAX_RX_DELAY_MS = 100;
@@ -285,8 +286,9 @@ export class SimSump implements SumpHandler {
     const stage = (c: number) => (c >> 2) & 3;
     switch (v[0]) {
       case 0x81: {
-        this.readReq = Math.min(MAX_PERIODS, (((v[2] << 8) | v[1]) + 1) * 4);
-        this.delayReq = Math.min(MAX_PERIODS, (((v[4] << 8) | v[3]) + 1) * 4);
+        const max = this.opts.legacyTriggers ? 1024 : MAX_PERIODS;
+        this.readReq = Math.min(max, (((v[2] << 8) | v[1]) + 1) * 4);
+        this.delayReq = Math.min(max, (((v[4] << 8) | v[3]) + 1) * 4);
         this.readPeriods = this.readReq;
         this.delayPeriods = this.delayReq;
         if (this.readPeriods > this.delayPeriods) this.readPeriods = this.delayPeriods;
@@ -340,15 +342,16 @@ export class SimSump implements SumpHandler {
     const t0 = this.now();
     // ID Tracker 1.3: read > delay with a stage-1 start trigger keeps samples from
     // before the trigger, sampling no faster than 80 MHz / 88.
-    if (!this.opts.legacyTriggers && this.readReq > this.delayReq && this.trigMask[0] && this.trigStart[0]) {
-      const pre = this.readReq - this.delayReq;
+    const preRead = Math.min(this.readReq, MAX_PRE_PERIODS);
+    if (!this.opts.legacyTriggers && preRead > this.delayReq && this.trigMask[0] && this.trigStart[0]) {
+      const pre = preRead - this.delayReq;
       const period = Math.max(this.clocksWait, 88) / CLK;
       const tt = this.waitPeq(t0 + pre * period, this.trigMask[0], this.trigVal[0]);
       const state: { timer: ReturnType<typeof setTimeout> | null } = { timer: null };
       this.running = state;
       if (tt === null) return;
       const send: number[] = [];
-      for (let i = this.readReq - 1; i >= 0; i--) send.push(this.levels(tt + (i - pre) * period));
+      for (let i = preRead - 1; i >= 0; i--) send.push(this.levels(tt + (i - pre) * period));
       state.timer = setTimeout(() => {
         if (this.running !== state) return;
         this.running = null;

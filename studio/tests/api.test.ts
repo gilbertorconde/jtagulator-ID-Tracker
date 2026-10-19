@@ -30,7 +30,7 @@ describe("general", () => {
   it("reads version info", async () => {
     const info = await dev.info();
     expect(info.idTracker).toBe(true);
-    expect(info.version).toBe("1.3");
+    expect(info.version).toBe("1.4");
   });
 
   it("requires target voltage for scans", async () => {

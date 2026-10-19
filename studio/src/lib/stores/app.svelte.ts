@@ -188,6 +188,8 @@ class AppState {
 
   /** ID Tracker 1.3+ parses all 24 logic analyzer trigger channels. */
   fullTriggers = $derived(!!this.info?.idTracker && parseFloat(this.info.version ?? "0") >= 1.3);
+  /** ID Tracker 1.4+ packs logic analyzer samples: 1364 per capture instead of 1024. */
+  longCaptures = $derived(!!this.info?.idTracker && parseFloat(this.info.version ?? "0") >= 1.4);
 
   readonly tauri = isTauri();
   readonly webSerial = hasWebSerial();

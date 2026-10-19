@@ -23,7 +23,7 @@ beforeAll(async () => {
   await s.connect();
   dev = new JTAGulator(s);
   expect(await dev.sync()).toBe("normal");
-  expect((await dev.info()).version).toBe("1.3");
+  expect((await dev.info()).version).toBe("1.4");
   await dev.setTargetVoltage(3.3);
 });
 

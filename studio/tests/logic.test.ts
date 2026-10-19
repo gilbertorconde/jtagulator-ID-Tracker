@@ -50,6 +50,7 @@ describe("SUMP helpers", () => {
 
   it("clamps sample counts to multiples of 4 up to 1024", () => {
     expect(clampSamples(5000)).toBe(1024);
+    expect(clampSamples(5000, 1364)).toBe(1364);
     expect(clampSamples(1)).toBe(4);
     expect(clampSamples(102)).toBe(104);
   });
@@ -306,5 +307,22 @@ describe("pre-trigger capture (ID Tracker 1.3)", () => {
     simSump.opts.clock = () => 1 - 0.0004;
     const cap = await client.capture({ sampleRateHz: 1_200_000, samples: 256, channels: [20], trigger: { mask: 1 << 20, value: 0 }, preTriggerSamples: 128 });
     expect(cap.triggerIndex).toBe(0);
+  });
+});
+
+describe("longer captures (ID Tracker 1.4)", () => {
+  it("takes 1364 samples when the firmware packs them, 1024 otherwise", async () => {
+    const long = new SumpClient(session, { longCaptures: true });
+    expect((await long.capture({ sampleRateHz: 100_000, samples: 5000, channels: [] })).samples.length).toBe(1364);
+    const old = new SumpClient(session);
+    expect((await old.capture({ sampleRateHz: 100_000, samples: 5000, channels: [] })).samples.length).toBe(1024);
+  });
+
+  it("keeps pre-trigger captures at 1024", async () => {
+    const c = new SumpClient(session, { fullTriggers: true, preTrigger: true, longCaptures: true });
+    simSump.opts.clock = () => 1 - 0.0004;
+    const cap = await c.capture({ sampleRateHz: 500_000, samples: 1364, channels: [20], trigger: { mask: 1 << 20, value: 0 }, preTriggerSamples: 256 });
+    expect(cap.samples.length).toBe(1024);
+    expect(cap.triggerIndex).toBe(256);
   });
 });

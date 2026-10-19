@@ -63,6 +63,7 @@
               dev={app.dev}
               session={app.session}
               fullTriggers={app.fullTriggers}
+              longCaptures={app.longCaptures}
               onError={(e: unknown) => app.error(e, "Logic analyzer")}
             />
           {:else}

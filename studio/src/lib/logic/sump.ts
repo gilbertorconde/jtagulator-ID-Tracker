@@ -52,6 +52,8 @@ export const SUMP_LIMITS = {
   advertisedMaxSampleRateHz: 1_200_000,
   minSampleRateHz: 80_000_000 / Math.floor((0x1000000 * 4) / 5),
   maxSamples: 1024,
+  /** ID Tracker 1.4 packs samples (4 per 3 longs): normal captures go up to this. */
+  packedMaxSamples: 1364,
   minSamples: 4,
   /** Sample counts are multiples of this. */
   sampleStep: 4,
@@ -131,12 +133,12 @@ export function planSampleRate(hz: number): RatePlan {
   return { divider, clocksWait, actualHz: L.clockHz / clocksWait };
 }
 
-/** Clamp a sample count to a multiple of 4 in [4, 1024]. */
-export function clampSamples(n: number): number {
+/** Clamp a sample count to a multiple of 4 in [4, max] (max 1024, or 1364 on ID Tracker 1.4). */
+export function clampSamples(n: number, max: number = SUMP_LIMITS.maxSamples): number {
   const L = SUMP_LIMITS;
-  if (!Number.isFinite(n)) return L.maxSamples;
+  if (!Number.isFinite(n)) return max;
   const r = Math.round(n / L.sampleStep) * L.sampleStep;
-  return Math.min(L.maxSamples, Math.max(L.minSamples, r));
+  return Math.min(max, Math.max(L.minSamples, r));
 }
 
 /** Bit g set = channel group g (CH8g..CH8g+7) enabled. */
@@ -164,12 +166,12 @@ const popcount3 = (g: number) => (g & 1) + ((g >> 1) & 1) + ((g >> 2) & 1);
 
 /** Expected capture time (ms) excluding trigger wait and transfer. */
 export function captureDurationMs(sampleRateHz: number, samples: number) {
-  return (clampSamples(samples) / planSampleRate(sampleRateHz).actualHz) * 1000;
+  return (clampSamples(samples, SUMP_LIMITS.packedMaxSamples) / planSampleRate(sampleRateHz).actualHz) * 1000;
 }
 
 /** Expected time (ms) to send a capture over the 115200 baud link. */
 export function transferDurationMs(samples: number, groups: number) {
-  return ((clampSamples(samples) * popcount3(groups) * 10) / SUMP_LIMITS.baud) * 1000;
+  return ((clampSamples(samples, SUMP_LIMITS.packedMaxSamples) * popcount3(groups) * 10) / SUMP_LIMITS.baud) * 1000;
 }
 
 const long = (cmd: number, v: number) =>
@@ -255,11 +257,17 @@ export class SumpClient {
   /**
    * fullTriggers: the firmware parses all 24 trigger channels (ID Tracker 1.3+).
    * preTrigger: the firmware can keep samples from before the trigger (1.3+).
+   * longCaptures: the firmware packs samples, allowing 1364 instead of 1024 (1.4+).
    */
   constructor(
     public readonly session: Session,
-    public readonly opts: { fullTriggers?: boolean; preTrigger?: boolean } = {},
+    public readonly opts: { fullTriggers?: boolean; preTrigger?: boolean; longCaptures?: boolean } = {},
   ) {}
+
+  /** Largest capture this firmware takes (pre-trigger captures stay at 1024). */
+  get maxSamples() {
+    return this.opts.longCaptures ? SUMP_LIMITS.packedMaxSamples : SUMP_LIMITS.maxSamples;
+  }
 
   get triggerChannelMask() {
     return this.opts.fullTriggers ? SUMP_LIMITS.fullTriggerChannelMask : SUMP_LIMITS.triggerChannelMask;
@@ -419,7 +427,9 @@ export class SumpClient {
 
   /** Run one capture. */
   capture(opts: CaptureOptions): Promise<Capture> {
-    const count = clampSamples(opts.samples);
+    const wantsPre = !!(opts.trigger?.mask && this.opts.preTrigger && opts.preTriggerSamples);
+    // The pre-trigger ring stores one long per sample: at most 1024 samples.
+    const count = clampSamples(opts.samples, wantsPre ? SUMP_LIMITS.maxSamples : this.maxSamples);
     const wantPre = opts.trigger?.mask && this.opts.preTrigger ? (opts.preTriggerSamples ?? 0) : 0;
     const pre = Math.min(count - SUMP_LIMITS.sampleStep, Math.max(0, Math.round(wantPre / 4) * 4));
     // Pre-trigger capture polls the trigger in software: the firmware enforces a
