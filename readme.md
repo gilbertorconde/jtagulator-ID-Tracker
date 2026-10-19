@@ -10,7 +10,7 @@
 ---
 # 🔍 JTAGulator-ID-Tracker
 
-**基于JTAGulator的增强固件 | 集成超过2000家芯片厂商ID数据库**
+**基于JTAGulator的增强固件 | 集成超过2000家芯片厂商ID数据库 | 附带图形化前端 JTAGulator Studio**
 
 *硬件安全测试工具 · JTAG/SWD接口扫描 · 芯片厂商自动识别*
 
@@ -19,6 +19,7 @@
 ## 📖 目录
 - [项目简介](#项目简介)
 - [✨ 新特性](#-新特性)
+- [🖥️ JTAGulator Studio 图形前端](#️-jtagulator-studio-图形前端)
 - [🧩 硬件要求](#-硬件要求)
 - [📦 烧录指南](#-烧录指南)
 - [🔧 使用展示](#-使用展示)
@@ -41,7 +42,8 @@
 - **应用**：硬件安全研究、逆向工程、设备诊断
 
 ### 本项目的改进
-原版固件仅使用了 EEPROM 的一半容量（32KB）。本项目充分利用了全部 64KB 空间，集成了庞大的芯片厂商识别数据库，在扫描接口的同时自动识别芯片制造商。
+1. **固件**：原版固件仅使用了 EEPROM 的一半容量（32KB）。本项目充分利用了全部 64KB 空间，集成了庞大的芯片厂商识别数据库，在扫描接口的同时自动识别芯片制造商。
+2. **JTAGulator Studio**（`studio/` 目录）：替代串口终端的图形化前端，见[下文](#️-jtagulator-studio-图形前端)。
 
 ---
 
@@ -54,12 +56,62 @@
 | **JTAG 扫描** | 仅发现接口 | **发现接口 + 显示厂商名称** |
 | **SWD 扫描** | 仅发现接口 | **发现接口 + 显示厂商名称** |
 | **数据库更新** | 无 | **一次烧录，永久使用** |
+| **图形化前端** | 无（串口终端） | **JTAGulator Studio** |
 
 ### 核心优势
 1. **智能识别** - 自动识别 ARM、MIPS、PowerPC 等架构的芯片厂商
 2. **效率提升** - 扫描过程中实时显示厂商信息，无需额外查询
 3. **数据库完整** - 涵盖主流芯片厂商及众多小众制造商
 4. **向后兼容** - 完全兼容原版 JTAGulator 所有功能
+
+---
+
+## 🖥️ JTAGulator Studio 图形前端
+
+<div align="center">
+<img src="image/studio-jtag.png" alt="JTAGulator Studio：JTAG 扫描" width="90%">
+<p><em>JTAGulator Studio 中的 JTAG 扫描：引脚、TRST# 以及每个 IDCODE 的厂商解析</em></p>
+</div>
+
+JTAGulator Studio 是一个桌面应用（基于 Tauri），也可以直接在浏览器中运行。它通过串口驱动 JTAGulator 自带的文本菜单：按表单内容自动回答每个提示，并把输出整理成结构化的结果卡片，而不是终端文字。支持 ID Tracker 固件和原版固件。
+
+| 模块 | 功能 |
+| :--- | :--- |
+| **JTAG** | 组合 / IDCODE / BYPASS / RTCK 扫描（BYPASS 可填入已知引脚加速），读取器件 ID，BYPASS 测试，IR/DR 探测，EXTEST 引脚映射，OpenOCD 模式 |
+| **SWD** | 引脚扫描，读取并解析 DPIDR |
+| **UART** | 主动扫描，被动 TXD 扫描（测量波特率），内置目标串口终端 |
+| **GPIO** | 读取 24 个通道，实时监视并记录变化，输出驱动 |
+| **逻辑分析仪** | OLS/SUMP 采集，24 通道波形查看，UART 解码，测量标记，导出 VCD/CSV |
+| **全部扫描** | 在同一组通道上依次运行任意组合的扫描 |
+| **芯片 ID** | 应用内使用 1,953 条 JEP106 厂商表解析 IDCODE / DPIDR，并识别常见型号。原版固件同样可用 |
+| **目标档案** | 记录已知引脚、通道标注和所有发现，自动保存，可导出 JSON 或 Markdown 报告 |
+| **脚本** | 沙箱 JavaScript，与界面使用同一套函数，支持 `uart.expect()` 自动化控制台；带脚本库和**宏录制**（把点击操作转成脚本） |
+| **设备终端** | 随时查看固件原始菜单 |
+| **模拟器** | 内置软件 JTAGulator 和虚拟目标板，无需硬件即可体验全部功能 |
+
+<div align="center">
+<img src="image/studio-logic.png" alt="JTAGulator Studio：逻辑分析仪" width="90%">
+<p><em>逻辑分析仪采集</em></p>
+</div>
+
+### 运行方法
+
+需要 [Node.js](https://nodejs.org) 20+ 和 [pnpm](https://pnpm.io)。桌面版还需要 [Rust](https://rustup.rs) 以及 [Tauri 依赖](https://tauri.app/start/prerequisites/)（Linux 下为 `webkit2gtk-4.1`）。
+
+```sh
+cd studio
+pnpm install
+
+pnpm tauri dev      # 桌面应用
+pnpm dev            # 浏览器访问 http://localhost:1420
+pnpm tauri build    # 打包安装程序
+```
+
+- **浏览器中连接真实设备**：请使用 Chrome 或 Edge（支持 Web Serial，需要 `localhost` 或 HTTPS）。其他浏览器只能使用模拟器。
+- **远程主机**：如果开发服务器运行在另一台机器上，先转发端口，例如 `ssh -L 1420:localhost:1420 <主机>`，再打开 `http://localhost:1420`。
+- **连接**：选择串口（FTDI 设备带 ★ 标记），点击 **Connect**，然后在顶栏设置目标电压；或点击 **Try the simulator** 体验模拟器。
+
+详细说明见 [`studio/README.md`](studio/README.md)。
 
 ---
 
@@ -156,6 +208,12 @@
 | **MCU 制造商** | 600+ | 各种微控制器厂商 |
 | **其他厂商** | 50+ | FPGA、CPLD 等器件厂商 |
 
+### 查询原理
+
+数据库采用 JEDEC **JEP106** 厂商列表，即 JTAG IDCODE 的厂商字段和 ARM DPIDR 的 Designer 字段所使用的编码：bit 11..8 为 bank 号，bit 7..1 为 7 位代码。表中每个 bank 有 126 条，每个名称 16 字节，从 EEPROM 地址 `0x8080` 开始存放。
+
+> **本版本修复**：早期版本在 JTAG 查询时直接把 11 位字段当作表索引，导致 bank 0 以外的所有厂商名称显示错误（例如 ARM `0x43B` 读取的是第 571 条而不是第 563 条）。现在 JTAG 与 SWD 一样使用 `bank × 126 + code` 作为索引（`JTAGulator.spin` 中的 `Display_Device_ID`）。
+
 ### 查询厂商信息
 数据库包含以下关键信息：
 - **厂商 ID** - 芯片 IDCODE 中的制造商代码
@@ -231,6 +289,9 @@ A: 推荐 **Propeller 1.3.2**烧录，串口工具随意。
 **Q: 如何确认数据库烧录成功？**  
 A: 烧录完成后，串口会显示 "Result: Success - Writing completion flag"。
 
+**Q: 使用 JTAGulator Studio 必须刷 ID Tracker 固件吗？**  
+A: 不需要。Studio 同样支持原版固件，并会自行解析厂商名称。
+
 ---
 
 ## 📄 许可证
@@ -249,7 +310,7 @@ A: 烧录完成后，串口会显示 "Result: Success - Writing completion flag"
 ### 🌟 如果这个项目对您有帮助，请给个 Star！
 **您的支持是我们持续改进的动力**
 
-*最后更新：2025年12月*
+*最后更新：2026年10月*
 
 </div>
 

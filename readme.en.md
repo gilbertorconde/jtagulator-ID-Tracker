@@ -1,252 +1,325 @@
-Below is a **complete English translation** of the provided document. The technical meaning, structure, and Markdown formatting have been preserved, with wording adjusted to read naturally for an international open-source and hardware-security audience.
+<div align="center">
+
+🌍 **Language** / **语言选择**
+
+[![中文](https://img.shields.io/badge/中文-red?style=for-the-badge)](readme.md)
+[![English](https://img.shields.io/badge/English-blue?style=for-the-badge)](readme.en.md)
+
+</div>
 
 ---
 
-````markdown
 # 🔍 JTAGulator-ID-Tracker
 
-**Enhanced firmware based on JTAGulator | Integrated manufacturer ID database with over 2,000 vendors**
+**Enhanced JTAGulator firmware with a 2,000+ chip-manufacturer ID database, plus JTAGulator Studio, a desktop and browser app for driving it**
 
-*Hardware security testing tool · JTAG/SWD interface scanning · Automatic chip manufacturer identification*
+*Hardware security testing · JTAG/SWD/UART interface discovery · Automatic chip manufacturer identification*
 
 ---
 
 ## 📖 Table of Contents
-- [Project Overview](#project-overview)
-- [✨ New Features](#-new-features)
+
+- [Overview](#overview)
+- [✨ Features](#-features)
+- [🖥️ JTAGulator Studio](#️-jtagulator-studio)
 - [🧩 Hardware Requirements](#-hardware-requirements)
 - [📦 Flashing Guide](#-flashing-guide)
-- [🔧 Usage Demonstration](#-usage-demonstration)
+- [🔧 Screenshots](#-screenshots)
 - [📊 Manufacturer Database](#-manufacturer-database)
-- [🎯 Application Scenarios](#-application-scenarios)
-- [🤝 Contribution Guide](#-contribution-guide)
+- [🎯 Use Cases](#-use-cases)
+- [🤝 Contributing](#-contributing)
 - [⚠️ Notes and Warnings](#️-notes-and-warnings)
 - [📄 License](#-license)
 
 ---
 
-## Project Overview
+## Overview
 
-**JTAGulator-ID-Tracker** is an enhanced firmware based on the original open-source **[JTAGulator](https://github.com/grandideastudio/jtagulator)** hardware.  
-JTAGulator was designed by Joe Grand (@joegrand) as a hardware security testing tool specifically for identifying debug interfaces on embedded devices.
+**JTAGulator-ID-Tracker** is enhanced firmware for the open-source **[JTAGulator](https://github.com/grandideastudio/jtagulator)**. Joe Grand ([@joegrand](https://github.com/joegrand)) designed the JTAGulator as a hardware security tool for finding on-chip debug interfaces on embedded devices.
 
-### Original JTAGulator Overview
-- **Function**: Automatically discovers JTAG, SWD, UART, and other debug interfaces
-- **MCU**: Parallax Propeller P8X32A microcontroller
-- **Storage**: 24LC512 EEPROM (64 KB) for program and data storage
-- **Applications**: Hardware security research, reverse engineering, device diagnostics
+### About the original JTAGulator
 
-### Improvements in This Project
-The original firmware used only half of the EEPROM capacity (32 KB).  
-This project fully utilizes the entire 64 KB EEPROM and integrates a large chip manufacturer identification database, enabling automatic vendor identification during interface scanning.
+- **Purpose**: finds JTAG, SWD, UART and other debug interfaces automatically
+- **MCU**: Parallax Propeller P8X32A
+- **Storage**: 24LC512 EEPROM (64 KB) for program and data
+- **Uses**: hardware security research, reverse engineering, device diagnostics
+
+### What this project adds
+
+1. **Firmware**: the stock firmware uses only half of the EEPROM (32 KB). This firmware uses all 64 KB and stores a chip manufacturer database there. JTAG and SWD scans then show the manufacturer name next to each ID.
+2. **JTAGulator Studio** (`studio/`): a graphical frontend that replaces the serial terminal. See [below](#️-jtagulator-studio).
 
 ---
 
-## ✨ New Features
+## ✨ Features
 
-| Feature | Original JTAGulator | Enhanced Version |
+| Feature | Original JTAGulator | ID Tracker |
 | :--- | :--- | :--- |
-| **EEPROM Usage** | 50% (32 KB / 64 KB) | **100% (64 KB / 64 KB)** |
-| **Manufacturer ID Database** | None | **Over 2,000 manufacturers** |
-| **JTAG Scan** | Interface detection only | **Interface detection + manufacturer name** |
-| **SWD Scan** | Interface detection only | **Interface detection + manufacturer name** |
-| **Database Update** | Not supported | **Flash once, use permanently** |
+| **EEPROM usage** | 50% (32 KB / 64 KB) | **100% (64 KB / 64 KB)** |
+| **Manufacturer ID database** | None | **2,000+ manufacturers** |
+| **JTAG scan** | Pinout only | **Pinout + manufacturer name** |
+| **SWD scan** | Pinout only | **Pinout + manufacturer name** |
+| **Database updates** | None | **Flash once, keep forever** |
+| **Graphical frontend** | None (serial terminal) | **JTAGulator Studio** |
 
-### Key Advantages
-1. **Intelligent Identification** – Automatically identifies manufacturers of ARM, MIPS, PowerPC, and other architectures
-2. **Improved Efficiency** – Manufacturer information is displayed in real time during scanning, no external lookup required
-3. **Comprehensive Database** – Covers major vendors as well as many niche manufacturers
-4. **Backward Compatibility** – Fully compatible with all original JTAGulator functionality
+### Highlights
+
+1. **Manufacturer identification**: names the chip manufacturer for ARM, MIPS, PowerPC and other architectures.
+2. **No extra lookups**: the manufacturer name is shown during the scan.
+3. **Broad coverage**: the major vendors plus many smaller ones.
+4. **Backward compatible**: every original JTAGulator feature still works.
+
+---
+
+## 🖥️ JTAGulator Studio
+
+<div align="center">
+<img src="image/studio-jtag.png" alt="JTAGulator Studio: JTAG scan" width="90%">
+<p><em>A JTAG scan in JTAGulator Studio: pinout, TRST#, and each IDCODE decoded with its manufacturer</em></p>
+</div>
+
+JTAGulator Studio is a desktop app, built with Tauri, that also runs in a browser. It drives the JTAGulator's own serial menu: it answers each prompt from your form inputs and shows the results as structured cards instead of terminal text. It works with ID Tracker and with the stock firmware.
+
+### What it does
+
+| Area | Features |
+| :--- | :--- |
+| **JTAG** | Combined / IDCODE / BYPASS / RTCK scans (BYPASS can use pins you already know), device IDs, BYPASS test, IR/DR discovery, EXTEST pin mapper, OpenOCD mode |
+| **SWD** | Pinout scan, DPIDR read and decode |
+| **UART** | Active scan, passive TXD scan with baud rate measurement, built-in terminal for the target console |
+| **GPIO** | Read all 24 channels, live monitor with change log, drive outputs |
+| **Logic analyzer** | OLS/SUMP capture, 24-channel waveform viewer, UART decoder, measurement markers, VCD/CSV export |
+| **Scan all** | Runs any combination of scans one after another over the same channels |
+| **Chip IDs** | IDCODE and DPIDR decoded in the app against the 1,953-entry JEP106 table, plus well-known part numbers. This works on stock firmware too. |
+| **Target profile** | Known pins, channel labels and all findings for the board under test. Saved automatically; export as JSON or a Markdown report. |
+| **Scripts** | Sandboxed JavaScript with the same functions as the UI, including `uart.expect()` for console automation. Includes a script library and a **macro recorder** that turns your clicks into a script. |
+| **Device terminal** | Raw view of the firmware menu, always available |
+| **Simulator** | A built-in software JTAGulator with a fake target board, so you can try everything without hardware |
+
+<div align="center">
+<img src="image/studio-logic.png" alt="JTAGulator Studio: logic analyzer" width="90%">
+<p><em>Logic analyzer capture</em></p>
+</div>
+
+A script example: find JTAG, then read every IDCODE.
+
+```js
+await device.setVoltage(3.3);
+const scan = await jtag.scan({ start: 0, end: 7 });
+const p = scan.findings[0];
+const ids = await jtag.deviceIds({ tdo: p.tdo, tck: p.tck, tms: p.tms });
+for (const d of ids.devices) log(d.idcode.hex, d.idcode.manufacturer);
+```
+
+### Running it
+
+Requirements: [Node.js](https://nodejs.org) 20+ and [pnpm](https://pnpm.io). The desktop app also needs [Rust](https://rustup.rs) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) (on Linux, `webkit2gtk-4.1`).
+
+```sh
+cd studio
+pnpm install
+
+pnpm tauri dev      # desktop app
+pnpm dev            # browser at http://localhost:1420
+pnpm tauri build    # build installers (.deb, .rpm, AppImage, .msi, .dmg)
+```
+
+- **In the browser**: use Chrome or Edge to reach a real JTAGulator. They support Web Serial, which needs `localhost` or HTTPS. Other browsers can only run the simulator.
+- **Remote machine**: if the dev server runs on another machine, tunnel the port, e.g. `ssh -L 1420:localhost:1420 <host>`, then open `http://localhost:1420`.
+- **Connecting**: pick the serial port (FTDI ports are marked ★), click **Connect**, and set the target voltage in the top bar. Or click **Try the simulator**.
+
+More detail is in [`studio/README.md`](studio/README.md).
 
 ---
 
 ## 🧩 Hardware Requirements
 
-### Required Equipment
-- JTAGulator hardware device
-- Mini USB cable (for PC connection)
-- Dupont wires (for connecting to the target device)
+### Required
 
-### Supported Target Devices
-- Any embedded device with JTAG or SWD interfaces
-- Interfaces with different voltage levels
-- UARTs at any baud rate
-- Other devices supporting boundary scan
+- JTAGulator
+- Mini USB cable (to the computer)
+- Jumper wires (to the target)
+
+### Supported targets
+
+- Any embedded device with a JTAG or SWD interface
+- Target I/O levels from 1.4 V to 3.3 V
+- UARTs at standard baud rates
+- Other devices that support boundary scan
 
 ---
 
 ## 📦 Flashing Guide
 
-### Step 1: Flash the Manufacturer Database
-**This is the most important step and only needs to be done once!**
+### Step 1: Flash the manufacturer database
 
-```bash
-# Flash using Propeller Tool or OpenPropeller
-1. Open the EEPROM_Update directory
-2. Set `EEPROM_Update.spin` as the top-level file
+**This is the most important step, and you only do it once.**
+
+```text
+Using Propeller Tool (or OpenPropeller):
+1. Open the eepromupdate folder
+2. Set EEPROM_Update.spin as the top-level file
 3. Connect the JTAGulator to your computer
-4. Compile and flash the firmware
-````
-
-**Database Writing Process:**
-
-* Open a serial terminal
-* Set baud rate to 115200 bps, 8 data bits, 1 stop bit, no parity
-* Connect to the JTAGulator
-
-<div align="center">
-<img src="image/running.png" alt="Database writing in progress" width="80%">
-<p><em>Writing database in progress</em></p>
-</div>
-
-* **Wait for the process to complete (approximately 20 minutes)**
-* Progress will be displayed in the serial terminal
-* The device will stop automatically when finished
-* If interrupted, simply power-cycle and retry
-* Once written successfully, the database will not be written again
-
-<div align="center">
-<img src="image/finish.png" alt="Database write completed" width="80%">
-<p><em>Database write completed</em></p>
-</div>
-
-> 💡 **Important Note**: The database flashing process takes time, but it is worth it.
-> Once completed, you can freely switch firmware versions without ever reflashing the database.
-
-### Step 2: Flash the Main Firmware
-
-```bash
-1. Return to the project root directory
-2. Set `JTAGulator.spin` as the top-level file
-3. Compile and flash the firmware
-4. The device is ready to use after reboot
+4. Compile and load it to EEPROM
 ```
 
-### Serial Configuration
+**While the database is written:**
 
-| Parameter    | Value  |
-| :----------- | :----- |
-| Baud Rate    | 115200 |
-| Data Bits    | 8      |
-| Stop Bits    | 1      |
-| Parity       | None   |
-| Flow Control | None   |
+- Open a serial terminal at 115200 bps, 8 data bits, 1 stop bit, no parity
+- Connect to the JTAGulator
+
+<div align="center">
+<img src="image/running.png" alt="Writing the database" width="80%">
+<p><em>Database write in progress</em></p>
+</div>
+
+- **The write takes about 20 minutes.** Progress shows in the terminal.
+- The device stops on its own when finished. If it's interrupted, power-cycle and it resumes. Once the write succeeds it won't run again.
+
+<div align="center">
+<img src="image/finish.png" alt="Database write complete" width="80%">
+<p><em>Database write complete</em></p>
+</div>
+
+> 💡 **Tip**: the database survives firmware updates. After this step you can switch firmware versions freely without writing it again.
+
+### Step 2: Flash the main firmware
+
+```text
+1. Go back to the project root
+2. Set JTAGulator.spin as the top-level file
+3. Compile and load it to EEPROM
+4. The device is ready after it resets
+```
+
+### Serial settings
+
+| Parameter | Value |
+| :--- | :--- |
+| Baud rate | 115200 |
+| Data bits | 8 |
+| Stop bits | 1 |
+| Parity | None |
+| Flow control | None |
+
+You can use JTAGulator Studio or any serial terminal.
 
 ---
 
-## 🔧 Usage Demonstration
+## 🔧 Screenshots
 
 <div align="center">
 <img src="image/jtag.png" alt="JTAG scan result" width="80%">
-<p><em>Manufacturer name identified during JTAG scan</em></p>
+<p><em>JTAG scan showing the manufacturer name (serial terminal)</em></p>
 </div>
 
 <div align="center">
 <img src="image/swd.png" alt="SWD scan result" width="80%">
-<p><em>Manufacturer name identified during SWD scan</em></p>
+<p><em>SWD scan showing the manufacturer name (serial terminal)</em></p>
 </div>
 
 ---
 
 ## 📊 Manufacturer Database
 
-### Database Statistics
+### Coverage
 
-| Category                   | Count | Description                                                |
-| :------------------------- | :---- | :--------------------------------------------------------- |
-| **Major Chip Vendors**     | 150+  | Intel, ARM, STMicroelectronics, NXP, TI, etc.              |
-| **Asian Manufacturers**    | 800+  | Mainland China, Taiwan, Korea, Japan                       |
-| **Specialized IC Vendors** | 400+  | Communications, industrial control, automotive electronics |
-| **MCU Manufacturers**      | 600+  | Various microcontroller vendors                            |
-| **Other Vendors**          | 50+   | FPGA, CPLD, and related device manufacturers               |
+| Category | Count | Examples |
+| :--- | :--- | :--- |
+| **Major chip vendors** | 150+ | Intel, ARM, ST, NXP, TI |
+| **Asian manufacturers** | 800+ | Mainland China, Taiwan, Korea, Japan |
+| **Specialized ICs** | 400+ | Communications, industrial control, automotive |
+| **MCU makers** | 600+ | Microcontroller vendors |
+| **Other** | 50+ | FPGA and CPLD vendors |
 
-### Manufacturer Information Fields
+### How lookup works
 
-The database includes the following key information:
+The database follows the JEDEC **JEP106** manufacturer list, the same list used by the manufacturer field of a JTAG IDCODE and the designer field of an ARM DPIDR. That field holds a bank number (bits 11..8) and a 7-bit code (bits 7..1). The table stores 126 entries per bank, 16 bytes per name, starting at EEPROM address `0x8080`.
 
-* **Manufacturer ID** – Vendor code from the chip IDCODE
-* **Manufacturer Name** – Full official company name
-* **Common Brand Names** – Market-facing brand names
-* **Main Products** – Representative product families
-* **Official Website** – Manufacturer’s website link
+> **Fix in this version**: earlier releases looked up JTAG names using the raw 11-bit field as the table index. That gave the wrong name for every manufacturer outside bank 0; for example ARM (`0x43B`) read entry 571 instead of 563. JTAG now uses the same `bank × 126 + code` index as SWD (`JTAGulator.spin`, `Display_Device_ID`).
 
 ---
 
-## 🎯 Application Scenarios
+## 🎯 Use Cases
 
-### 1. Hardware Security Assessment
+### 1. Hardware security assessment
 
-* Identify exposed debug interfaces and evaluate security risks
-* Discover hidden test points or debug ports
-* Provide hardware access points for penetration testing
+- Find exposed debug interfaces and judge the risk
+- Discover hidden test points and debug ports
+- Get a hardware foothold for penetration tests
 
-### 2. Reverse Engineering Research
+### 2. Reverse engineering
 
-* Analyze unknown device architectures
-* Identify chip manufacturers and potential models
-* Gather debug interface information for deeper analysis
+- Work out the architecture of unknown devices
+- Identify the chip manufacturer and likely part
+- Gather debug interface details for deeper analysis
 
-### 3. Device Repair and Debugging
+### 3. Repair and debugging
 
-* Recover bricked embedded devices
-* Access debug and programming interfaces
-* Extract firmware or perform firmware updates
+- Recover bricked devices
+- Reach debug and programming interfaces
+- Extract or update firmware
 
-### 4. Education and Learning
+### 4. Learning
 
-* Learn how JTAG and SWD protocols work
-* Understand boundary scan technology
-* Master debug interface discovery techniques
+- How JTAG and SWD work
+- Boundary scan
+- Debug interface discovery techniques
 
 ---
 
-## 🤝 Contribution Guide
+## 🤝 Contributing
 
-Contributions of all kinds are welcome!
+Contributions of every kind are welcome.
 
-### Bug Reports
+### Reporting bugs
 
-If you find a bug, please contact me as soon as possible.
+Please open an issue when you find a bug.
 
-### Updating the Manufacturer Database
+### Adding manufacturers
 
-Found a missing manufacturer ID? Please submit:
+Found a manufacturer ID that's missing? Please send:
 
-* The chip IDCODE value
-* The official manufacturer name
-* A reference link (datasheet or official website)
+- The chip's IDCODE value
+- The manufacturer's official name
+- A source (datasheet or official website)
+
+After editing `eepromupdate/jep106.inc`, run `pnpm gen:jep106` in `studio/` to refresh the app's copy of the table.
 
 ---
 
 ## ⚠️ Notes and Warnings
 
-### Legal and Ethical Notice
+### Legal and ethical use
 
-* **For authorized security testing only** – Ensure you have permission to test the target device
-* **Comply with local laws and regulations** – Debugging hardware may be regulated in some regions
-* **Respect intellectual property** – Do not use this tool for piracy or infringement
+- **Authorized testing only**: make sure you have permission to test the target device.
+- **Follow local law**: rules on hardware debugging differ between countries and regions.
+- **Respect intellectual property**: don't use this tool for piracy or infringement.
 
-### Technical Precautions
+### Technical precautions
 
-1. **Power Requirements** – Ensure stable power to the target device to avoid damage
-2. **Pin Connections** – Double-check pin mappings to prevent short circuits
-3. **ESD Protection** – Use proper ESD precautions when handling sensitive devices
-4. **First-Time Flashing** – The database only needs to be flashed once
+1. **Power**: keep the target's power stable to avoid damage.
+2. **Wiring**: double-check pin connections to avoid shorts. Connect ground first.
+3. **Voltage**: set the target I/O voltage to match the target's logic level. Don't connect VADJ to the target.
+4. **ESD**: use ESD protection when handling sensitive devices.
+5. **Persistent modes**: logic analyzer and OpenOCD mode stay on through resets and power cycles until you exit them (Ctrl-X, or **Exit mode** in Studio).
 
-### Frequently Asked Questions
+### FAQ
 
-**Q: Why does flashing the database take 20 minutes?**
-A: EEPROM write speeds are slow, and each sector must be verified to ensure data integrity.
+**Q: Why does writing the database take 20 minutes?**
+A: EEPROM writes are slow, and every page is verified to make sure the data is intact.
 
 **Q: Can more manufacturers be added?**
-A: Yes. There is still room for a few hundred additional manufacturers.
+A: Yes. There's room for roughly one or two hundred more.
 
-**Q: Which operating systems are supported?**
-A: **Propeller Tool 1.3.2** is recommended for flashing; any serial terminal can be used.
+**Q: What do I need to flash it?**
+A: **Propeller Tool 1.3.2** is recommended for flashing. Any serial terminal works for the database step, and JTAGulator Studio runs on Windows, macOS and Linux.
 
-**Q: How can I confirm the database was flashed successfully?**
-A: After completion, the serial terminal will display
-`Result: Success - Writing completion flag`.
+**Q: How do I know the database was written successfully?**
+A: When it's done the terminal shows `Result: Success - Writing completion flag`.
+
+**Q: Do I need ID Tracker firmware to use JTAGulator Studio?**
+A: No. Studio works with the stock firmware too, and decodes manufacturer names itself.
 
 ---
 
@@ -254,11 +327,13 @@ A: After completion, the serial terminal will display
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+The original JTAGulator firmware is distributed under the Creative Commons Attribution 3.0 United States license.
+
 ### Acknowledgements
 
-* Thanks to Joe Grand for creating the excellent JTAGulator hardware
-* Thanks to all chip manufacturers for publishing public technical documentation
-* Thanks to community members for testing and feedback
+- Joe Grand, for creating the JTAGulator
+- Chip manufacturers, for publishing their technical documentation
+- Community members, for testing and feedback
 
 ---
 
@@ -266,9 +341,6 @@ A: After completion, the serial terminal will display
 
 ### 🌟 If this project helped you, please give it a Star!
 
-**Your support motivates continued development**
-
-*Last updated: December 2025*
+*Last updated: October 2026*
 
 </div>
-```
