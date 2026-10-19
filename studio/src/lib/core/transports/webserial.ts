@@ -62,6 +62,10 @@ export class WebSerialTransport implements Transport {
     }
   }
 
+  async setDtr(on: boolean) {
+    await this.port?.setSignals({ dataTerminalReady: on });
+  }
+
   async reset() {
     await this.port?.setSignals({ dataTerminalReady: false });
     await new Promise((r) => setTimeout(r, 50));

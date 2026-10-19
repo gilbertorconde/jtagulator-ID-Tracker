@@ -57,6 +57,15 @@ pub fn read_text_file(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+pub fn read_binary_file(path: String) -> Result<Vec<u8>, String> {
+    let meta = fs::metadata(&path).map_err(|e| format!("{path}: {e}"))?;
+    if meta.len() > 16 * 1024 * 1024 {
+        return Err(format!("{path}: file is too large"));
+    }
+    fs::read(&path).map_err(|e| format!("{path}: {e}"))
+}
+
+#[tauri::command]
 pub fn write_text_file(path: String, contents: String) -> Result<(), String> {
     fs::write(&path, contents).map_err(|e| format!("{path}: {e}"))
 }

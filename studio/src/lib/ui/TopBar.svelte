@@ -12,6 +12,7 @@
     logic: "Logic analyzer",
     scripts: "Scripts",
     findings: "Target & findings",
+    firmware: "Firmware",
     settings: "Settings",
   };
   const PRESETS = [1.8, 2.5, 3.3];

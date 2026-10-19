@@ -133,6 +133,14 @@ pub fn serial_close(state: State<'_, Ports>, id: u32) -> Result<(), String> {
     Ok(())
 }
 
+/// Set DTR. Asserting it resets the Propeller (used by the firmware loader).
+#[tauri::command]
+pub fn serial_set_dtr(state: State<'_, Ports>, id: u32, on: bool) -> Result<(), String> {
+    let mut open = state.open.lock().unwrap();
+    let p = open.get_mut(&id).ok_or("Port is not open")?;
+    p.port.write_data_terminal_ready(on).map_err(|e| e.to_string())
+}
+
 /// Pulse DTR. The JTAGulator's FT232R drives the Propeller's reset from DTR.
 #[tauri::command]
 pub fn serial_reset(state: State<'_, Ports>, id: u32) -> Result<(), String> {

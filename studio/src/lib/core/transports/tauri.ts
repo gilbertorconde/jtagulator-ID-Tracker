@@ -71,6 +71,11 @@ export class TauriSerialTransport implements Transport {
     await invoke("serial_write", { id: this.id, data: Array.from(data) });
   }
 
+  async setDtr(on: boolean) {
+    if (this.id === null) throw new Error("Port is not open");
+    await invoke("serial_set_dtr", { id: this.id, on });
+  }
+
   async reset() {
     if (this.id === null) return;
     await invoke("serial_reset", { id: this.id });

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Cable, Code2, Cpu, LayoutDashboard, Layers, ListChecks, Settings, ToggleRight, Waves, Zap } from "@lucide/svelte";
+  import { Cable, Code2, Cpu, HardDriveDownload, LayoutDashboard, Layers, ListChecks, Settings, ToggleRight, Waves, Zap } from "@lucide/svelte";
   import { app, type View } from "../stores/app.svelte";
 
   export const NAV: { id: View; label: string; icon: typeof Cpu }[] = [
@@ -35,6 +35,9 @@
     </button>
   {/each}
   <div class="grow"></div>
+  <button class="nav" class:active={app.view === "firmware"} onclick={() => ((app.view = "firmware"), (app.navOpen = false))}>
+    <HardDriveDownload size={16} /><span>Firmware</span>
+  </button>
   <button class="nav" class:active={app.view === "settings"} onclick={() => ((app.view = "settings"), (app.navOpen = false))}>
     <Settings size={16} /><span>Settings</span>
   </button>

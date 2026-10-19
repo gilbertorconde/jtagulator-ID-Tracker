@@ -1,4 +1,5 @@
 mod files;
+mod net;
 mod process;
 mod serial;
 
@@ -14,12 +15,15 @@ pub fn run() {
             serial::serial_write,
             serial::serial_close,
             serial::serial_reset,
+            serial::serial_set_dtr,
+            net::http_get,
             process::process_spawn,
             process::process_kill,
             process::which,
             files::app_dir,
             files::list_dir,
             files::read_text_file,
+            files::read_binary_file,
             files::write_text_file,
             files::delete_file,
         ])

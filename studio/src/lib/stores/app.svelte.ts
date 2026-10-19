@@ -10,8 +10,9 @@ import type { DeviceMode, Finding, Menu, OpContext, OpEvent } from "../core/type
 import { CALLS, callToCode, type CallName } from "../scripting/api";
 import { DEFAULT_TARGET } from "../sim/firmware";
 import { untrack } from "svelte";
+import { canLoad, type DtrTransport } from "../firmware/loader";
 
-export type View = "overview" | "jtag" | "swd" | "uart" | "gpio" | "logic" | "all" | "scripts" | "findings" | "settings";
+export type View = "overview" | "jtag" | "swd" | "uart" | "gpio" | "logic" | "all" | "scripts" | "findings" | "firmware" | "settings";
 
 export interface RunningOp {
   id: number;
@@ -76,6 +77,8 @@ export interface Settings {
   lastPort: string | null;
   /** Wiring guides the user collapsed, per page. */
   wiringHidden: Record<string, boolean>;
+  /** GitHub repository ("owner/name") checked for firmware releases. */
+  firmwareRepo: string;
 }
 
 const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -177,6 +180,7 @@ class AppState {
       terminalHeight: 260,
       lastPort: null,
       wiringHidden: {},
+      firmwareRepo: "gilbertorconde/jtagulator-ID-Tracker",
     } as Settings),
   );
 
@@ -516,6 +520,42 @@ class AppState {
   importTarget(t: TargetProfile) {
     const known = this.targets.some((x) => x.id === t.id);
     this.target = { ...blankTarget(), ...t, id: t.id && !known ? t.id : newId() };
+  }
+
+  // ------------------------------------------------------------------ firmware
+
+  /** Label of the running firmware task (loader in use), or null. */
+  firmwareBusy = $state<string | null>(null);
+
+  /** True when the connected port can load firmware (needs DTR control). */
+  get canFlash() {
+    return this.status === "connected" && !!this.session && canLoad(this.session.transport);
+  }
+
+  /**
+   * Run a firmware task with exclusive use of the serial port, then let the
+   * board boot and re-sync with it.
+   */
+  async firmwareTask<T>(label: string, fn: (t: DtrTransport) => Promise<T>): Promise<T> {
+    const s = this.session;
+    const d = this.dev;
+    if (!s || !d || !canLoad(s.transport)) throw new Error("Connect a JTAGulator over USB first (the simulator can't be flashed)");
+    if (this.firmwareBusy) throw new Error(`${this.firmwareBusy} is already running`);
+    const release = await s.acquire();
+    this.firmwareBusy = label;
+    try {
+      return await fn(s.transport);
+    } finally {
+      s.flush();
+      d.invalidateMenu();
+      release();
+      this.firmwareBusy = null;
+      // The board resets after a load; give it time to boot from EEPROM or RAM.
+      await new Promise((r) => setTimeout(r, 1800));
+      const mode = await d.sync().catch(() => "unknown");
+      this.info = mode === "normal" ? await d.info().catch(() => null) : null;
+      if (mode === "normal") await d.getVoltage().catch(() => null);
+    }
   }
 
   // ------------------------------------------------------------------ recorder

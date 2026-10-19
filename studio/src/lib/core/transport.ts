@@ -21,6 +21,8 @@ export interface Transport {
   write(data: Uint8Array): Promise<void>;
   /** Pulse DTR to reset the Propeller, if the transport can. */
   reset?(): Promise<void>;
+  /** Drive DTR directly (needed by the firmware loader). */
+  setDtr?(on: boolean): Promise<void>;
   onData(cb: (data: Uint8Array) => void): () => void;
   onClose(cb: (reason: string) => void): () => void;
 }

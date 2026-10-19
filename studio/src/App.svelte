@@ -17,6 +17,7 @@
     logic: () => import("./lib/ui/logic/LogicAnalyzerView.svelte"),
     scripts: () => import("./lib/ui/views/ScriptsView.svelte"),
     findings: () => import("./lib/ui/views/FindingsView.svelte"),
+    firmware: () => import("./lib/ui/views/FirmwareView.svelte"),
     settings: () => import("./lib/ui/views/SettingsView.svelte"),
   };
   const cache = new Map<string, ReturnType<Lazy>>();
