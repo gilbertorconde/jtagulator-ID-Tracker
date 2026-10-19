@@ -286,131 +286,29 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
           next
         disableFlags:=vCmd[1] & DISABLE_FLAGS_MASK
 
-      CMD_TRIG1_MASK:
+      ' Trigger stage n (0..3) is in bits 3..2 of the command; the per-stage
+      ' masks, values and start flags are consecutive longs in the struct.
+      CMD_TRIG1_MASK, CMD_TRIG2_MASK, CMD_TRIG3_MASK, CMD_TRIG4_MASK:
         if (GetFourMoreParamBytes == -1)
           next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
+        trig1Mask[(vCmd[0] >> 2) & 3] := ParamLong & TRIGGER_CH_MASK
 
-        trig1Mask:=larg & TRIGGER_CH_MASK            
-
-      CMD_TRIG2_MASK:
+      CMD_TRIG1_VAL, CMD_TRIG2_VAL, CMD_TRIG3_VAL, CMD_TRIG4_VAL:
         if (GetFourMoreParamBytes == -1)
           next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig2Mask:=larg & TRIGGER_CH_MASK
-
-      CMD_TRIG3_MASK:
-        if (GetFourMoreParamBytes == -1)
-          next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig3Mask:=larg & TRIGGER_CH_MASK
-
-      CMD_TRIG4_MASK:
-        if (GetFourMoreParamBytes == -1)
-          next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig4Mask:=larg & TRIGGER_CH_MASK
-
-      CMD_TRIG1_VAL:
-        if (GetFourMoreParamBytes == -1)
-          next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig1Val:=larg & TRIGGER_CH_MASK            
-
-      CMD_TRIG2_VAL:
-        if (GetFourMoreParamBytes == -1)
-          next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig2Val:=larg & TRIGGER_CH_MASK
-
-      CMD_TRIG3_VAL:
-        if (GetFourMoreParamBytes == -1)
-          next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig3Val:=larg & TRIGGER_CH_MASK
-
-      CMD_TRIG4_VAL:
-        if (GetFourMoreParamBytes == -1)
-          next
-        larg:=vCmd[4]
-        larg<<=8
-        larg|=vCmd[3]
-        larg<<=8
-        larg|=vCmd[2]
-        larg<<=8
-        larg|=vCmd[1]
-
-        trig4Val:=larg & TRIGGER_CH_MASK
+        trig1Val[(vCmd[0] >> 2) & 3] := ParamLong & TRIGGER_CH_MASK
 
       'TODO: support full triggers including delays and serial forms; for now support only sigrok OLS features
-      CMD_TRIG1_CONF:
+      CMD_TRIG1_CONF, CMD_TRIG2_CONF, CMD_TRIG3_CONF, CMD_TRIG4_CONF:
         if (GetFourMoreParamBytes == -1)
           next
-        isTrig1Start:=(vCmd[4] & 1<<3)
+        isTrig1Start[(vCmd[0] >> 2) & 3] := (vCmd[4] & 1<<3)   ' NB: stage 4 always starts the sampler
 
-      CMD_TRIG2_CONF:
-        if (GetFourMoreParamBytes == -1)
-          next
-        isTrig2Start:=(vCmd[4] & 1<<3)
 
-      CMD_TRIG3_CONF:
-        if (GetFourMoreParamBytes == -1)
-          next
-        isTrig3Start:=(vCmd[4] & 1<<3)
+PRI ParamLong
+  ' The four parameter bytes of a long command, little endian
+  return vCmd[1] | vCmd[2] << 8 | vCmd[3] << 16 | vCmd[4] << 24
 
-      CMD_TRIG4_CONF:
-        if (GetFourMoreParamBytes == -1)
-          next
-        isTrig4Start:=(vCmd[4] & 1<<3)   ' NB: ignored; all 4th stage triggers start the sampler
-      
 
 PRI GetFourMoreParamBytes : val
   if (vCmd[1]:=pst.RxTime(MAX_RX_DELAY_MS)) < 0
