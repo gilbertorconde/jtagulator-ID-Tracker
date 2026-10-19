@@ -2,6 +2,7 @@
   import type { Finding, PinsLow } from "../../core/types";
   import { app } from "../../stores/app.svelte";
   import Field from "../Field.svelte";
+  import OpenOcdPanel from "../OpenOcdPanel.svelte";
   import OpResults from "../OpResults.svelte";
   import Panel from "../Panel.svelte";
   import PinHeader from "../PinHeader.svelte";
@@ -218,16 +219,7 @@
         {/snippet}
       </Panel>
 
-      <Panel title="OpenOCD mode" subtitle="Hand the JTAGulator to OpenOCD as a Bus Pirate-compatible adapter.">
-        <div class="note">
-          This mode stays on through resets and power cycles until you exit it. After entering, disconnect here and run:
-          <pre class="mono">openocd -f interface/buspirate.cfg -c "transport select jtag; buspirate port {app.portName ?? '/dev/ttyUSB0'}"</pre>
-          Reconnect afterwards and choose <b>Exit mode</b> in the top bar.
-        </div>
-        {#snippet footer()}
-          <RunButton label="Enter OpenOCD mode" onclick={() => app.run("jtag.openocd", { ...pins })} disabled={!unique} />
-        {/snippet}
-      </Panel>
+      <OpenOcdPanel {pins} valid={unique} />
     </div>
   {/if}
 </div>
@@ -272,17 +264,5 @@
   }
   .small {
     font-size: 12px;
-  }
-  .note {
-    font-size: 12.5px;
-    color: var(--text-muted);
-  }
-  pre {
-    white-space: pre-wrap;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px;
-    color: var(--text);
   }
 </style>
