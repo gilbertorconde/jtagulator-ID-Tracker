@@ -1,0 +1,49 @@
+name: Firmware release
+
+# Push a tag like fw-v1.3 to build the firmware with OpenSpin and attach the
+# images to a draft GitHub release. JTAGulator Studio's Firmware page lists
+# these releases under "GitHub releases".
+on:
+  push:
+    tags: ["fw-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build OpenSpin
+        run: |
+          git clone --depth 1 https://github.com/parallaxinc/OpenSpin.git "$RUNNER_TEMP/OpenSpin"
+          make -C "$RUNNER_TEMP/OpenSpin" -j"$(nproc)"
+          echo "$RUNNER_TEMP/OpenSpin/build" >> "$GITHUB_PATH"
+
+      - name: Build firmware
+        run: |
+          version="${GITHUB_REF_NAME#fw-v}"
+          mkdir -p out
+          openspin -q -b -o "out/JTAGulator-IDTracker-${version}.binary" JTAGulator.spin
+          openspin -q -e -o "out/JTAGulator-IDTracker-${version}.eeprom" JTAGulator.spin
+          openspin -q -b -o out/EEPROM_Update.binary eepromupdate/EEPROM_Update.spin
+          # The firmware must report the version in the tag.
+          grep -aq "ID Tracker ${version}" "out/JTAGulator-IDTracker-${version}.binary"
+          ls -l out
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: "JTAGulator firmware ID Tracker ${{ github.ref_name }}"
+          body: |
+            Install with JTAGulator Studio (Firmware page) or Propeller Tool.
+
+            - `JTAGulator-IDTracker-*.binary` / `.eeprom`: the firmware.
+            - `EEPROM_Update.binary`: writes the manufacturer database (run it
+              from RAM; JTAGulator Studio does this for you).
+
+            See CHANGES.markdown for what changed.
+          files: out/*
