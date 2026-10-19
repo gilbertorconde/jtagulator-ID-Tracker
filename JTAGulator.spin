@@ -2857,7 +2857,7 @@ InitHeader    byte CR, LF, LF
               byte "           Welcome to JTAGulator. Press 'H' for available commands.", CR, LF
               byte "         Warning: Use of this tool may affect target system behavior!", 0
 
-VersionInfo   byte CR, LF, "JTAGulator FW ID Tracker 1.2", CR, LF
+VersionInfo   byte CR, LF, "JTAGulator FW ID Tracker 1.3", CR, LF
               byte "Designed by Joe Grand, Grand Idea Studio, Inc.", CR, LF
               byte "Modified by Weiao, 2025.10.30", CR, LF 
               byte "Main: jtagulator.com", CR, LF

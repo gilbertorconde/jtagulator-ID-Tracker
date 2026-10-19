@@ -3,6 +3,16 @@ JTAGulator ID Tracker Change Log
 
 Visit the JTAGulator [GitHub repository](https://github.com/grandideastudio/jtagulator/commits/master) for full commit comments.
 
+<a id="idt_1_3"></a>ID Tracker 1.3
+----
+
+Release date: **October 19, 2026**
+
+* JTAG: Fixed the manufacturer name lookup for JEP106 banks above 0. The raw 11-bit manufacturer field was used as the database index, so every manufacturer outside bank 0 showed the wrong name. JTAG now uses `bank * 126 + code`, like SWD.
+
+* Logic analyzer: Fixed parsing of the trigger mask and value commands, which kept only the first parameter byte. Triggers now work on all 24 channels instead of CH0-7.
+
+
 <a id="v1_12"></a>ID Tracker 1.0
 ----
 
