@@ -24,8 +24,10 @@ jobs:
           echo "$RUNNER_TEMP/OpenSpin/build" >> "$GITHUB_PATH"
 
       - name: Build firmware
+        id: build
         run: |
           version="${GITHUB_REF_NAME#fw-v}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
           mkdir -p out
           openspin -q -b -o "out/JTAGulator-IDTracker-${version}.binary" JTAGulator.spin
           openspin -q -e -o "out/JTAGulator-IDTracker-${version}.eeprom" JTAGulator.spin
@@ -37,7 +39,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           draft: true
-          name: "JTAGulator firmware ID Tracker ${{ github.ref_name }}"
+          name: "JTAGulator firmware ID Tracker ${{ steps.build.outputs.version }}"
           body: |
             Install with JTAGulator Studio (Firmware page) or Propeller Tool.
 
