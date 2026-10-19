@@ -1,0 +1,459 @@
+// SUMP / Openbench Logic Sniffer client for the JTAGulator's logic analyzer mode
+// (PropSUMP.spin). The device must already be in SUMP mode (see
+// JTAGulator.enterLogicAnalyzer()).
+//
+// Firmware facts this client is built around (all from PropSUMP.spin):
+//  - 24 probes in 3 groups of 8. Group-disable flags (0x82, byte 1 bits 2..4)
+//    decide how many bytes each sample takes on the wire (1..3, group 0 first).
+//  - Samples are stored 32 bits at a time: at most 1024 samples per capture,
+//    regardless of how many groups are enabled (metadata claims 3072 bytes).
+//  - 0x81 counts are 16-bit little endian: periods = (n + 1) * 4, capped at 1024;
+//    read count is capped to the delay count. No pre-trigger capture.
+//  - 0x80 divider is 24-bit little endian in OLS 100 MHz units; the firmware
+//    converts it to 80 MHz Propeller clocks: wait = floor((div + 1) * 4 / 5),
+//    minimum 66 clocks (1.212 MHz).
+//  - Samples are sent newest first (buffer[delay - 1 - i]).
+//  - Trigger masks/values: a parsing bug keeps only the first parameter byte,
+//    so only CH0-7 can participate in a trigger. Triggers are level (WAITPEQ)
+//    and sampling starts at the trigger, so the trigger is sample 0.
+//  - Trigger config: only the "start" bit (byte 4 bit 3) is honoured.
+//  - 0x06 returns the current inputs in the same 1..3 byte format as a sample.
+//  - 0x00 during a capture cancels it (no samples sent). Long commands must
+//    arrive within 100 ms per byte.
+import { AbortedError, TimeoutError, type Session } from "../core/session";
+
+export const SUMP = {
+  RESET: 0x00,
+  RUN: 0x01,
+  ID: 0x02,
+  META: 0x04,
+  INPUT: 0x06,
+  DIV: 0x80,
+  CNT: 0x81,
+  FLAGS: 0x82,
+  TRIG_MASK: [0xc0, 0xc4, 0xc8, 0xcc],
+  TRIG_VAL: [0xc1, 0xc5, 0xc9, 0xcd],
+  TRIG_CONF: [0xc2, 0xc6, 0xca, 0xce],
+} as const;
+
+export const SUMP_LIMITS = {
+  /** Propeller system clock. */
+  clockHz: 80_000_000,
+  /** Clock the OLS protocol's divider is expressed in. */
+  olsClockHz: 100_000_000,
+  /** Minimum wait between samples, in Propeller clocks. */
+  minClocksWait: 66,
+  maxClocksWait: Math.floor((0x1000000 * 4) / 5),
+  /** 80 MHz / 66 clocks. */
+  maxSampleRateHz: 80_000_000 / 66,
+  /** What the firmware advertises in its metadata (0x23). */
+  advertisedMaxSampleRateHz: 1_200_000,
+  minSampleRateHz: 80_000_000 / Math.floor((0x1000000 * 4) / 5),
+  maxSamples: 1024,
+  minSamples: 4,
+  /** Sample counts are multiples of this. */
+  sampleStep: 4,
+  channels: 24,
+  groups: 3,
+  /** Only these channels can be used in a trigger (firmware parsing quirk). */
+  triggerChannelMask: 0xff,
+  /** Serial link speed (bytes/s ~ baud / 10). */
+  baud: 115_200,
+} as const;
+
+/** Sample rates offered by the UI. The actual rate is quantized; see planSampleRate(). */
+export const SAMPLE_RATES = [
+  1_200_000, 1_000_000, 800_000, 500_000, 400_000, 250_000, 200_000, 100_000, 50_000, 20_000, 10_000, 5_000, 2_000,
+  1_000, 500, 200, 100, 50, 20, 10,
+];
+
+export interface Capture {
+  /** Actual sample rate (after firmware quantization). */
+  sampleRateHz: number;
+  /** Oldest first; bit n = CHn. Bits of disabled groups are 0. */
+  samples: Uint32Array;
+  /** Channels that were actually captured (enabled groups). */
+  channelMask: number;
+  /** Sample index the trigger fired at, or null for an untriggered capture. */
+  triggerIndex: number | null;
+  /** Date.now() when the capture completed. */
+  capturedAt: number;
+}
+
+export interface Trigger {
+  /** Channels that must match (CH0-7 only, see SUMP_LIMITS.triggerChannelMask). */
+  mask: number;
+  /** Required level of each masked channel. */
+  value: number;
+}
+
+export interface CaptureOptions {
+  sampleRateHz: number;
+  samples: number;
+  /** Channels of interest; every group containing one is enabled. Empty = all. */
+  channels: number[];
+  trigger?: Trigger;
+  signal?: AbortSignal;
+  /**
+   * Give up after this long (ms). Defaults to the expected capture + transfer
+   * time plus margin when untriggered, and no limit when waiting for a trigger.
+   */
+  timeoutMs?: number;
+  /** Called as sample bytes arrive (0..1). */
+  onProgress?: (fraction: number) => void;
+}
+
+export interface RatePlan {
+  /** Value sent with 0x80 (OLS 100 MHz units, minus one). */
+  divider: number;
+  /** Propeller clocks between samples, as computed by the firmware. */
+  clocksWait: number;
+  actualHz: number;
+}
+
+/** Quantize a requested sample rate to what the firmware will really do. */
+export function planSampleRate(hz: number): RatePlan {
+  const L = SUMP_LIMITS;
+  const want = Number.isFinite(hz) && hz > 0 ? hz : L.maxSampleRateHz;
+  let cw = Math.round(L.clockHz / want);
+  cw = Math.min(L.maxClocksWait, Math.max(L.minClocksWait, cw));
+  // Smallest divider whose floor((div + 1) * 4 / 5) is cw.
+  const divider = Math.min(0xffffff, Math.ceil((cw * 5) / 4) - 1);
+  const clocksWait = Math.max(L.minClocksWait, Math.floor(((divider + 1) * 4) / 5));
+  return { divider, clocksWait, actualHz: L.clockHz / clocksWait };
+}
+
+/** Clamp a sample count to a multiple of 4 in [4, 1024]. */
+export function clampSamples(n: number): number {
+  const L = SUMP_LIMITS;
+  if (!Number.isFinite(n)) return L.maxSamples;
+  const r = Math.round(n / L.sampleStep) * L.sampleStep;
+  return Math.min(L.maxSamples, Math.max(L.minSamples, r));
+}
+
+/** Bit g set = channel group g (CH8g..CH8g+7) enabled. */
+export function groupsForChannels(channels: number[]): number {
+  if (!channels.length) return 0b111;
+  let g = 0;
+  for (const c of channels) if (c >= 0 && c < SUMP_LIMITS.channels) g |= 1 << (c >> 3);
+  return g;
+}
+
+export function groupMaskToChannelMask(groups: number): number {
+  let m = 0;
+  for (let g = 0; g < SUMP_LIMITS.groups; g++) if (groups & (1 << g)) m |= 0xff << (8 * g);
+  return m >>> 0;
+}
+
+/** 0x82 flags byte: bits 2..4 disable groups 0..2; group 4 (bit 5) always disabled. */
+export function flagsForGroups(groups: number): number {
+  let f = 0b0010_0000;
+  for (let g = 0; g < SUMP_LIMITS.groups; g++) if (!(groups & (1 << g))) f |= 1 << (2 + g);
+  return f;
+}
+
+const popcount3 = (g: number) => (g & 1) + ((g >> 1) & 1) + ((g >> 2) & 1);
+
+/** Expected capture time (ms) excluding trigger wait and transfer. */
+export function captureDurationMs(sampleRateHz: number, samples: number) {
+  return (clampSamples(samples) / planSampleRate(sampleRateHz).actualHz) * 1000;
+}
+
+/** Expected time (ms) to send a capture over the 115200 baud link. */
+export function transferDurationMs(samples: number, groups: number) {
+  return ((clampSamples(samples) * popcount3(groups) * 10) / SUMP_LIMITS.baud) * 1000;
+}
+
+const long = (cmd: number, v: number) =>
+  new Uint8Array([cmd, v & 0xff, (v >>> 8) & 0xff, (v >>> 16) & 0xff, (v >>> 24) & 0xff]);
+
+/** SUMP metadata keys (sigrok naming). */
+const META_KEYS: Record<number, string> = {
+  0x01: "deviceName",
+  0x02: "fpgaVersion",
+  0x03: "ancillaryVersion",
+  0x20: "numProbes",
+  0x21: "sampleMemory",
+  0x22: "dynamicMemory",
+  0x23: "maxSampleRate",
+  0x24: "protocolVersion",
+  0x40: "numProbes",
+  0x41: "protocolVersion",
+};
+
+/**
+ * Parse a SUMP metadata block. Returns null while incomplete. Tags 0x01-0x1F
+ * are NUL-terminated strings, 0x20-0x3F 32-bit big endian, 0x40-0x5F one byte,
+ * 0x00 ends the block.
+ */
+export function parseMetadata(b: ArrayLike<number>): { meta: Record<string, string | number>; length: number } | null {
+  const meta: Record<string, string | number> = {};
+  let i = 0;
+  while (i < b.length) {
+    const tag = b[i++];
+    if (tag === 0x00) return { meta, length: i };
+    const key = META_KEYS[tag] ?? `0x${tag.toString(16).padStart(2, "0")}`;
+    if (tag < 0x20) {
+      let s = "";
+      while (i < b.length && b[i] !== 0) s += String.fromCharCode(b[i++]);
+      if (i >= b.length) return null;
+      i++;
+      meta[key] = s;
+    } else if (tag < 0x40) {
+      if (i + 4 > b.length) return null;
+      meta[key] = ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
+      i += 4;
+    } else if (tag < 0x60) {
+      if (i + 1 > b.length) return null;
+      meta[key] = b[i++];
+    } else {
+      // Unknown tag class: can't know its length; stop here.
+      return { meta, length: i };
+    }
+  }
+  return null;
+}
+
+/** Decode a newest-first SUMP sample stream into an oldest-first array. */
+export function unpackSamples(raw: ArrayLike<number>, count: number, groups: number): Uint32Array {
+  const bps = popcount3(groups);
+  const out = new Uint32Array(count);
+  const shifts: number[] = [];
+  for (let g = 0; g < 3; g++) if (groups & (1 << g)) shifts.push(8 * g);
+  for (let k = 0; k < count; k++) {
+    let v = 0;
+    const o = k * bps;
+    for (let j = 0; j < bps; j++) v |= raw[o + j] << shifts[j];
+    out[count - 1 - k] = v >>> 0;
+  }
+  return out;
+}
+
+interface Reader {
+  bytes: number[];
+  /** Resolve once `done(bytes)` is true. */
+  wait(done: (b: number[]) => boolean, o: { timeout?: number; idle?: number; signal?: AbortSignal; onData?: () => void }): Promise<void>;
+  close(): void;
+}
+
+export class SumpError extends Error {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "SumpError";
+  }
+}
+
+export class SumpClient {
+  constructor(public readonly session: Session) {}
+
+  /** Raw byte reader on top of the session's latin1 stream. Call only inside exclusive(). */
+  private reader(): Reader {
+    const s = this.session;
+    const bytes: number[] = [];
+    let notify: (() => void) | null = null;
+    let closedReason: string | null = null;
+    const offRx = s.rx.on((t) => {
+      for (let i = 0; i < t.length; i++) bytes.push(t.charCodeAt(i) & 0xff);
+      notify?.();
+    });
+    const offClosed = s.closed.on((r) => {
+      closedReason = r;
+      notify?.();
+    });
+    return {
+      bytes,
+      wait(done, o) {
+        return new Promise<void>((resolve, reject) => {
+          let overall: ReturnType<typeof setTimeout> | undefined;
+          let idle: ReturnType<typeof setTimeout> | undefined;
+          let seen = bytes.length;
+          const finish = (e?: Error) => {
+            notify = null;
+            clearTimeout(overall);
+            clearTimeout(idle);
+            o.signal?.removeEventListener("abort", onAbort);
+            e ? reject(e) : resolve();
+          };
+          const onAbort = () => finish(new AbortedError());
+          const armIdle = () => {
+            if (!o.idle) return;
+            clearTimeout(idle);
+            idle = setTimeout(() => finish(new SumpError(`Device stopped sending (got ${bytes.length} bytes)`)), o.idle);
+          };
+          const check = () => {
+            if (closedReason !== null) return finish(new AbortedError(`Port closed: ${closedReason}`));
+            if (bytes.length !== seen) {
+              seen = bytes.length;
+              o.onData?.();
+              armIdle();
+            }
+            if (done(bytes)) finish();
+          };
+          if (o.signal?.aborted) return reject(new AbortedError());
+          o.signal?.addEventListener("abort", onAbort, { once: true });
+          if (o.timeout && o.timeout > 0)
+            overall = setTimeout(
+              () => finish(new TimeoutError(`SUMP reply (got ${bytes.length} bytes)`, String.fromCharCode(...bytes.slice(-64)))),
+              o.timeout,
+            );
+          notify = check;
+          check();
+        });
+      },
+      close() {
+        notify = null;
+        offRx();
+        offClosed();
+      },
+    };
+  }
+
+  /** Wait until the line has been quiet for `quietMs` (bounded by `maxMs`). */
+  private async drain(quietMs = 120, maxMs = 1500) {
+    const r = this.reader();
+    try {
+      const t0 = Date.now();
+      for (;;) {
+        const n = r.bytes.length;
+        await new Promise((res) => setTimeout(res, quietMs));
+        if (r.bytes.length === n || Date.now() - t0 > maxMs) break;
+      }
+    } finally {
+      r.close();
+      this.session.flush();
+    }
+  }
+
+  private async send(...chunks: Uint8Array[]) {
+    const total = chunks.reduce((n, c) => n + c.length, 0);
+    const buf = new Uint8Array(total);
+    let o = 0;
+    for (const c of chunks) buf.set(c, o), (o += c.length);
+    await this.session.write(buf);
+  }
+
+  /** Five resets: backs out of any half-received long command, cancels a capture. */
+  private resetBytes() {
+    return new Uint8Array(5).fill(SUMP.RESET);
+  }
+
+  /** Send the SUMP reset sequence (also cancels a running capture). */
+  reset(): Promise<void> {
+    return this.session.exclusive(async () => {
+      await this.send(this.resetBytes());
+      await this.drain();
+    });
+  }
+
+  /** Query the device ID. The JTAGulator answers "1ALS". */
+  identify(o: { timeout?: number; signal?: AbortSignal } = {}): Promise<string> {
+    return this.session.exclusive(async () => {
+      const r = this.reader();
+      try {
+        this.session.flush();
+        await this.send(this.resetBytes(), new Uint8Array([SUMP.ID]));
+        await r.wait((b) => b.length >= 4, { timeout: o.timeout ?? 1500, signal: o.signal });
+        return String.fromCharCode(...r.bytes.slice(-4));
+      } finally {
+        r.close();
+        this.session.flush();
+      }
+    });
+  }
+
+  /** Query and parse the metadata block (0x04). */
+  metadata(o: { timeout?: number; signal?: AbortSignal } = {}): Promise<Record<string, string | number>> {
+    return this.session.exclusive(async () => {
+      const r = this.reader();
+      try {
+        this.session.flush();
+        await this.send(this.resetBytes(), new Uint8Array([SUMP.META]));
+        let parsed: ReturnType<typeof parseMetadata> = null;
+        await r.wait((b) => (parsed = parseMetadata(b)) !== null, { timeout: o.timeout ?? 2000, signal: o.signal });
+        return parsed!.meta;
+      } finally {
+        r.close();
+        this.session.flush();
+      }
+    });
+  }
+
+  /**
+   * Read the current level of all 24 channels (0x06). All groups are enabled
+   * first since the reply format follows the group-disable flags.
+   */
+  snapshot(o: { timeout?: number; signal?: AbortSignal } = {}): Promise<number> {
+    return this.session.exclusive(async () => {
+      const r = this.reader();
+      try {
+        this.session.flush();
+        await this.send(long(SUMP.FLAGS, flagsForGroups(0b111)), new Uint8Array([SUMP.INPUT]));
+        await r.wait((b) => b.length >= 3, { timeout: o.timeout ?? 1000, signal: o.signal });
+        const b = r.bytes;
+        return (b[0] | (b[1] << 8) | (b[2] << 16)) >>> 0;
+      } finally {
+        r.close();
+        this.session.flush();
+      }
+    });
+  }
+
+  /** Run one capture. */
+  capture(opts: CaptureOptions): Promise<Capture> {
+    const count = clampSamples(opts.samples);
+    const rate = planSampleRate(opts.sampleRateHz);
+    const groups = groupsForChannels(opts.channels);
+    if (!groups) throw new SumpError("No channel group enabled");
+    const trig = opts.trigger && opts.trigger.mask ? opts.trigger : undefined;
+    if (trig && trig.mask & ~SUMP_LIMITS.triggerChannelMask)
+      throw new SumpError("The JTAGulator firmware can only trigger on CH0-7");
+    const bps = popcount3(groups);
+    const expectBytes = count * bps;
+    const n = count / 4 - 1;
+    const cmds = [
+      this.resetBytes(),
+      long(SUMP.FLAGS, flagsForGroups(groups)),
+      long(SUMP.DIV, rate.divider),
+      long(SUMP.CNT, (n & 0xffff) | ((n & 0xffff) << 16)),
+      long(SUMP.TRIG_MASK[0], trig ? trig.mask & 0xff : 0),
+      long(SUMP.TRIG_VAL[0], trig ? trig.value & trig.mask & 0xff : 0),
+      // Stage 1 starts the capture (bit 27 = byte 4 bit 3).
+      long(SUMP.TRIG_CONF[0], 0x08000000),
+      new Uint8Array([SUMP.RUN]),
+    ];
+    const timeout =
+      opts.timeoutMs ??
+      (trig ? 0 : captureDurationMs(rate.actualHz, count) + transferDurationMs(count, groups) + 3000);
+
+    return this.session.exclusive(async () => {
+      const r = this.reader();
+      try {
+        this.session.flush();
+        await this.send(...cmds);
+        await r.wait((b) => b.length >= expectBytes, {
+          timeout,
+          // Once samples flow, they come back to back.
+          idle: 2000,
+          signal: opts.signal,
+          onData: () => opts.onProgress?.(Math.min(1, r.bytes.length / expectBytes)),
+        });
+        return {
+          sampleRateHz: rate.actualHz,
+          samples: unpackSamples(r.bytes, count, groups),
+          channelMask: groupMaskToChannelMask(groups),
+          triggerIndex: trig ? 0 : null,
+          capturedAt: Date.now(),
+        } satisfies Capture;
+      } catch (e) {
+        r.close();
+        // Cancel the capture (the firmware drops the samples) and discard stragglers.
+        await this.session.write(this.resetBytes()).catch(() => {});
+        await this.drain().catch(() => {});
+        throw e;
+      } finally {
+        r.close();
+        this.session.flush();
+      }
+    });
+  }
+}
