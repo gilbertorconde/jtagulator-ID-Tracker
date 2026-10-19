@@ -72,7 +72,7 @@ Studio talks to the JTAGulator's own serial menu. It answers every prompt from y
 | **Firmware** | Shows the installed version, test-runs firmware from RAM, installs firmware to EEPROM, checks GitHub releases for updates, and checks for or writes the manufacturer database |
 | **Scan all** | Any combination of scans, run one after another |
 | **Chip IDs** | IDCODE and DPIDR decoded in the app against the JEP106 table and about 500 known part numbers, on any firmware |
-| **Targets** | Saved targets with known pins, channel labels and findings; export as JSON or a Markdown report |
+| **Targets** | Saved targets with known pins, channel labels and findings; share them as `.jtarget` files (open as new or merge into your own) or export a Markdown report |
 | **Scripts** | Sandboxed JavaScript using the same functions as the UI, including `uart.expect()`, plus a macro recorder |
 | **Simulator** | A software JTAGulator with a fake target board, for trying everything without hardware |
 | **Layout** | Works in a desktop window and on a phone-sized screen |

@@ -443,7 +443,7 @@ JTAGulator Studio (`studio/` in this repository) is a desktop app (Windows, macO
 | GPIO | Read, monitor and drive the 24 channels |
 | Logic analyzer | Captures, triggers, pre-trigger, decoders, export |
 | Scripts | Automate any of the above in JavaScript, or record a macro |
-| Target & findings | Known pins, channel labels and results per board; Markdown reports |
+| Target & findings | Known pins, channel labels and results per board; share a board as a `.jtarget` file (open as new, replace, or merge into yours); Markdown reports |
 | Firmware | Installed version, test-run or install firmware, updates, manufacturer database |
 
 It also has a built-in simulator, a software JTAGulator with a fake target, so you can learn the tool without hardware. See the [README](README.md) for installation.

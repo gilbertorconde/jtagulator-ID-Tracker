@@ -20,14 +20,16 @@
 
 {#if app.dialog}
   {@const d = app.dialog}
-  <div class="backdrop" role="presentation" onclick={() => d.resolve(false)}>
-    <div class="card dialog" role="dialog" aria-modal="true" tabindex="-1" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.key === "Escape" && d.resolve(false)}>
+  <div class="backdrop" role="presentation" onclick={() => d.resolve(null)}>
+    <div class="card dialog" role="dialog" aria-modal="true" tabindex="-1" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.key === "Escape" && d.resolve(null)}>
       <h3>{d.title}</h3>
       <p>{d.body}</p>
       <div class="buttons">
-        <button class="btn" onclick={() => d.resolve(false)}>Cancel</button>
-        <!-- svelte-ignore a11y_autofocus -->
-        <button class="btn {d.danger ? 'danger' : 'primary'}" autofocus onclick={() => d.resolve(true)}>{d.ok}</button>
+        <button class="btn" onclick={() => d.resolve(null)}>Cancel</button>
+        {#each d.choices as c, i (c.value)}
+          <!-- svelte-ignore a11y_autofocus -->
+          <button class="btn {c.kind === 'plain' ? '' : (c.kind ?? 'primary')}" autofocus={i === d.choices.length - 1} onclick={() => d.resolve(c.value)}>{c.label}</button>
+        {/each}
       </div>
     </div>
   </div>

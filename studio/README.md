@@ -13,7 +13,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
 - **Logic analyzer**: OLS/SUMP capture client with a 24-channel waveform viewer, triggers (all 24 channels and pre-trigger capture on ID Tracker 1.3), UART, SPI, I2C, 1-Wire, CAN, JTAG and SWD decoders, and VCD, CSV and sigrok (`.sr`, opens in PulseView) export.
 - **Scan all**: runs any set of scans one after another.
 - **Chip ID decoding**: IDCODE and DPIDR values are decoded in the app against the 1,953-entry JEP106 manufacturer table, plus a list of known part numbers.
-- **Target profile**: stores known pins, channel labels and every finding for the board you're testing. It saves automatically and exports as JSON or a Markdown report.
+- **Target profile**: stores known pins, channel labels and every finding for the board you're testing. It saves automatically. Share a board as a `.jtarget` file; opening one lets you add it as a new target, replace the saved copy, or merge it into the current target (your pins and labels win, conflicts are listed). Also exports a Markdown report.
 - **Scripts**: sandboxed JavaScript that runs in a Web Worker and uses the same API as the UI.
   - `uart.expect` waits for target output.
   - Scripts are stored as files in the app data folder.

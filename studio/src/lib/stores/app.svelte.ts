@@ -13,6 +13,9 @@ import { untrack } from "svelte";
 import { canLoad, type DtrTransport } from "../firmware/loader";
 import { loadLibrary, type BsdlEntry } from "../bsdl/library";
 import { matchesIdcode } from "../bsdl/parser";
+import { blankTarget, findingKey, mergeTargets, newId, type TargetProfile } from "../target/profile";
+
+export type { TargetProfile };
 
 export type View = "overview" | "jtag" | "swd" | "uart" | "gpio" | "logic" | "all" | "scripts" | "findings" | "firmware" | "settings";
 
@@ -54,20 +57,11 @@ export interface Toast {
   detail?: string;
 }
 
-/** What we know about the board under test, prefilled into forms. */
-export interface TargetProfile {
-  id: string;
-  updatedAt: number;
-  name: string;
-  notes: string;
-  voltage: number | null;
-  jtag: { tdi: number | null; tdo: number | null; tck: number | null; tms: number | null; trst: number | null; rtck: number | null };
-  swd: { swdio: number | null; swclk: number | null };
-  uart: { txd: number | null; rxd: number | null; baud: number | null };
-  range: { start: number; end: number };
-  /** Every finding, newest first, de-duplicated. */
-  findings: { at: number; op: string; finding: Finding }[];
-  channelNames: Record<number, string>;
+
+export interface Choice {
+  value: string;
+  label: string;
+  kind?: "primary" | "danger" | "plain";
 }
 
 export interface Settings {
@@ -83,21 +77,6 @@ export interface Settings {
   firmwareRepo: string;
 }
 
-const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-
-const blankTarget = (): TargetProfile => ({
-  id: newId(),
-  updatedAt: Date.now(),
-  name: "Untitled target",
-  notes: "",
-  voltage: null,
-  jtag: { tdi: null, tdo: null, tck: null, tms: null, trst: null, rtck: null },
-  swd: { swdio: null, swclk: null },
-  uart: { txd: null, rxd: null, baud: null },
-  range: { start: 0, end: 7 },
-  findings: [],
-  channelNames: {},
-});
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -117,24 +96,6 @@ function loadList(key: string): TargetProfile[] {
   }
 }
 
-function findingKey(f: Finding): string {
-  switch (f.kind) {
-    case "jtag":
-      return `jtag:${f.tdi}:${f.tdo}:${f.tck}:${f.tms}:${f.devices.map((d) => d.idcode.raw).join(",")}`;
-    case "swd":
-      return `swd:${f.swdio}:${f.swclk}:${f.dpidr?.raw}`;
-    case "uart":
-      return `uart:${f.txd}:${f.rxd}:${f.baud}`;
-    case "uart-txd":
-      return `txd:${f.txd}:${f.bestFit}`;
-    case "rtck":
-      return `rtck:${f.tck}:${f.rtck}`;
-    case "extest":
-      return `extest:${f.channel}:${f.bit}`;
-    case "irdr":
-      return `irdr:${f.ir}:${f.dr}`;
-  }
-}
 
 let opSeq = 1;
 let toastSeq = 1;
@@ -164,7 +125,7 @@ class AppState {
   op = $state<RunningOp | null>(null);
   history = $state<OpRecord[]>([]);
   toasts = $state<Toast[]>([]);
-  dialog = $state<{ title: string; body: string; ok: string; danger?: boolean; resolve: (v: boolean) => void } | null>(null);
+  dialog = $state<{ title: string; body: string; choices: Choice[]; resolve: (v: string | null) => void } | null>(null);
 
   // recorder
   recording = $state(false);
@@ -228,14 +189,18 @@ class AppState {
   }
 
   /** Modal yes/no question. */
-  ask(title: string, body: string, ok = "OK", danger = false): Promise<boolean> {
-    this.dialog?.resolve(false);
+  async ask(title: string, body: string, ok = "OK", danger = false): Promise<boolean> {
+    return (await this.choose(title, body, [{ value: "ok", label: ok, kind: danger ? "danger" : "primary" }])) === "ok";
+  }
+
+  /** Modal question with several answers; resolves to the chosen value, or null on Cancel. */
+  choose(title: string, body: string, choices: Choice[]): Promise<string | null> {
+    this.dialog?.resolve(null);
     return new Promise((resolve) => {
       this.dialog = {
         title,
         body,
-        ok,
-        danger,
+        choices,
         resolve: (v) => {
           this.dialog = null;
           resolve(v);
@@ -243,6 +208,7 @@ class AppState {
       };
     });
   }
+
 
   dismiss(id: number) {
     this.toasts = this.toasts.filter((t) => t.id !== id);
@@ -521,10 +487,20 @@ class AppState {
     }
   }
 
-  /** Add or replace a target from an imported file, then switch to it. */
-  importTarget(t: TargetProfile) {
+  /**
+   * Bring in a target from a file. "new" adds it as its own saved target (a
+   * fresh id if one with the same id exists), "replace" overwrites the saved
+   * target with the same id, "merge" folds it into the current target.
+   */
+  importTarget(t: TargetProfile, how: "new" | "replace" | "merge" = "new"): string[] {
+    if (how === "merge") {
+      const { target, conflicts } = mergeTargets($state.snapshot(this.target) as TargetProfile, t);
+      this.target = target;
+      return conflicts;
+    }
     const known = this.targets.some((x) => x.id === t.id);
-    this.target = { ...blankTarget(), ...t, id: t.id && !known ? t.id : newId() };
+    this.target = { ...blankTarget(), ...t, id: how === "replace" || !known ? t.id : newId(), updatedAt: Date.now() };
+    return [];
   }
 
   // ---------------------------------------------------------------------- BSDL

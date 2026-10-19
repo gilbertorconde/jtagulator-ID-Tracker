@@ -1,8 +1,9 @@
 <script lang="ts">
   import { Download, FileJson, FilePlus2, Trash2, Upload } from "@lucide/svelte";
-  import { openText, saveTextAs } from "../../files";
+  import { openTextFile, saveTextAs } from "../../files";
   import { markdownReport } from "../../report";
-  import { app, type TargetProfile } from "../../stores/app.svelte";
+  import { app } from "../../stores/app.svelte";
+  import { parseTarget, serializeTarget } from "../../target/profile";
   import FindingCard from "../FindingCard.svelte";
   import Panel from "../Panel.svelte";
   import PinHeader from "../PinHeader.svelte";
@@ -31,19 +32,33 @@
   const slug = () => t.name.replace(/[^\w-]+/g, "_").toLowerCase() || "target";
 
   async function exportJson() {
-    await saveTextAs(`${slug()}.jtarget.json`, JSON.stringify(t, null, 2), "json").catch((e) => app.error(e, "Export"));
+    await saveTextAs(`${slug()}.jtarget`, serializeTarget($state.snapshot(t)), "jtarget").catch((e) => app.error(e, "Export"));
   }
   async function exportMd() {
     await saveTextAs(`${slug()}-report.md`, markdownReport(t), "md").catch((e) => app.error(e, "Export"));
   }
   async function importJson() {
     try {
-      const text = await openText("json");
-      if (!text) return;
-      const data = JSON.parse(text) as TargetProfile;
-      if (!data.jtag || !Array.isArray(data.findings)) throw new Error("Not a JTAGulator Studio target file");
-      app.importTarget(data);
-      app.toast("ok", "Target loaded", data.name);
+      const file = await openTextFile(["jtarget", "json"]);
+      if (!file) return;
+      const { target: data, skipped } = parseTarget(file.text);
+      const same = app.targets.find((x) => x.id === data.id);
+      const n = (k: number, w: string) => `${k} ${w}${k === 1 ? "" : "s"}`;
+      const summary = `“${data.name}”: ${n(data.findings.length, "finding")}, ${n(Object.keys(data.channelNames).length, "channel label")}.`;
+      const how = await app.choose(
+        "Open target",
+        same
+          ? `${summary}\n\nYou already have this target (“${same.name}”, saved ${new Date(same.updatedAt).toLocaleString()}). Replace it with the file, keep both, or merge the file into the current target?`
+          : `${summary}\n\nOpen it as a new saved target, or merge it into the current target “${t.name}”? Merging keeps your pins and labels and adds what the file knows that you don't.`,
+        [
+          { value: "merge", label: "Merge into current", kind: "plain" },
+          ...(same ? [{ value: "new", label: "Keep both", kind: "plain" as const }, { value: "replace", label: "Replace", kind: "danger" as const }] : [{ value: "new", label: "Open as new" }]),
+        ],
+      );
+      if (!how) return;
+      const conflicts = app.importTarget(data, how as "new" | "replace" | "merge");
+      const notes = [skipped ? `${skipped} unreadable findings skipped.` : "", conflicts.length ? `Kept your values where they differ:\n${conflicts.join("\n")}` : ""].filter(Boolean).join("\n");
+      app.toast(conflicts.length || skipped ? "warn" : "ok", how === "merge" ? "Target merged" : "Target opened", notes || data.name, conflicts.length ? 10000 : undefined);
     } catch (e) {
       app.error(e, "Import");
     }
@@ -71,7 +86,7 @@
         <span class="label">Saved targets</span>
         <select class="input" value={t.id} onchange={(e) => app.switchTarget((e.currentTarget as HTMLSelectElement).value)}>
           {#each [...app.targets].sort((a, b) => b.updatedAt - a.updatedAt) as x (x.id)}
-            <option value={x.id}>{x.name} · {x.findings.length} findings · {new Date(x.updatedAt).toLocaleDateString()}</option>
+            <option value={x.id}>{x.name} · {x.findings.length} finding{x.findings.length === 1 ? "" : "s"} · {new Date(x.updatedAt).toLocaleDateString()}</option>
           {/each}
         </select>
       </div>
