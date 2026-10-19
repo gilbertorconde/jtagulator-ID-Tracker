@@ -71,7 +71,7 @@ const STR = {
     "           Welcome to JTAGulator. Press 'H' for available commands.\r\n" +
     "         Warning: Use of this tool may affect target system behavior!",
   version:
-    "\r\nJTAGulator FW ID Tracker 1.2 (simulated)\r\nDesigned by Joe Grand, Grand Idea Studio, Inc.\r\nModified by Weiao, 2025.10.30\r\nMain: jtagulator.com\r\nSource: github.com/grandideastudio/jtagulator",
+    "\r\nJTAGulator FW ID Tracker 1.3 (simulated)\r\nDesigned by Joe Grand, Grand Idea Studio, Inc.\r\nModified by Weiao, 2025.10.30\r\nMain: jtagulator.com\r\nSource: github.com/grandideastudio/jtagulator",
   menuMain:
     "\r\nTarget Interfaces:\r\nJ   JTAG\r\nU   UART\r\nG   GPIO\r\nS   SWD\r\nA   All (GPIO, JTAG, SWD, UART)\r\n\nGeneral Commands:\r\nV   Set target I/O voltage\r\nI   Display version information\r\nH   Display available commands",
   menuJTAG:

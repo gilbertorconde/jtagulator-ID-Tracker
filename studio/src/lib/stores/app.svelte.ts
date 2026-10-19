@@ -157,6 +157,9 @@ class AppState {
     } as Settings),
   );
 
+  /** ID Tracker 1.3+ parses all 24 logic analyzer trigger channels. */
+  fullTriggers = $derived(!!this.info?.idTracker && parseFloat(this.info.version ?? "0") >= 1.3);
+
   readonly tauri = isTauri();
   readonly webSerial = hasWebSerial();
 

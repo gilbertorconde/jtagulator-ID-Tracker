@@ -43,9 +43,14 @@
   import { captureFileName, downloadText, toCSV, toVCD } from "../../logic/export";
   import Waveform, { defaultNames, type WaveAnnotation, type WaveMarkers } from "./Waveform.svelte";
 
-  let { dev, session, onError }: { dev: JTAGulator; session: Session; onError?: (e: unknown) => void } = $props();
+  let {
+    dev,
+    session,
+    onError,
+    fullTriggers = false,
+  }: { dev: JTAGulator; session: Session; onError?: (e: unknown) => void; fullTriggers?: boolean } = $props();
 
-  const sump = $derived(new SumpClient(session));
+  const sump = $derived(new SumpClient(session, { fullTriggers }));
 
   // ------------------------------------------------------------------ mode
   let mode = $state<DeviceMode>("unknown");
@@ -117,7 +122,8 @@
   let groups = $state([true, true, true]);
   let trigOn = $state(false);
   /** Per trigger channel: null = don't care, 0 / 1 = level. */
-  let trig = $state<(0 | 1 | null)[]>(Array(8).fill(null));
+  let trig = $state<(0 | 1 | null)[]>(Array(24).fill(null));
+  const trigChannels = $derived(fullTriggers ? 24 : 8);
 
   const plan = $derived(planSampleRate(rateHz));
   const nClamped = $derived(clampSamples(samplesN));
@@ -129,7 +135,7 @@
     let mask = 0;
     let value = 0;
     trig.forEach((t, i) => {
-      if (t === null) return;
+      if (t === null || i >= trigChannels) return;
       mask |= 1 << i;
       if (t) value |= 1 << i;
     });
@@ -413,7 +419,7 @@
           </label>
         </div>
         <div class="trig" class:disabled={!trigOn}>
-          {#each trig as t, i (i)}
+          {#each trig.slice(0, trigChannels) as t, i (i)}
             <button
               class="cell mono"
               class:one={t === 1}
@@ -428,8 +434,8 @@
           {/each}
         </div>
         <span class="hint">
-          Level trigger; capture starts at the trigger (no pre-trigger). The firmware only honours CH0–7 in
-          trigger masks.
+          Level trigger; capture starts at the trigger (no pre-trigger).
+          {#if !fullTriggers}This firmware only honours CH0–7 in triggers; ID Tracker 1.3 can trigger on all 24.{/if}
           {#if trigOn && !trigger}<br /><span class="warn-t">Set at least one channel to 0 or 1.</span>{/if}
         </span>
       </section>

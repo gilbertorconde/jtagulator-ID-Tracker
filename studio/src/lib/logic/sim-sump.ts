@@ -58,6 +58,8 @@ export interface SimSumpOptions {
   triggerHorizon?: number;
   /** Signal time source in seconds (default: wall clock). Lets tests pick the waveform phase. */
   clock?: () => number;
+  /** Emulate the pre-1.3 trigger parsing bug (only the first byte of masks/values kept). */
+  legacyTriggers?: boolean;
 }
 
 function hash(n: number) {
@@ -89,7 +91,7 @@ export class SimSump implements SumpHandler {
     private readonly fw: SimFirmware,
     opts: SimSumpOptions = {},
   ) {
-    this.opts = { realtime: true, maxCaptureMs: 3000, triggerHorizon: 1, ...opts };
+    this.opts = { realtime: true, maxCaptureMs: 3000, triggerHorizon: 1, legacyTriggers: false, ...opts };
   }
 
   /** True while a long command is still collecting its parameter bytes. */
@@ -102,6 +104,11 @@ export class SimSump implements SumpHandler {
   }
 
   /** PropSUMP Go(): defaults restored; any capture is gone. */
+  private triggerArg(v: ArrayLike<number>): number {
+    if (this.opts.legacyTriggers) return v[1];
+    return (v[1] | (v[2] << 8) | (v[3] << 16) | (v[4] << 24)) & 0xffffff;
+  }
+
   reset() {
     this.stopCapture();
     this.cmd = [];
@@ -253,18 +260,18 @@ export class SimSump implements SumpHandler {
       case 0x82:
         this.disableFlags = v[1] & DISABLE_FLAGS_MASK;
         break;
-      // Firmware quirk: `larg:=vCmd[n]` (not `|=`) leaves only the first byte.
+      // Before ID Tracker 1.3, `larg:=vCmd[n]` (not `|=`) left only the first byte.
       case 0xc0:
       case 0xc4:
       case 0xc8:
       case 0xcc:
-        this.trigMask[stage(v[0])] = v[1];
+        this.trigMask[stage(v[0])] = this.triggerArg(v);
         break;
       case 0xc1:
       case 0xc5:
       case 0xc9:
       case 0xcd:
-        this.trigVal[stage(v[0])] = v[1];
+        this.trigVal[stage(v[0])] = this.triggerArg(v);
         break;
       default:
         this.trigStart[stage(v[0])] = v[4] & 0b1000;

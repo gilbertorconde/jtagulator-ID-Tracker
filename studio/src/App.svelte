@@ -45,7 +45,12 @@
       {:else if app.view === "gpio"}<GpioView />
       {:else if app.view === "logic"}
         {#if app.dev && app.session}
-          <LogicAnalyzerView dev={app.dev} session={app.session} onError={(e) => app.error(e, "Logic analyzer")} />
+          <LogicAnalyzerView
+            dev={app.dev}
+            session={app.session}
+            fullTriggers={app.fullTriggers}
+            onError={(e) => app.error(e, "Logic analyzer")}
+          />
         {:else}
           <div class="card empty">Connect a JTAGulator (or the simulator) to use the logic analyzer.</div>
         {/if}

@@ -13,8 +13,8 @@
 //    converts it to 80 MHz Propeller clocks: wait = floor((div + 1) * 4 / 5),
 //    minimum 66 clocks (1.212 MHz).
 //  - Samples are sent newest first (buffer[delay - 1 - i]).
-//  - Trigger masks/values: a parsing bug keeps only the first parameter byte,
-//    so only CH0-7 can participate in a trigger. Triggers are level (WAITPEQ)
+//  - Trigger masks/values: before ID Tracker 1.3 a parsing bug kept only the
+//    first parameter byte, so only CH0-7 could participate in a trigger. Triggers are level (WAITPEQ)
 //    and sampling starts at the trigger, so the trigger is sample 0.
 //  - Trigger config: only the "start" bit (byte 4 bit 3) is honoured.
 //  - 0x06 returns the current inputs in the same 1..3 byte format as a sample.
@@ -55,8 +55,10 @@ export const SUMP_LIMITS = {
   sampleStep: 4,
   channels: 24,
   groups: 3,
-  /** Only these channels can be used in a trigger (firmware parsing quirk). */
+  /** Trigger channels on firmware with the old parsing bug (before ID Tracker 1.3). */
   triggerChannelMask: 0xff,
+  /** Trigger channels on fixed firmware. */
+  fullTriggerChannelMask: 0xffffff,
   /** Serial link speed (bytes/s ~ baud / 10). */
   baud: 115_200,
 } as const;
@@ -81,7 +83,7 @@ export interface Capture {
 }
 
 export interface Trigger {
-  /** Channels that must match (CH0-7 only, see SUMP_LIMITS.triggerChannelMask). */
+  /** Channels that must match (CH0-7 only on old firmware, see SumpClient fullTriggers). */
   mask: number;
   /** Required level of each masked channel. */
   value: number;
@@ -244,7 +246,15 @@ export class SumpError extends Error {
 }
 
 export class SumpClient {
-  constructor(public readonly session: Session) {}
+  /** fullTriggers: the firmware parses all 24 trigger channels (ID Tracker 1.3+). */
+  constructor(
+    public readonly session: Session,
+    public readonly opts: { fullTriggers?: boolean } = {},
+  ) {}
+
+  get triggerChannelMask() {
+    return this.opts.fullTriggers ? SUMP_LIMITS.fullTriggerChannelMask : SUMP_LIMITS.triggerChannelMask;
+  }
 
   /** Raw byte reader on top of the session's latin1 stream. Call only inside exclusive(). */
   private reader(): Reader {
@@ -405,8 +415,9 @@ export class SumpClient {
     const groups = groupsForChannels(opts.channels);
     if (!groups) throw new SumpError("No channel group enabled");
     const trig = opts.trigger && opts.trigger.mask ? opts.trigger : undefined;
-    if (trig && trig.mask & ~SUMP_LIMITS.triggerChannelMask)
-      throw new SumpError("The JTAGulator firmware can only trigger on CH0-7");
+    const tmask = this.triggerChannelMask;
+    if (trig && trig.mask & ~tmask)
+      throw new SumpError("This firmware can only trigger on CH0-7 (update to ID Tracker 1.3 for all channels)");
     const bps = popcount3(groups);
     const expectBytes = count * bps;
     const n = count / 4 - 1;
@@ -415,8 +426,8 @@ export class SumpClient {
       long(SUMP.FLAGS, flagsForGroups(groups)),
       long(SUMP.DIV, rate.divider),
       long(SUMP.CNT, (n & 0xffff) | ((n & 0xffff) << 16)),
-      long(SUMP.TRIG_MASK[0], trig ? trig.mask & 0xff : 0),
-      long(SUMP.TRIG_VAL[0], trig ? trig.value & trig.mask & 0xff : 0),
+      long(SUMP.TRIG_MASK[0], trig ? trig.mask & tmask : 0),
+      long(SUMP.TRIG_VAL[0], trig ? trig.value & trig.mask & tmask : 0),
       // Stage 1 starts the capture (bit 27 = byte 4 bit 3).
       long(SUMP.TRIG_CONF[0], 0x08000000),
       new Uint8Array([SUMP.RUN]),

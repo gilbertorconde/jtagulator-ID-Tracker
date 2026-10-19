@@ -138,7 +138,15 @@ describe("SumpClient against the simulator", () => {
     }
   });
 
-  it("rejects triggers outside CH0-7 (firmware only parses the low byte)", () => {
+  it("triggers on any channel with fixed firmware (ID Tracker 1.3)", async () => {
+    const full = new SumpClient(session, { fullTriggers: true });
+    const uart = 1 << 16; // sim UART TX idles high; trigger on a start bit
+    const cap = await full.capture({ sampleRateHz: 100_000, samples: 64, channels: [], trigger: { mask: uart, value: 0 } });
+    expect(cap.triggerIndex).toBe(0);
+    expect(cap.samples[0] & uart).toBe(0);
+  });
+
+  it("rejects triggers outside CH0-7 on old firmware", () => {
     expect(() => sump.capture({ sampleRateHz: 1e6, samples: 64, channels: [], trigger: { mask: 1 << 16, value: 0 } })).toThrow(
       /CH0-7/,
     );
