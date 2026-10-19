@@ -58,7 +58,12 @@ export interface DatabaseStatus {
 export function parseProbe(text: string): DatabaseStatus | null {
   const m = text.match(/JTS-PROBE flag=([0-9A-F]{2}) mode=(-?\d+) vtarget=(-?\d+) amd=(\S*) arm=(\S*) st=(\S*) end/);
   if (!m) return null;
-  const name = (s: string) => (!s || /^_+$/.test(s) ? null : s.replace(/_+$/, ""));
+  // The probe prints spaces and unprintable bytes as "_" (the line is space
+  // separated); an erased slot (all 0xFF) comes out as only underscores.
+  const name = (s: string) => {
+    const n = s.replace(/_/g, " ").trim();
+    return n || null;
+  };
   const flag = parseInt(m[1], 16);
   return { flag, complete: flag === 0x5a, samples: { amd: name(m[4]), arm: name(m[5]), st: name(m[6]) }, mode: +m[2] };
 }
