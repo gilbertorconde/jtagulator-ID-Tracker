@@ -1,4 +1,5 @@
 <script lang="ts">
+  import WiringGuide from "../WiringGuide.svelte";
   import type { Finding, PinsLow } from "../../core/types";
   import { app } from "../../stores/app.svelte";
   import Field from "../Field.svelte";
@@ -102,6 +103,7 @@
 {/snippet}
 
 <div class="view">
+  <WiringGuide kind="jtag" />
   <Tabs
     tabs={[
       { id: "discover", label: "Discover pinout" },

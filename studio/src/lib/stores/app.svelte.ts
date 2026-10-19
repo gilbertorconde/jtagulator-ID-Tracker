@@ -71,6 +71,8 @@ export interface Settings {
   terminalOpen: boolean;
   terminalHeight: number;
   lastPort: string | null;
+  /** Wiring guides the user collapsed, per page. */
+  wiringHidden: Record<string, boolean>;
 }
 
 const blankTarget = (): TargetProfile => ({
@@ -156,6 +158,7 @@ class AppState {
       terminalOpen: false,
       terminalHeight: 260,
       lastPort: null,
+      wiringHidden: {},
     } as Settings),
   );
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import WiringGuide from "../WiringGuide.svelte";
   import type { Terminal } from "@xterm/xterm";
   import { Plug, Unplug, Send } from "@lucide/svelte";
   import type { PassthroughHandle } from "../../core/jtagulator";
@@ -107,6 +108,7 @@
 {/snippet}
 
 <div class="view">
+  <WiringGuide kind="uart" />
   <Tabs
     tabs={[
       { id: "scan", label: "Active scan" },

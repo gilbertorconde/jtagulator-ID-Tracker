@@ -1,4 +1,5 @@
 <script lang="ts">
+  import WiringGuide from "../WiringGuide.svelte";
   import type { Finding, PinsLow } from "../../core/types";
   import { app } from "../../stores/app.svelte";
   import OpResults from "../OpResults.svelte";
@@ -30,6 +31,7 @@
   {#if f.kind === "swd" && f.swdio >= 0}<button class="btn sm" onclick={() => use(f)}>Use pinout</button>{/if}
 {/snippet}
 
+<div class="guide-wrap"><WiringGuide kind="swd" /></div>
 <div class="warn">
   The JTAGulator's input circuitry doesn't work with many SWD targets, so a scan can miss a real SWD port. See the
   <a href="https://github.com/grandideastudio/jtagulator/wiki/Hardware-Modifications" target="_blank" rel="noreferrer">hardware modifications</a> page.
@@ -59,6 +61,9 @@
 </div>
 
 <style>
+  .guide-wrap {
+    margin-bottom: 14px;
+  }
   .cols {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));

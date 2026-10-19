@@ -1,4 +1,5 @@
 <script lang="ts">
+  import WiringGuide from "../WiringGuide.svelte";
   import { Radio, RefreshCw, Zap } from "@lucide/svelte";
   import { gpioBits, type GpioWriteHandle } from "../../core/jtagulator";
   import { app } from "../../stores/app.svelte";
@@ -78,6 +79,7 @@
   };
 </script>
 
+<div class="guide-wrap"><WiringGuide kind="gpio" /></div>
 <div class="cols">
   <Panel title="Read channels" subtitle="All 24 channels as inputs. Green = high.">
     {#snippet aside()}
@@ -143,6 +145,9 @@
 </div>
 
 <style>
+  .guide-wrap {
+    margin-bottom: 14px;
+  }
   .cols {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(520px, 100%), 1fr));

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import WiringGuide from "../WiringGuide.svelte";
   import { CircleCheck, CircleDashed, CircleX, Loader, Square } from "@lucide/svelte";
   import type { Finding, PinsLow } from "../../core/types";
   import type { CallName } from "../../scripting/api";
@@ -84,6 +85,7 @@
   }
 </script>
 
+<div class="guide-wrap"><WiringGuide kind="all" /></div>
 <div class="cols">
   <Panel title="Scan everything" subtitle="Runs the selected scans one after another over the same channels. Same as the firmware's “A” command, with control over each step.">
     <RangeField bind:start bind:end min={4} roles={{}} />
@@ -131,6 +133,9 @@
 </div>
 
 <style>
+  .guide-wrap {
+    margin-bottom: 14px;
+  }
   .cols {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr));
