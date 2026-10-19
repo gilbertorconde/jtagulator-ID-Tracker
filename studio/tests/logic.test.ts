@@ -326,3 +326,32 @@ describe("longer captures (ID Tracker 1.4)", () => {
     expect(cap.triggerIndex).toBe(256);
   });
 });
+
+describe("run-length encoding (ID Tracker 1.4)", () => {
+  it("decodes to the same waveform over a much longer time", async () => {
+    const plain = new SumpClient(session, { longCaptures: true });
+    const rle = new SumpClient(session, { longCaptures: true, rle: true });
+    simSump.opts.clock = () => 2;
+    const a = await plain.capture({ sampleRateHz: 500_000, samples: 1024, channels: [0, 1] });
+    simSump.opts.clock = () => 2;
+    const b = await rle.capture({ sampleRateHz: 500_000, samples: 1024, channels: [0, 1], rle: true });
+    expect(b.samples.length).toBeGreaterThan(5 * a.samples.length);
+    // The first 1024 decompressed samples match a plain capture (CH7 is the RLE flag).
+    for (let i = 0; i < a.samples.length; i++) expect(b.samples[i] & 0x7f, `sample ${i}`).toBe(a.samples[i] & 0x7f);
+    expect(b.channelMask).toBe(0x7f);
+  });
+
+  it("works with only the upper channel group enabled", async () => {
+    const rle = new SumpClient(session, { rle: true });
+    const cap = await rle.capture({ sampleRateHz: 100_000, samples: 256, channels: [20, 21, 22], rle: true });
+    expect(cap.samples.length).toBeGreaterThan(256);
+    expect(cap.channelMask).toBe(0x7f0000);
+    expect(cap.samples.every((v) => (v & 0xff80ffff) === 0)).toBe(true);
+  });
+
+  it("decodeRle follows sigrok: a count repeats the next value", async () => {
+    const { decodeRle } = await import("../src/lib/logic/sump");
+    // Newest first: value 0x05, count 2 (0x82), value 0x03 -> oldest first: 03 03 03 05
+    expect([...decodeRle([0x05, 0x82, 0x03], 3, 0b001)]).toEqual([3, 3, 3, 5]);
+  });
+});

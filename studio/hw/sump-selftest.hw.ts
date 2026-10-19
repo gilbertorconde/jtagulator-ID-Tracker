@@ -109,3 +109,50 @@ describe("multi-stage trigger chain", () => {
     expect(cap.samples[0] & 0x20).toBe(0x20);
   });
 });
+
+describe("run-length encoding (ID Tracker 1.4)", () => {
+  /** Lengths of runs of equal samples, ignoring the partial first and last run. */
+  const runs = (s: Uint32Array) => {
+    const out: number[] = [];
+    let n = 1;
+    for (let i = 1; i < s.length; i++) {
+      if (s[i] === s[i - 1]) n++;
+      else (out.push(n), (n = 1));
+    }
+    return out.slice(1);
+  };
+  const mean = (a: number[]) => a.reduce((x, y) => x + y, 0) / a.length;
+
+  it("decompresses to a continuous count over a much longer window", async () => {
+    const rle = new SumpClient(s, { rle: true, longCaptures: true });
+    const cap = await rle.capture({ sampleRateHz: 500_000, samples: 1024, channels: [], rle: true, timeoutMs: 15000 });
+    expect(cap.samples.length).toBeGreaterThan(3000);
+    let prev = -1;
+    for (let i = 0; i < cap.samples.length; i++) {
+      const v = cap.samples[i];
+      const b0 = v & 0xff;
+      expect([(v >>> 8) & 0xff, (v >>> 16) & 0x7f], `sample ${i}`).toEqual([b0, b0 & 0x7f]); // CH23 is the flag
+      expect(v & 0x800000).toBe(0);
+      if (prev >= 0 && b0 !== prev) expect((b0 - prev + 256) % 256, `step at ${i}`).toBe(1);
+      prev = b0;
+    }
+    // Same run lengths as a plain capture at the same rate (checks the count semantics).
+    const plain = await sump.capture({ sampleRateHz: 500_000, samples: 1364, channels: [], timeoutMs: 8000 });
+    const ratio = mean(runs(cap.samples)) / mean(runs(plain.samples));
+    console.log("decompressed", cap.samples.length, "mean run rle/plain", ratio.toFixed(3));
+    expect(Math.abs(ratio - 1)).toBeLessThan(0.15);
+  });
+
+  it("uses the top channel of a single group as the flag", async () => {
+    const rle = new SumpClient(s, { rle: true });
+    const cap = await rle.capture({ sampleRateHz: 250_000, samples: 512, channels: [2], rle: true, timeoutMs: 15000 });
+    expect(cap.channelMask).toBe(0x7f);
+    expect(cap.samples.length).toBeGreaterThan(1000);
+    let prev = -1;
+    for (const v of cap.samples) {
+      expect(v & ~0x7f).toBe(0);
+      if (prev >= 0 && v !== prev) expect((v - prev + 128) % 128).toBe(1);
+      prev = v;
+    }
+  });
+});

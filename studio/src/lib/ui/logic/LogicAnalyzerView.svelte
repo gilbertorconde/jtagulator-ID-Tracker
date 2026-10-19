@@ -52,7 +52,7 @@
     longCaptures = false,
   }: { dev: JTAGulator; session: Session; onError?: (e: unknown) => void; fullTriggers?: boolean; longCaptures?: boolean } = $props();
 
-  const sump = $derived(new SumpClient(session, { fullTriggers, preTrigger: fullTriggers, longCaptures }));
+  const sump = $derived(new SumpClient(session, { fullTriggers, preTrigger: fullTriggers, longCaptures, rle: longCaptures }));
 
   // ------------------------------------------------------------------ mode
   let mode = $state<DeviceMode>("unknown");
@@ -125,13 +125,17 @@
   let trigOn = $state(false);
   /** Fraction of the capture kept from before the trigger (ID Tracker 1.3+). */
   let preFraction = $state(0);
+  /** Run-length encoding (ID Tracker 1.4): stores runs, so slow signals cover far more time. */
+  let rleOn = $state(false);
+  const usingPre = $derived(trigOn && preFraction > 0);
+  const usingRle = $derived(longCaptures && rleOn && !usingPre);
   /** Per trigger channel: null = don't care, 0 / 1 = level. */
   let trig = $state<(0 | 1 | null)[]>(Array(24).fill(null));
   const trigChannels = $derived(fullTriggers ? 24 : 8);
 
   const plan = $derived(planSampleRate(rateHz));
   // Pre-trigger captures keep one long per sample in the firmware: at most 1024.
-  const maxN = $derived(trigOn && preFraction > 0 ? SUMP_LIMITS.maxSamples : longCaptures ? SUMP_LIMITS.packedMaxSamples : SUMP_LIMITS.maxSamples);
+  const maxN = $derived(usingPre || usingRle ? SUMP_LIMITS.maxSamples : longCaptures ? SUMP_LIMITS.packedMaxSamples : SUMP_LIMITS.maxSamples);
   const nClamped = $derived(clampSamples(samplesN, maxN));
   const groupMask = $derived(groups.reduce((m, g, i) => m | (g ? 1 << i : 0), 0));
   const windowMs = $derived(captureDurationMs(rateHz, nClamped));
@@ -181,6 +185,7 @@
         channels,
         trigger,
         preTriggerSamples: trigger && fullTriggers ? Math.round((nClamped * preFraction) / 4) * 4 : 0,
+        rle: usingRle,
         signal: ctl.signal,
         onProgress: (f) => (progress = f),
       });
@@ -490,6 +495,18 @@
             {/each}
           </div>
           <span class="hint">{groupMask ? "Fewer groups = faster transfer." : "Enable at least one group."}</span>
+        {#if longCaptures}
+          <label class="switch rle">
+            <input type="checkbox" bind:checked={rleOn} />
+            <span>Compress repeated samples (RLE)</span>
+          </label>
+          {#if rleOn}
+            <span class="hint">
+              Stores each value once with a repeat count, so slow or idle signals cover far more time. Up to 500 kHz;
+              the highest enabled channel (e.g. CH23) carries the count flag and reads as 0. {SUMP_LIMITS.maxSamples} entries.
+            </span>
+          {/if}
+        {/if}
         </div>
       </section>
 
@@ -527,6 +544,7 @@
               <option value={0.75}>75 % of the capture</option>
             </select>
           </label>
+          {#if usingPre && rleOn}<span class="hint">Pre-trigger capture turns compression off.</span>{/if}
           {#if trigOn && preFraction > 0 && rateHz > 80_000_000 / 88}
             <span class="hint warn-t">With pre-trigger samples the rate is limited to 909 kHz.</span>
           {/if}
@@ -1078,6 +1096,9 @@
     min-height: 0;
     overflow: auto;
     padding: 12px;
+  }
+  .rle {
+    margin-top: 8px;
   }
   .pre {
     display: flex;

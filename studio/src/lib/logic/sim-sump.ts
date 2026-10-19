@@ -87,6 +87,8 @@ export class SimSump implements SumpHandler {
   readReq = MAX_PERIODS;
   delayReq = MAX_PERIODS;
   disableFlags = 0b0010_0000;
+  /** OLS flag bit 8: run-length encoding (ID Tracker 1.4). */
+  rle = false;
   trigMask = [0, 0, 0, 0];
   trigVal = [0, 0, 0, 0];
   trigStart = [1, 1, 1, 1];
@@ -301,6 +303,7 @@ export class SimSump implements SumpHandler {
       }
       case 0x82:
         this.disableFlags = v[1] & DISABLE_FLAGS_MASK;
+        this.rle = !this.opts.legacyTriggers && (v[2] & 1) === 1;
         break;
       // Before ID Tracker 1.3, `larg:=vCmd[n]` (not `|=`) left only the first byte.
       case 0xc0:
@@ -327,6 +330,44 @@ export class SimSump implements SumpHandler {
     let o = 0;
     for (let i = 0; i < values.length; i++) for (const g of groups) out[o++] = (values[i] >>> (8 * g)) & 0xff;
     return out;
+  }
+
+  /** Run-length encoded capture, as ID Tracker 1.4's samplerRle + SendAllSamples do it. */
+  private runRle(t: number, t0: number, state: { timer: ReturnType<typeof setTimeout> | null }) {
+    const groups = [0, 1, 2].filter((g) => !(this.disableFlags & (1 << (2 + g))));
+    const rleMax = 2 ** (groups.length * 8 - 1) - 1;
+    const entriesMax = Math.min(this.delayReq, MAX_PRE_PERIODS);
+    const read = Math.min(this.readReq, entriesMax);
+    const period = Math.max(this.clocksWait, 160) / CLK;
+    const entries: number[] = [];
+    let hold = this.levels(t) & 0xffffff;
+    let count = 0;
+    // Bounded so a constant signal can't stall the simulator.
+    for (let i = 1; entries.length < entriesMax && i < 5_000_000; i++) {
+      const v = this.levels(t + i * period) & 0xffffff;
+      if (v === hold && count < rleMax) {
+        count++;
+        continue;
+      }
+      entries.push(hold);
+      if (entries.length < entriesMax && count) entries.push((0x80000000 | count) >>> 0);
+      hold = v;
+      count = 0;
+    }
+    const packed = (v: number) => groups.reduce((w, g, n) => w | (((v >>> (8 * g)) & 0xff) << (8 * n)), 0);
+    const bytes: number[] = [];
+    for (let i = 0; i < read; i++) {
+      const e = entries[entries.length - 1 - i] ?? 0;
+      const w = e >= 0x80000000 ? (e & rleMax) | (rleMax + 1) : packed(e) & rleMax;
+      for (let n = 0; n < groups.length; n++) bytes.push((w >>> (8 * n)) & 0xff);
+    }
+    void t0;
+    state.timer = setTimeout(() => {
+      if (this.running !== state) return;
+      this.running = null;
+      const data = Uint8Array.from(bytes);
+      for (let o = 0; o < data.length; o += 512) this.out?.(data.subarray(o, o + 512));
+    }, 0);
   }
 
   /** Time (s) at which (levels & mask) == val first holds at or after t, or null within the horizon. */
@@ -370,6 +411,8 @@ export class SimSump implements SumpHandler {
     this.running = state;
     // Trigger never fires: wait (forever) for RESET / CAN / power cycle.
     if (t === null) return;
+
+    if (this.rle) return this.runRle(t, t0, state);
 
     const period = this.clocksWait / CLK;
     const buf = new Uint32Array(MAX_PERIODS); // cleared before every run

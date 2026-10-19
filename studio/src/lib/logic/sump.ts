@@ -54,6 +54,8 @@ export const SUMP_LIMITS = {
   maxSamples: 1024,
   /** ID Tracker 1.4 packs samples (4 per 3 longs): normal captures go up to this. */
   packedMaxSamples: 1364,
+  /** Fastest rate with run-length encoding (firmware RLE_MIN_CLOCKS_WAIT = 160). */
+  rleMaxRateHz: 80_000_000 / 160,
   minSamples: 4,
   /** Sample counts are multiples of this. */
   sampleStep: 4,
@@ -103,6 +105,11 @@ export interface CaptureOptions {
   trigger?: Trigger;
   /** Samples to keep from before the trigger (needs the preTrigger option). */
   preTriggerSamples?: number;
+  /**
+   * Run-length encode (needs the rle option): `samples` then counts entries, and
+   * the capture covers as much time as the signal's runs allow. Max 500 kHz.
+   */
+  rle?: boolean;
   /**
    * Multi-stage trigger (up to 4 stages, replaces `trigger`): each stage waits for
    * its pattern; a stage with `start` (or the 4th) starts the capture, otherwise
@@ -231,6 +238,34 @@ export function parseMetadata(b: ArrayLike<number>): { meta: Record<string, stri
 }
 
 /** Decode a newest-first SUMP sample stream into an oldest-first array. */
+/**
+ * Decode a run-length encoded capture (OLS RLE, as sigrok reads it): entries
+ * arrive newest first; one whose top bit (the last byte's bit 7) is set is a
+ * count, meaning the next value entry repeats count + 1 times. Returns the
+ * samples oldest first, with the flag bit cleared.
+ */
+export function decodeRle(raw: ArrayLike<number>, entries: number, groups: number): Uint32Array {
+  const bps = popcount3(groups);
+  const shifts: number[] = [];
+  for (let g = 0; g < 3; g++) if (groups & (1 << g)) shifts.push(8 * g);
+  const newestFirst: number[] = [];
+  let repeat = 0;
+  for (let k = 0; k < entries; k++) {
+    const o = k * bps;
+    if (raw[o + bps - 1] & 0x80) {
+      let c = 0;
+      for (let j = 0; j < bps; j++) c |= (j === bps - 1 ? raw[o + j] & 0x7f : raw[o + j]) << (8 * j);
+      repeat = c;
+      continue;
+    }
+    let v = 0;
+    for (let j = 0; j < bps; j++) v |= raw[o + j] << shifts[j];
+    for (let i = 0; i <= repeat; i++) newestFirst.push(v >>> 0);
+    repeat = 0;
+  }
+  return Uint32Array.from(newestFirst.reverse());
+}
+
 export function unpackSamples(raw: ArrayLike<number>, count: number, groups: number): Uint32Array {
   const bps = popcount3(groups);
   const out = new Uint32Array(count);
@@ -264,10 +299,11 @@ export class SumpClient {
    * fullTriggers: the firmware parses all 24 trigger channels (ID Tracker 1.3+).
    * preTrigger: the firmware can keep samples from before the trigger (1.3+).
    * longCaptures: the firmware packs samples, allowing 1364 instead of 1024 (1.4+).
+   * rle: the firmware supports run-length encoded captures (1.4+).
    */
   constructor(
     public readonly session: Session,
-    public readonly opts: { fullTriggers?: boolean; preTrigger?: boolean; longCaptures?: boolean } = {},
+    public readonly opts: { fullTriggers?: boolean; preTrigger?: boolean; longCaptures?: boolean; rle?: boolean } = {},
   ) {}
 
   /** Largest capture this firmware takes (pre-trigger captures stay at 1024). */
@@ -434,13 +470,20 @@ export class SumpClient {
   /** Run one capture. */
   capture(opts: CaptureOptions): Promise<Capture> {
     const wantsPre = !!(opts.trigger?.mask && this.opts.preTrigger && opts.preTriggerSamples);
-    // The pre-trigger ring stores one long per sample: at most 1024 samples.
-    const count = clampSamples(opts.samples, wantsPre ? SUMP_LIMITS.maxSamples : this.maxSamples);
+    const rle = !!(opts.rle && this.opts.rle && !wantsPre);
+    // Pre-trigger rings and RLE entries are one long each: at most 1024.
+    const count = clampSamples(opts.samples, wantsPre || rle ? SUMP_LIMITS.maxSamples : this.maxSamples);
     const wantPre = opts.trigger?.mask && this.opts.preTrigger ? (opts.preTriggerSamples ?? 0) : 0;
     const pre = Math.min(count - SUMP_LIMITS.sampleStep, Math.max(0, Math.round(wantPre / 4) * 4));
     // Pre-trigger capture polls the trigger in software: the firmware enforces a
     // longer sample period (PRE_MIN_CLOCKS_WAIT).
-    const rate = planSampleRate(pre ? Math.min(opts.sampleRateHz, SUMP_LIMITS.preTriggerMaxRateHz) : opts.sampleRateHz);
+    const rate = planSampleRate(
+      pre
+        ? Math.min(opts.sampleRateHz, SUMP_LIMITS.preTriggerMaxRateHz)
+        : rle
+          ? Math.min(opts.sampleRateHz, SUMP_LIMITS.rleMaxRateHz)
+          : opts.sampleRateHz,
+    );
     const groups = groupsForChannels(opts.channels);
     if (!groups) throw new SumpError("No channel group enabled");
     const trig = opts.trigger && opts.trigger.mask ? opts.trigger : undefined;
@@ -456,7 +499,7 @@ export class SumpClient {
     const d = (count - pre) / 4 - 1;
     const cmds = [
       this.resetBytes(),
-      long(SUMP.FLAGS, flagsForGroups(groups)),
+      long(SUMP.FLAGS, flagsForGroups(groups) | (rle ? 0x100 : 0)),
       long(SUMP.DIV, rate.divider),
       long(SUMP.CNT, (n & 0xffff) | ((d & 0xffff) << 16)),
       ...[0, 1, 2, 3].flatMap((i) => {
@@ -473,7 +516,8 @@ export class SumpClient {
     ];
     const timeout =
       opts.timeoutMs ??
-      (triggered ? 0 : captureDurationMs(rate.actualHz, count) + transferDurationMs(count, groups) + 3000);
+      // An RLE capture lasts until the buffer fills, which depends on the signal.
+      (triggered || rle ? 0 : captureDurationMs(rate.actualHz, count) + transferDurationMs(count, groups) + 3000);
 
     return this.session.exclusive(async () => {
       const r = this.reader();
@@ -489,8 +533,9 @@ export class SumpClient {
         });
         return {
           sampleRateHz: rate.actualHz,
-          samples: unpackSamples(r.bytes, count, groups),
-          channelMask: groupMaskToChannelMask(groups),
+          samples: rle ? decodeRle(r.bytes, count, groups) : unpackSamples(r.bytes, count, groups),
+          // With RLE the top channel of the highest enabled group carries the count flag.
+          channelMask: rle ? groupMaskToChannelMask(groups) & ~(1 << (31 - Math.clz32(groupMaskToChannelMask(groups)))) : groupMaskToChannelMask(groups),
           triggerIndex: triggered ? pre : null,
           capturedAt: Date.now(),
         } satisfies Capture;
