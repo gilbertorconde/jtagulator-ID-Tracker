@@ -1,5 +1,6 @@
 // Decoding of JTAG IDCODE (IEEE 1149.1) and ARM SWD DPIDR values.
 import jep106 from "../data/jep106.json";
+import parts from "../data/parts.json";
 
 const NAMES = jep106 as string[];
 
@@ -43,35 +44,64 @@ export interface SwdDpidr {
   valid: boolean;
 }
 
-// Well-known IDCODEs / DPIDRs, keyed by value with the version nibble masked off.
-const KNOWN_JTAG: Record<number, string> = {
-  0x0ba00477: "ARM CoreSight JTAG-DP (Cortex-M3/M4/M7, Cortex-A)",
-  0x0ba01477: "ARM CoreSight SW-DP / JTAG-DP",
-  0x0ba02477: "ARM CoreSight JTAG-DP (DPv2)",
-  0x06430041: "STM32F1xx (XL density) boundary scan",
-  0x06413041: "STM32F4xx boundary scan",
-  0x06414041: "STM32F1xx (high density) boundary scan",
-  0x06410041: "STM32F1xx (medium density) boundary scan",
-  0x06412041: "STM32F1xx (low density) boundary scan",
-  0x06418041: "STM32F1xx (connectivity line) boundary scan",
-  0x0362d093: "Xilinx Artix-7 XC7A35T",
-  0x03631093: "Xilinx Artix-7 XC7A100T",
-  0x03636093: "Xilinx Artix-7 XC7A200T",
-  0x03727093: "Xilinx Zynq-7000 XC7Z020",
-  0x03722093: "Xilinx Zynq-7000 XC7Z010",
-};
+// Known IDCODE / DPIDR values (src/lib/data/parts.json, built by scripts/gen-parts.mjs
+// from openFPGALoader, UrJTAG and OpenOCD, plus hand-added entries).
+interface PartEntry {
+  id: string;
+  mask: string;
+  name: string;
+  vendor: string;
+  family: string;
+  kind: "jtag" | "swd" | "any";
+  source: string;
+}
 
-const KNOWN_DPIDR: Record<number, string> = {
-  0x0ba01477: "ARM SW-DP v1 (Cortex-M3/M4)",
-  0x0ba02477: "ARM SW-DP v2 (e.g. Cortex-M7)",
-  0x0bc11477: "ARM SW-DP v1 MINDP (Cortex-M0/M0+)",
-  0x0bc12477: "ARM SW-DP v2 MINDP (Cortex-M0+, e.g. RP2040)",
-  0x0be12477: "ARM SW-DP v2 (Cortex-M23/M33)",
-  0x0bb11477: "ARM SW-DP v1 (Cortex-M0)",
-};
+export interface KnownPart {
+  name: string;
+  vendor: string;
+  family: string;
+  source: string;
+  sourceUrl: string | null;
+}
 
-const lookup = (table: Record<number, string>, raw: number) =>
-  table[(raw & 0x0fffffff) >>> 0] ?? null;
+const PARTS_DATA = parts as { sources: Record<string, string>; parts: PartEntry[] };
+const PARTS = PARTS_DATA.parts.map((p) => {
+  const mask = parseInt(p.mask, 16) >>> 0;
+  let bits = 0;
+  for (let m = mask; m; m >>>= 1) bits += m & 1;
+  return { ...p, value: (parseInt(p.id, 16) & mask) >>> 0, maskN: mask, bits };
+});
+
+/** The most specific known part for an ID (exact matches beat version-masked ones). */
+export function findPart(raw: number, kind: "jtag" | "swd"): KnownPart | null {
+  raw >>>= 0;
+  let best: (typeof PARTS)[number] | null = null;
+  for (const p of PARTS) {
+    if (p.kind !== "any" && p.kind !== kind) continue;
+    if (((raw & p.maskN) >>> 0) !== p.value) continue;
+    if (!best || p.bits > best.bits) best = p;
+  }
+  if (!best) return null;
+  return { name: best.name, vendor: best.vendor, family: best.family, source: best.source, sourceUrl: PARTS_DATA.sources[best.source] ?? null };
+}
+
+/** Number of known IDs in the table. */
+export const knownPartCount = PARTS.length;
+
+/** Generic names from the ARM debug interface spec when no specific part is known. */
+function armDebugPort(raw: number, kind: "jtag" | "swd"): string | null {
+  if ((raw & 0xfff) !== 0x477) return null;
+  const partno = (raw >>> 12) & 0xffff;
+  if (kind === "jtag" && (partno & 0xfff0) === 0xba00) return "ARM CoreSight JTAG-DP";
+  if (kind === "swd") return "ARM CoreSight debug port";
+  return null;
+}
+
+function partLabel(raw: number, kind: "jtag" | "swd"): string | null {
+  const p = findPart(raw, kind);
+  if (p) return p.family ? `${p.name} (${p.family})` : p.name;
+  return armDebugPort(raw, kind);
+}
 
 export function decodeJtag(raw: number): JtagIdcode {
   raw >>>= 0;
@@ -88,7 +118,7 @@ export function decodeJtag(raw: number): JtagIdcode {
     bank,
     code,
     manufacturer: jep106Name(bank, code),
-    part: lookup(KNOWN_JTAG, raw),
+    part: partLabel(raw, "jtag"),
     valid: (raw & 1) === 1 && raw !== 0xffffffff,
   };
 }
@@ -110,7 +140,7 @@ export function decodeDpidr(raw: number): SwdDpidr {
     bank,
     code,
     designer: jep106Name(bank, code),
-    part: lookup(KNOWN_DPIDR, raw),
+    part: partLabel(raw, "swd"),
     valid: (raw & 1) === 1 && raw !== 0xffffffff,
   };
 }

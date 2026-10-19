@@ -1,0 +1,4 @@
+{
+  "about": "Hand-added known IDs. Each needs a source link (datasheet, reference manual or BSDL file). Run `node scripts/gen-parts.mjs` after editing.",
+  "parts": []
+}

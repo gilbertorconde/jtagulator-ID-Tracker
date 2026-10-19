@@ -11,7 +11,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
     "gen:jep106": "node scripts/gen-jep106.mjs",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "gen:parts": "node scripts/gen-parts.mjs"
   },
   "license": "MIT",
   "dependencies": {

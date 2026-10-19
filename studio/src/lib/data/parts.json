@@ -1,0 +1,4536 @@
+{
+ "sources": {
+  "openFPGALoader": "https://github.com/trabucayre/openFPGALoader/blob/master/src/part.hpp",
+  "UrJTAG": "https://sourceforge.net/p/urjtag/git/ci/master/tree/urjtag/data/",
+  "OpenOCD": "https://github.com/openocd-org/openocd/tree/master/tcl/target"
+ },
+ "parts": [
+  {
+   "id": "0x5BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM cortex A53",
+   "vendor": "",
+   "family": "",
+   "kind": "any",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x4BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM cortex A9",
+   "vendor": "",
+   "family": "",
+   "kind": "any",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x1000563D",
+   "mask": "0xFFFFFFFF",
+   "name": "GD32VF103",
+   "vendor": "",
+   "family": "",
+   "kind": "any",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x790007A3",
+   "mask": "0xFFFFFFFF",
+   "name": "GD32VF103",
+   "vendor": "",
+   "family": "",
+   "kind": "any",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020A30DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5M1270Z",
+   "vendor": "Altera",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x020830DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP1C12",
+   "vendor": "Altera",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x020840DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP1C20F400",
+   "vendor": "Altera",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x020820DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP1C6Q240",
+   "vendor": "Altera",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x070640DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EPM3064A",
+   "vendor": "Altera",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x071280DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EPM7128AETC100",
+   "vendor": "Altera",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x028000CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF506",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x028001CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF506",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027E80CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF518",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027E81CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF518",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027E40CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF526",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027E41CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF526",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027E00CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF527",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027E01CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF527",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027A50CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF533",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027A51CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF533",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027C60CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF534",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027C61CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF534",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027C80CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF537",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027C81CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF537",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027C40CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF538",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027C41CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF538",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027DE0CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF548",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027DE1CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF548",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027EA0CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF548M",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027EA1CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF548M",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027BB0CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF561",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027BB1CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF561",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x028020CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF592",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x028021CB",
+   "mask": "0x0FFFFFFF",
+   "name": "BF592",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027A70CB",
+   "mask": "0x0FFFFFFF",
+   "name": "SHARC",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x027A71CB",
+   "mask": "0x0FFFFFFF",
+   "name": "SHARC",
+   "vendor": "Analog Devices, Inc.",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x00004C37",
+   "mask": "0x0FFFFFFF",
+   "name": "EF2M45",
+   "vendor": "Anlogic",
+   "family": "elf2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04014C35",
+   "mask": "0x0FFFFFFF",
+   "name": "EG4D20EG176",
+   "vendor": "Anlogic",
+   "family": "eagle d20",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0A014C35",
+   "mask": "0x0FFFFFFF",
+   "name": "EG4S20BG256",
+   "vendor": "Anlogic",
+   "family": "eagle s20",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0BA01477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on lpc4350, lpc4370",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BA04477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on stm32x5x_common",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BB11477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on bluenrg-x, lpc1xxx, psoc4, stm32f0x, swm050 and 1 more",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BC11477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on bluenrg-x, ke0x, klx, stm32c0x, stm32g0x and 1 more",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BD11477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on atsamv",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BE11477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on stm32wba2x",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BE12477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on stm32wba2x, stm32x5x_common",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x0BF11477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on atsaml1x",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x1BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on em357, imx51, imx53",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x1BA01477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on stm32f1x, stm32w108xx",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x2BA01477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on 1986ве1т, aducm360, eos_s3, fm4, k1921vk01t and 16 more",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x2BA06477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on ampere_qs_mq",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x3BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on em357, stm32f1x, stm32w108xx",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x3BA02477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on adsp-sc58x, vybrid_vf6xx",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x3BA06477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on ampere_qs_mq",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x5BA02477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on at91sama5d2, renesas_s7g2, rk3399, stm32f7x",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x6BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on ls1028a, ngultra, renesas_rz, stm32h7rsx, stm32h7x and 5 more",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x6BA02477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on rtl872xd, stm32h7rsx, stm32h7x, stm32n6x, stm32u0x and 4 more",
+   "kind": "any",
+   "source": "OpenOCD"
+  },
+  {
+   "id": "0x01E8203F",
+   "mask": "0x0FFFFFFF",
+   "name": "AT32AP7000",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05B0A03F",
+   "mask": "0x0FFFFFFF",
+   "name": "AT91SAM7S128",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05B0903F",
+   "mask": "0x0FFFFFFF",
+   "name": "AT91SAM7S256",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05B0703F",
+   "mask": "0x0FFFFFFF",
+   "name": "AT91SAM7S32",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05B0C03F",
+   "mask": "0x0FFFFFFF",
+   "name": "AT91SAM7S321",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05B0603F",
+   "mask": "0x0FFFFFFF",
+   "name": "AT91SAM7S64",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0151403F",
+   "mask": "0x0FFFFFFF",
+   "name": "ATF1504ASV",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0970203F",
+   "mask": "0x0FFFFFFF",
+   "name": "ATmega128",
+   "vendor": "Atmel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x002022E1",
+   "mask": "0x0FFFFFFF",
+   "name": "MSP2006",
+   "vendor": "Brecis (PMC-Sierra)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0125017F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM1250",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x012502A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM1250",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0331017F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM3310",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x033102A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM3310",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0471017F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM4702",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x047102A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM4702",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0471217F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM4712",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x047122A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM4712",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0542117F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM5421S",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x054212A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM5421S",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0634817F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM6348",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x063482A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM6348",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0635817F",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM6358",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x063582A1",
+   "mask": "0x0FFFFFFF",
+   "name": "BCM6358",
+   "vendor": "Broadcom",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x20000001",
+   "mask": "0xFFFFFFFF",
+   "name": "GM1AX",
+   "vendor": "Cologne Chip",
+   "family": "GateMate Series",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0108406B",
+   "mask": "0x0FFFFFFF",
+   "name": "SA1100",
+   "vendor": "DEC",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x00240A79",
+   "mask": "0x0FFFFFFF",
+   "name": "T20BGA324/T35",
+   "vendor": "Efinix",
+   "family": "Trion",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00000001",
+   "mask": "0x0FFFFFFF",
+   "name": "T4/T8",
+   "vendor": "Efinix",
+   "family": "Trion",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00220A79",
+   "mask": "0x0FFFFFFF",
+   "name": "T55/T85/T120",
+   "vendor": "Efinix",
+   "family": "Trion",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00210A79",
+   "mask": "0x0FFFFFFF",
+   "name": "T8QFP144/T13/T20",
+   "vendor": "Efinix",
+   "family": "Trion",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00690A79",
+   "mask": "0x0FFFFFFF",
+   "name": "TI180",
+   "vendor": "Efinix",
+   "family": "Titanium",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00661A79",
+   "mask": "0x0FFFFFFF",
+   "name": "TI35",
+   "vendor": "Efinix",
+   "family": "Titanium",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x006A0A79",
+   "mask": "0x0FFFFFFF",
+   "name": "TI375",
+   "vendor": "Efinix",
+   "family": "Titanium",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00660A79",
+   "mask": "0x0FFFFFFF",
+   "name": "TI60",
+   "vendor": "Efinix",
+   "family": "Titanium",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x00360A79",
+   "mask": "0x0FFFFFFF",
+   "name": "TI60ES",
+   "vendor": "Efinix",
+   "family": "Titanium",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0001101D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc5200",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0AE4901D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc5646",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x018E701D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc8377",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x018E601D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc8377e",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x018E501D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc8378",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x018E401D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc8378e",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x018E301D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc8379",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x018E201D",
+   "mask": "0x0FFFFFFF",
+   "name": "mpc8379e",
+   "vendor": "Freescale (Motorola)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0900281B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1N-1",
+   "vendor": "Gowin",
+   "family": "GW1N",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0120681B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1N-2",
+   "vendor": "Gowin",
+   "family": "GW1N",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0100381B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1N-4",
+   "vendor": "Gowin",
+   "family": "GW1N",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0100481B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1N(R)-9C",
+   "vendor": "Gowin",
+   "family": "GW1N",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0100581B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1NR-9",
+   "vendor": "Gowin",
+   "family": "GW1N",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0300181B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1NS-2C",
+   "vendor": "Gowin",
+   "family": "GW1NS",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0100981B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1NSR-4C",
+   "vendor": "Gowin",
+   "family": "GW1NSR",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0100681B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW1NZ-1",
+   "vendor": "Gowin",
+   "family": "GW1NZ",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0000281B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW2A-55",
+   "vendor": "Gowin",
+   "family": "GW2A",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0000081B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW2A(R)-18(C)",
+   "vendor": "Gowin",
+   "family": "GW2A",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0001281B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW5A-25",
+   "vendor": "Gowin",
+   "family": "GW5A",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0001081B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW5AST-138",
+   "vendor": "Gowin",
+   "family": "GW5AST",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0001181B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW5AT-138",
+   "vendor": "Gowin",
+   "family": "GW5AT",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0001681B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW5AT-15",
+   "vendor": "Gowin",
+   "family": "GW5AT",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0001481B",
+   "mask": "0x0FFFFFFF",
+   "name": "GW5AT-60",
+   "vendor": "Gowin",
+   "family": "GW5AT",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0000100F",
+   "mask": "0x0FFFFFFF",
+   "name": "AR7300",
+   "vendor": "Hitachi",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0004200F",
+   "mask": "0x0FFFFFFF",
+   "name": "SH7727",
+   "vendor": "Hitachi",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0756E00F",
+   "mask": "0x0FFFFFFF",
+   "name": "SH7727",
+   "vendor": "Hitachi",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02054049",
+   "mask": "0x0FFFFFFF",
+   "name": "IBM440GX",
+   "vendor": "IBM Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x00267049",
+   "mask": "0x0FFFFFFF",
+   "name": "PowerPC 405EP",
+   "vendor": "IBM Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09277013",
+   "mask": "0x0FFFFFFF",
+   "name": "IXP425-266MHz",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09275013",
+   "mask": "0x0FFFFFFF",
+   "name": "IXP425-400MHz",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09274013",
+   "mask": "0x0FFFFFFF",
+   "name": "IXP425-533MHz",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0927A013",
+   "mask": "0x0FFFFFFF",
+   "name": "IXP465",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0926C013",
+   "mask": "0x0FFFFFFF",
+   "name": "PXA210",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09264013",
+   "mask": "0x0FFFFFFF",
+   "name": "PXA250",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09265013",
+   "mask": "0x0FFFFFFF",
+   "name": "PXA270",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09261013",
+   "mask": "0x0FFFFFFF",
+   "name": "SA1110",
+   "vendor": "Intel",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x031810DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M02S",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x031820DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M08S",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x031030DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M16D",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x031830DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M16S",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x031840DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M25S",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0318D0DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M40S",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x031050DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M50D",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x031850DD",
+   "mask": "0x0FFFFFFF",
+   "name": "10M50S",
+   "vendor": "Intel (Altera)",
+   "family": "MAX 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B150DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CE*A2",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B050DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CE*A4",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B220DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CE*A5",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B130DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CE*A7",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B140DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CE*A9",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B020DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CGT*5/5CGX*5",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B030DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CGT*7/5CGX*7",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B040DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CGT*9/5CGX*9",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B010DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CGX*3",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02B120DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CGX*4",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02D110DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CSE*A2/5CSX*2",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V Soc",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02D010DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CSE*A4/5CSX*4",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V Soc",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02D120DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CSE*A5/5CST*5/5CSX*5",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V Soc",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02D020DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5CSE*A6/5CSX*6",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone V Soc",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x029070DD",
+   "mask": "0x0FFFFFFF",
+   "name": "5SGSD5",
+   "vendor": "Intel (Altera)",
+   "family": "stratix V GS",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x4361B0DD",
+   "mask": "0xFFFFFFFF",
+   "name": "A3CY100",
+   "vendor": "Intel (Altera)",
+   "family": "agilex 3",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x436DB0DD",
+   "mask": "0xFFFFFFFF",
+   "name": "A3CZ135",
+   "vendor": "Intel (Altera)",
+   "family": "agilex 3",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x4369C0DD",
+   "mask": "0xFFFFFFFF",
+   "name": "A5EC008B",
+   "vendor": "Intel (Altera)",
+   "family": "agilex 5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020B30DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP2C15",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020B40DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP2C35",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020B10DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP2C5",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020B50DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP2C50",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020B60DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP2C70",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020B20DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP2C8",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F70DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C120/EP4CE115/10CL120",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F20DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C16/EP4CE15/10CL016",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F30DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C25/EP4CE22/10CL025",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F40DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C40/EP4CE30/EP4C40/10CL025",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F10DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C5/EP3C10/EP4CE6/EP4CE10",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F50DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C55/EP4CE55/10CL055",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020F60DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP3C80/EP4CE75/10CL080",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone III/IV/10 LP",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x028040DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EP4CGX150",
+   "vendor": "Intel (Altera)",
+   "family": "cyclone IV GX",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020A40DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EPM2210",
+   "vendor": "Intel (Altera)",
+   "family": "max II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x020A10DD",
+   "mask": "0x0FFFFFFF",
+   "name": "EPM240T100C5N",
+   "vendor": "Intel (Altera)",
+   "family": "max II",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E060DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GT1150",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E260DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GT900",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E660DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX1150",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02EE20DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX160",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E220DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX220",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02EE30DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX270",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E230DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX320",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E240DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX480",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02EE50DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX570",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E250DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX660",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02EE60DD",
+   "mask": "0x0FFFFFFF",
+   "name": "GX900",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E620DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX160",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E020DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX220",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E630DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX270",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E030DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX320",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E040DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX480",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E650DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX570",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x02E050DD",
+   "mask": "0x0FFFFFFF",
+   "name": "SX660",
+   "vendor": "Intel (Altera)",
+   "family": "arria 10",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012BA043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-1200HC/LCMXO2-640UHC",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B2043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-1200ZE",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012BB043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-2000HC/LCMXO2-1200UHC",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B3043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-2000ZE/LCMXO2-2000HE",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B8043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-256HC",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B0043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-256ZE",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012BC043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-4000HC/LCMXO2-2000UHC",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B4043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-4000ZE/LCMXO2-4000HE/LCMXO2-2000UHE",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B9043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-640HC",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B1043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-640ZE",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012BD043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-7000HC/LCMXO2-4000UHC",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012B5043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-7000ZE/LCMXO2-7000HE",
+   "vendor": "Lattice",
+   "family": "MachXO2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x012E2043",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO3D-4300HC/LCMXO3D-4300ZC",
+   "vendor": "Lattice",
+   "family": "MachXO3D",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x212E3043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3D-9400HC/LCMXO3D-9400ZC",
+   "vendor": "Lattice",
+   "family": "MachXO3D",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x212E1043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3D-9400HE",
+   "vendor": "Lattice",
+   "family": "MachXO3D",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xC12BB043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-1300C",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xC12B3043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-1300E-CSFBGA256",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412B2043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-1300E-WLCSP36/CSFBGA121",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412BB043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-2100C-CABGA256",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xC12BC043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-2100C-CABGA324",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xC12B4043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-2100E-CSFBGA324",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412B3043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-2100E-WLCSP49/CSFBGA121/CSFBGA256",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412BC043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-4300C-CABGA256/CABGA324",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xC12BD043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-4300C-CABGA400",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412B4043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-4300E",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xC12B2043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-640E",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412BD043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-6900C",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412B5043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-6900E",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412BE043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-9400C",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x412B6043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3L-9400E",
+   "vendor": "Lattice",
+   "family": "MachXO3L",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xE12BB043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-1300C",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xE12B3043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-1300E-CSFBGA256",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612B2043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-1300E-WLCSP36/CSFBGA121",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612BB043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-2100C-CABGA256",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xE12BC043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-2100C-CABGA324",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xE12B4043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-2100E-CSFBGA324",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612B3043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-2100E-WLCSP49/CSFBGA121/CSFBGA256",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612BC043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-4300C-CABGA256/CABGA324",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xE12BD043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-4300C-CABGA400",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612B4043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-4300E",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0xE12B2043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-640E",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612BD043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-6900C",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612B5043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-6900E",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612BE043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-9400C",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x612B6043",
+   "mask": "0xFFFFFFFF",
+   "name": "LCMXO3LF-9400E",
+   "vendor": "Lattice",
+   "family": "MachXO3LF",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x010F4043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFCPNX-100",
+   "vendor": "Lattice",
+   "family": "CertusProNX",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x310F0043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFD2NX-17",
+   "vendor": "Lattice",
+   "family": "CertusNX",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x310F1043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFD2NX-40",
+   "vendor": "Lattice",
+   "family": "CertusNX",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01015043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE3-150EA",
+   "vendor": "Lattice",
+   "family": "ECP3",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01014043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE3-70E",
+   "vendor": "Lattice",
+   "family": "ECP3",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x21111043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5U-12",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x41111043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5U-25",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x41112043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5U-45",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x41113043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5U-85",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01111043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE5UM-25",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01112043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE5UM-45",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01113043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE5UM-85",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x81111043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5UM5G-25",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x81112043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5UM5G-45",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x81113043",
+   "mask": "0xFFFFFFFF",
+   "name": "LFE5UM5G-85",
+   "vendor": "Lattice",
+   "family": "ECP5",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0129A043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFXP2-8E",
+   "vendor": "Lattice",
+   "family": "XP2",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x010F0043",
+   "mask": "0x0FFFFFFF",
+   "name": "LIFCL-17",
+   "vendor": "Lattice",
+   "family": "CrosslinkNX",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x010F1043",
+   "mask": "0x0FFFFFFF",
+   "name": "LIFCL-40",
+   "vendor": "Lattice",
+   "family": "CrosslinkNX",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01805043",
+   "mask": "0x0FFFFFFF",
+   "name": "LC4032V-TQFP48",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01805157",
+   "mask": "0x0FFFFFFF",
+   "name": "LC4032V-TQFP48",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0180C043",
+   "mask": "0x0FFFFFFF",
+   "name": "LC4064ZC",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0180C157",
+   "mask": "0x0FFFFFFF",
+   "name": "LC4064ZC",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01810043",
+   "mask": "0x0FFFFFFF",
+   "name": "LC4128C-TQFP100",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01810157",
+   "mask": "0x0FFFFFFF",
+   "name": "LC4128C-TQFP100",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x012B2157",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO2-1200-CSBGA",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x012BD157",
+   "mask": "0x0FFFFFFF",
+   "name": "LCMXO3-6900-CABGA256",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01271043",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE2-12E",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01271157",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE2-12E",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01112157",
+   "mask": "0x0FFFFFFF",
+   "name": "LFE5U-45F-CABGA256",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0060F043",
+   "mask": "0x0FFFFFFF",
+   "name": "M4A3-256/192-fpBGA256",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0060F157",
+   "mask": "0x0FFFFFFF",
+   "name": "M4A3-256/192-fpBGA256",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x07486043",
+   "mask": "0x0FFFFFFF",
+   "name": "M4A3-64/32-TQFP48",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x07486157",
+   "mask": "0x0FFFFFFF",
+   "name": "M4A3-64/32-TQFP48",
+   "vendor": "Lattice Semiconductors",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0528000D",
+   "mask": "0x0FFFFFFF",
+   "name": "LX5280",
+   "vendor": "Lexr",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0000A357",
+   "mask": "0x0FFFFFFF",
+   "name": "MV88E1118",
+   "vendor": "Marvell",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0000A3D3",
+   "mask": "0x0FFFFFFF",
+   "name": "MV88E1118",
+   "vendor": "Marvell",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05182357",
+   "mask": "0x0FFFFFFF",
+   "name": "MV88F5182",
+   "vendor": "Marvell",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x051823D3",
+   "mask": "0x0FFFFFFF",
+   "name": "MV88F5182",
+   "vendor": "Marvell",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05946357",
+   "mask": "0x0FFFFFFF",
+   "name": "MV88W8500",
+   "vendor": "Marvell",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x059463D3",
+   "mask": "0x0FFFFFFF",
+   "name": "MV88W8500",
+   "vendor": "Marvell",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0488C02B",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3128XL-CS144",
+   "vendor": "Philips Semi. (Signetics)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0488902B",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3128XL-VQ100",
+   "vendor": "Philips Semi. (Signetics)",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0B52D02F",
+   "mask": "0x0FFFFFFF",
+   "name": "TNETV1060",
+   "vendor": "Texas Instruments",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0B6C602F",
+   "mask": "0x0FFFFFFF",
+   "name": "TNETV1061",
+   "vendor": "Texas Instruments",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x07926031",
+   "mask": "0x0FFFFFFF",
+   "name": "TMPA9xx",
+   "vendor": "Toshiba",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0001E031",
+   "mask": "0x0FFFFFFF",
+   "name": "TX4925",
+   "vendor": "Toshiba",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0001F031",
+   "mask": "0x0FFFFFFF",
+   "name": "TX4926",
+   "vendor": "Toshiba",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05025093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC18V02_PC44",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05035093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC18V02_PC44",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05026093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC18V04_PC44",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x06D4C093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2C256-TQ144",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x06D4A093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2C256-VQ100",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x06E1B093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc2c32a-cp56",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x06E1A093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc2c32a-cv64",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x00A1C093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2S200E-PQ208",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x00A20093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2S300E",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01028093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2V1000-FG256",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01018093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2V250-FG256",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01010093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2V80-FG256",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0127E093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2VP30-FFG896",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0123E093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc2vp4",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01428093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s1000",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01C10093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s100e_die",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01C2E093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s1200e_fg320",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02230093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s1400a",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01434093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s1500",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01C3A093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s1600e",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01440093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s2000",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02218093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s200a",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0141C093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s400",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01448093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s4000",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02220093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s400a",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0140D093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s50",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01450093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s5000",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02210093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s50a",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02228093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc3s700a",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01EE4093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vfx100",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01E58093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vfx12",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01F14093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vfx140",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01E64093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vfx20",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01E8C093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vfx40",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01EB4093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vfx60",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01700093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx100",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01658093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx15",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01718093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx160",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x01734093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx200",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0167C093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx25",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x016A4093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx40",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x016B4093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx60",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x016D8093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vlx80",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02068093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vsx25",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x02088093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vsx35",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x020B0093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc4vsx55",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x04031093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx100t",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0401D093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx150",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0403D093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx150t",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x04024093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx25t",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x04000093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx4",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0400E093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx75",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0402E093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc6slx75t",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x09506093",
+   "mask": "0x0FFFFFFF",
+   "name": "xc95108",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0A001093",
+   "mask": "0x0FFFFFFF",
+   "name": "xccace",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05057093",
+   "mask": "0x0FFFFFFF",
+   "name": "xcf08p",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05058093",
+   "mask": "0x0FFFFFFF",
+   "name": "xcf16p",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x05059093",
+   "mask": "0x0FFFFFFF",
+   "name": "xcf32p",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0480E093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3032XL-VQ44",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0488C093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3128XL-CS144",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0488B093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3128XL-TQ144",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x04889093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3128XL-VQ100",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x0494E093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCR3256XL-FT256",
+   "vendor": "Xilinx",
+   "family": "",
+   "kind": "jtag",
+   "source": "UrJTAG"
+  },
+  {
+   "id": "0x16D4A093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC2C256",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc2c",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x06E1C093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2C32A",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc2c",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x06E59093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2C64A",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc2c",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x06E5D093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2C64A",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc2c",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x06E5E093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC2C64A",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc2c",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01414093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC3S200",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan3",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x11C1A093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC3S250E",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan3e",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x01C22093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC3S500E",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan3e",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04011093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC6SLX100",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x4403D093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC6SLX150T",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04002093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC6SLX16",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04004093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC6SLX25",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x24024093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC6SLX25T",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04008093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC6SLX45",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04028093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC6SLX45T",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04001093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC6SLX9",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x8424A093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC6VLX130T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex6",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03631093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A100",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 100t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x037C3093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A12T",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 12t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0362E093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A15",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 15t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03636093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A200",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 200t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x037C2093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A25",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 25t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0362D093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A35",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 35t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0362C093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A50T",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 50t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03632093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7A75T",
+   "vendor": "Xilinx (AMD)",
+   "family": "artix a7 75t",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0364C093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7K160T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03651093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7K325T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03747093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7K355T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03656093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7K410T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x23752093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC7K420T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x23751093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC7K480T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03647093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7K70T",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x037C7093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7S100",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03620093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7S15FTGB196-1",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x037C4093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7S25",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0362F093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7S50",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03622093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7S6",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x037C8093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7S75",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartan7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x036B3093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7V2000T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03671093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7V585T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x036D9093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VH580T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x036DB093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VH870T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x036D5093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VX1140T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03667093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VX330T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03682093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VX415T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03687093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VX485T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03692093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VX550T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x33691093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC7VX690T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03696093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7VX980T",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtex7",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x13723093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC7Z007S",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynq",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03722093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7Z010",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynq",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03727093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7Z020",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynq",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x1372C093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC7Z030",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynq",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x23731093",
+   "mask": "0xFFFFFFFF",
+   "name": "XC7Z045",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynq",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03736093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC7Z100",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynq",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x09608093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC95144XL",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc9500xl",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x09616093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC95288XL",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc9500xl",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x09602093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC9536XL",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc9500xl",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x09604093",
+   "mask": "0x0FFFFFFF",
+   "name": "XC9572XL",
+   "vendor": "Xilinx (AMD)",
+   "family": "xc9500xl",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04AC4033",
+   "mask": "0x0FFFFFFF",
+   "name": "XCAU10P",
+   "vendor": "Xilinx (AMD)",
+   "family": "artixusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04AC4093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCAU10P",
+   "vendor": "Xilinx (AMD)",
+   "family": "artixusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04AC2093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCAU15P",
+   "vendor": "Xilinx (AMD)",
+   "family": "artixusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A65093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCAU20P",
+   "vendor": "Xilinx (AMD)",
+   "family": "artixusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A64093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCAU25P",
+   "vendor": "Xilinx (AMD)",
+   "family": "artixusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04AF6093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCAU7P",
+   "vendor": "Xilinx (AMD)",
+   "family": "artixusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x05044093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCF01S",
+   "vendor": "Xilinx (AMD)",
+   "family": "xcf",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x05045093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCF02S",
+   "vendor": "Xilinx (AMD)",
+   "family": "xcf",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x05046093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCF04S",
+   "vendor": "Xilinx (AMD)",
+   "family": "xcf",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04712093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCK24",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E24126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCK24",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04724093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCK26",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E48126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCK26",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x13823093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCKU035",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexus",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x13822093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCKU040",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexus",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x13919093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCKU060",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexus",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x23844093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCKU095",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexus",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x1390D093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCKU115",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexus",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A4E093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU11P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A51093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU11P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A52093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU13P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A56093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU15P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A59093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU15P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04ACF093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU19P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04AD3093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU19P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A63093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU3P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04A62093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU5P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x0484A093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCKU9P",
+   "vendor": "Xilinx (AMD)",
+   "family": "kintexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04E98093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU100P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04E81093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU10P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04EA1093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU150P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04EA0093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU200P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04E82093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU25P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04E80093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU35P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04EB1093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU45P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04E90093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU55P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04EB2093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU60P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04E99093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCSU65P",
+   "vendor": "Xilinx (AMD)",
+   "family": "spartanusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x03842093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU095",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexus",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B49093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU11P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B4F093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU11P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B51093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU13P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B55093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU13P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04BA3093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU15P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04BA1093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU19P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04BA5093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU19P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04AEA093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU2P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x14B79093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCVU37P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B39093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU3P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B3D093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU3P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B2B093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU5P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B2F093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU5P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B29093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU7P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B2D093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU7P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x14B29093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCVU7P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B31093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU9P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04B35093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCVU9P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x14B31093",
+   "mask": "0xFFFFFFFF",
+   "name": "XCVU9P",
+   "vendor": "Xilinx (AMD)",
+   "family": "virtexusp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04740093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU11EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E80126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU11EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04750093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU15EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08EA0126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU15EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04759093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU17EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08EB2126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU17EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04758093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU19EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08EB0126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU19EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047E1093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU21DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FC2126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU21DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047E5093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU25DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FCA126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU25DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047E4093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU27DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FC8126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU27DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047E0093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU28DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FC0126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU28DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047E2093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU29DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FC4126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU29DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04711093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU2CG/EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E22126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU2CG/EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047E6093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU39DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FCC126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU39DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04710093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU3CG/EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E20126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU3CG/EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047FD093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU43DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FFA126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU43DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047F8093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU46DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FF0126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU46DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047FF093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU47DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FFE126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU47DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047FB093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU48DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FF6126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU48DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x047FE093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU49DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08FFC126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU49DR",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04721093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU4CG/EG/EV",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E42126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU4CG/EG/EV",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04720093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU5CG/EG/EV",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E40126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU5CG/EG/EV",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04739093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU6CG/EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E72126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU6CG/EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04730093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU7CG/EG/EV",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E60126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU7CG/EG/EV",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x04738093",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU9EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  },
+  {
+   "id": "0x08E70126",
+   "mask": "0x0FFFFFFF",
+   "name": "XCZU9EG",
+   "vendor": "Xilinx (AMD)",
+   "family": "zynqmp_cfgn",
+   "kind": "jtag",
+   "source": "openFPGALoader"
+  }
+ ]
+}

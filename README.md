@@ -71,7 +71,7 @@ Studio talks to the JTAGulator's own serial menu. It answers every prompt from y
 | **Logic analyzer** | 24-channel waveform viewer, triggers, pre-trigger capture (1.3), UART/SPI/I2C decoders, markers, VCD/CSV export |
 | **Firmware** | Shows the installed version, test-runs firmware from RAM, installs firmware to EEPROM, checks GitHub releases for updates, and checks for or writes the manufacturer database |
 | **Scan all** | Any combination of scans, run one after another |
-| **Chip IDs** | IDCODE and DPIDR decoded in the app against the JEP106 table, on any firmware |
+| **Chip IDs** | IDCODE and DPIDR decoded in the app against the JEP106 table and about 500 known part numbers, on any firmware |
 | **Targets** | Saved targets with known pins, channel labels and findings; export as JSON or a Markdown report |
 | **Scripts** | Sandboxed JavaScript using the same functions as the UI, including `uart.expect()`, plus a macro recorder |
 | **Simulator** | A software JTAGulator with a fake target board, for trying everything without hardware |
@@ -215,6 +215,15 @@ To add a missing manufacturer, send:
 - a source (datasheet or website)
 
 After editing `eepromupdate/jep106.inc`, run `pnpm gen:jep106` in `studio/` to refresh the app's copy.
+
+To add a known part number (so Studio names the exact chip, not just its manufacturer), add an entry to `studio/src/lib/data/parts-extra.json` with a source link, then run `pnpm gen:parts --urjtag <UrJTAG checkout> --openocd <OpenOCD checkout>` in `studio/`. Entries look like:
+
+```json
+{ "id": "0x0362D093", "mask": "0x0FFFFFFF", "name": "XC7A35T", "vendor": "Xilinx (AMD)", "family": "Artix-7",
+  "kind": "jtag", "source": "https://link-to-datasheet-or-bsdl" }
+```
+
+`mask` 0x0FFFFFFF ignores the version nibble; `kind` is `jtag`, `swd` or `any`. The rest of the table is imported from [openFPGALoader](https://github.com/trabucayre/openFPGALoader), [UrJTAG](https://sourceforge.net/p/urjtag/git/ci/master/tree/urjtag/data/) and [OpenOCD](https://github.com/openocd-org/openocd/tree/master/tcl/target).
 
 ---
 

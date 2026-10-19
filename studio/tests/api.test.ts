@@ -22,7 +22,7 @@ describe("idcode", () => {
     expect(decodeJtag(0x4ba00477).manufacturer).toBe("ARM Ltd");
     expect(decodeJtag(0x06413041).manufacturer).toBe("STMicroelectronics");
     expect(decodeDpidr(0x2ba01477).designer).toBe("ARM Ltd");
-    expect(decodeDpidr(0x2ba01477).part).toMatch(/SW-DP/);
+    expect(decodeDpidr(0x2ba01477).part).toMatch(/ARM debug port \(seen on/);
   });
 });
 
