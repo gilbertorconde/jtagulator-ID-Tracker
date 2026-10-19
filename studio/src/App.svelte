@@ -1,19 +1,30 @@
 <script lang="ts">
-  import LogicAnalyzerView from "./lib/ui/logic/LogicAnalyzerView.svelte";
+  import type { Component } from "svelte";
   import Sidebar from "./lib/ui/Sidebar.svelte";
-  import TerminalDock from "./lib/ui/TerminalDock.svelte";
   import Toasts from "./lib/ui/Toasts.svelte";
   import TopBar from "./lib/ui/TopBar.svelte";
-  import FindingsView from "./lib/ui/views/FindingsView.svelte";
-  import GpioView from "./lib/ui/views/GpioView.svelte";
-  import JtagView from "./lib/ui/views/JtagView.svelte";
   import OverviewView from "./lib/ui/views/OverviewView.svelte";
-  import ScanAllView from "./lib/ui/views/ScanAllView.svelte";
-  import ScriptsView from "./lib/ui/views/ScriptsView.svelte";
-  import SettingsView from "./lib/ui/views/SettingsView.svelte";
-  import SwdView from "./lib/ui/views/SwdView.svelte";
-  import UartView from "./lib/ui/views/UartView.svelte";
   import { app, type View } from "./lib/stores/app.svelte";
+
+  // Pages other than the overview load on first use to keep startup small.
+  type Lazy = () => Promise<{ default: Component<any> }>;
+  const LOADERS: Record<Exclude<View, "overview">, Lazy> = {
+    all: () => import("./lib/ui/views/ScanAllView.svelte"),
+    jtag: () => import("./lib/ui/views/JtagView.svelte"),
+    swd: () => import("./lib/ui/views/SwdView.svelte"),
+    uart: () => import("./lib/ui/views/UartView.svelte"),
+    gpio: () => import("./lib/ui/views/GpioView.svelte"),
+    logic: () => import("./lib/ui/logic/LogicAnalyzerView.svelte"),
+    scripts: () => import("./lib/ui/views/ScriptsView.svelte"),
+    findings: () => import("./lib/ui/views/FindingsView.svelte"),
+    settings: () => import("./lib/ui/views/SettingsView.svelte"),
+  };
+  const cache = new Map<string, ReturnType<Lazy>>();
+  const load = (v: Exclude<View, "overview">) => {
+    if (!cache.has(v)) cache.set(v, LOADERS[v]());
+    return cache.get(v)!;
+  };
+  const terminal = () => import("./lib/ui/TerminalDock.svelte");
 
   const ORDER: View[] = ["overview", "all", "jtag", "swd", "uart", "gpio", "logic", "scripts", "findings"];
 
@@ -38,28 +49,32 @@
   <div class="main">
     <TopBar />
     <div class="content" class:fill={app.view === "scripts"}>
-      {#if app.view === "overview"}<OverviewView />
-      {:else if app.view === "all"}<ScanAllView />
-      {:else if app.view === "jtag"}<JtagView />
-      {:else if app.view === "swd"}<SwdView />
-      {:else if app.view === "uart"}<UartView />
-      {:else if app.view === "gpio"}<GpioView />
-      {:else if app.view === "logic"}
-        {#if app.dev && app.session}
-          <LogicAnalyzerView
-            dev={app.dev}
-            session={app.session}
-            fullTriggers={app.fullTriggers}
-            onError={(e) => app.error(e, "Logic analyzer")}
-          />
-        {:else}
-          <div class="card empty">Connect a JTAGulator (or the simulator) to use the logic analyzer.</div>
-        {/if}
-      {:else if app.view === "scripts"}<ScriptsView />
-      {:else if app.view === "findings"}<FindingsView />
-      {:else}<SettingsView />{/if}
+      {#if app.view === "overview"}
+        <OverviewView />
+      {:else if app.view === "logic" && !(app.dev && app.session)}
+        <div class="card empty">Connect a JTAGulator (or the simulator) to use the logic analyzer.</div>
+      {:else}
+        {#await load(app.view)}
+          <div class="loading faint">Loading…</div>
+        {:then mod}
+          {#if app.view === "logic"}
+            <mod.default
+              dev={app.dev}
+              session={app.session}
+              fullTriggers={app.fullTriggers}
+              onError={(e: unknown) => app.error(e, "Logic analyzer")}
+            />
+          {:else}
+            <mod.default />
+          {/if}
+        {:catch e}
+          <div class="card empty">Could not load this page: {e?.message ?? e}</div>
+        {/await}
+      {/if}
     </div>
-    {#if app.settings.terminalOpen}<TerminalDock />{/if}
+    {#if app.settings.terminalOpen}
+      {#await terminal() then T}<T.default />{/await}
+    {/if}
   </div>
 </div>
 <Toasts />
@@ -94,6 +109,10 @@
     .content {
       padding: 12px 12px 24px;
     }
+  }
+  .loading {
+    padding: 40px;
+    text-align: center;
   }
   .empty {
     padding: 40px;
