@@ -364,26 +364,13 @@ PRI SendAllSamples | i, e   'NB: OLS sends samples in reverse
       ++i
 
     
-PRI SendSamples(value) | b
-  'bits:            %76543210
-  'ch disable flag:  --4321--
-  if disableFlags & %00000100 == 0
-    b:=(value) & $FF
-    pst.Tx(b)
-    
-  'ch disable flag:  --4321--
-  if disableFlags & %00001000 == 0
-    b:=(value >> 8) & $FF
-    pst.Tx(b)
-    
-  'ch disable flag:  --4321--
-  if disableFlags & %00010000 == 0
-    b:=(value >> 16) & $FF
-    pst.Tx(b)
+PRI SendSamples(value) | g
+  ' One byte per enabled channel group, CH0-7 first. Disable flags: %--4321--
+  repeat g from 0 to MAX_CH_GROUPS - 1
+    if disableFlags & (%100 << g) == 0
+      pst.Tx((value >> (g << 3)) & $FF)
 
-  'channel group 4 not currently used since JTAGulator has 24 channels (3 groups of 8-bits)
-    
-    
+
 DAT             
 
               ORG
@@ -416,7 +403,7 @@ samplerOff              RDLONG  t1,                 samplerRunningA     WZ
               IF_NE     MOVS    samplerTramp,       #samplerArm
                         JMP     #samplerCommon 
                         
-samplerArm              MOVS    samplerTramp,       #samplerArmed1
+samplerArm              MOVS    samplerTramp,       #samplerArmed
 
                         MOV     samplerTargetA,     PAR                     
                         ADD     samplerTargetA,     #SAMPLEBUFFER_OFF  
@@ -432,15 +419,8 @@ samplerArm              MOVS    samplerTramp,       #samplerArmed1
                         ADD     t1,                 #CLOCKSWAIT_OFF
                         RDLONG  samplerWait,        t1
 
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG1VAL_OFF
-                        RDLONG  samplerTrigVal,     t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG1MASK_OFF
-                        RDLONG  samplerTrigMask,    t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #ISTRIG1START_OFF
-                        RDLONG  samplerTrigStart,   t1
+                        MOV     samplerStage,       #0
+                        CALL    #samplerLoadStage
 
                         ' Pre-trigger capture? (Spin only sets prePeriods with a stage 1 start trigger)
                         MOV     samplerBaseA,       samplerTargetA
@@ -455,66 +435,31 @@ samplerArm              MOVS    samplerTramp,       #samplerArmed1
                         MOVS    samplerTramp,       #samplerPreStart
                         JMP     #samplerCommon
 
-samplerArmed1           CMP     samplerTrigMask,    #0                  WZ
+' Trigger chain: wait for the current stage's pattern, then either start
+' sampling (the stage's start flag, or the 4th stage) or move to the next stage.
+samplerArmed            CMP     samplerTrigMask,    #0                  WZ
               IF_NE     WAITPEQ samplerTrigVal,     samplerTrigMask
-
-                        CMP     samplerTrigStart,   #0                  WZ
-              IF_NE     MOVS    samplerTramp,       #samplerStart
-              IF_NE     JMP     #samplerCommon
-
-                        MOVS    samplerTramp,       #samplerArmed2
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG2VAL_OFF
-                        RDLONG  samplerTrigVal,     t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG2MASK_OFF
-                        RDLONG  samplerTrigMask,    t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #ISTRIG2START_OFF
-                        RDLONG  samplerTrigStart,   t1
-                        JMP     #samplerCommon
-
-samplerArmed2           CMP     samplerTrigMask,    #0                  WZ
-              IF_NE     WAITPEQ samplerTrigVal,     samplerTrigMask
-
-                        CMP     samplerTrigStart,   #0                  WZ
-              IF_NE     MOVS    samplerTramp,       #samplerStart
-              IF_NE     JMP     #samplerCommon
-
-                        MOVS    samplerTramp,       #samplerArmed3
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG3VAL_OFF
-                        RDLONG  samplerTrigVal,     t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG3MASK_OFF
-                        RDLONG  samplerTrigMask,    t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #ISTRIG3START_OFF
-                        RDLONG  samplerTrigStart,   t1
-                        JMP     #samplerCommon
-
-samplerArmed3           CMP     samplerTrigMask,    #0                  WZ
-              IF_NE     WAITPEQ samplerTrigVal,     samplerTrigMask
-
-                        CMP     samplerTrigStart,   #0                  WZ
-              IF_NE     MOVS    samplerTramp,       #samplerStart
-              IF_NE     JMP     #samplerCommon
-
-                        MOVS    samplerTramp,       #samplerArmed4
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG4VAL_OFF
-                        RDLONG  samplerTrigVal,     t1
-                        MOV     t1,                 PAR
-                        ADD     t1,                 #TRIG4MASK_OFF
-                        RDLONG  samplerTrigMask,    t1
-                        JMP     #samplerCommon
-
-samplerArmed4           CMP     samplerTrigMask,    #0                  WZ
-              IF_NE     WAITPEQ samplerTrigVal,     samplerTrigMask
-
+                        CMP     samplerStage,       #3                  WC  ' C = stages 1-3
+              IF_C      CMP     samplerTrigStart,   #0                  WZ
+              IF_C_AND_Z ADD    samplerStage,       #1
+              IF_C_AND_Z CALL   #samplerLoadStage
+              IF_C_AND_Z JMP    #samplerCommon
                         MOVS    samplerTramp,       #samplerStart
                         JMP     #samplerCommon
-                                  
+
+' Load mask, value and start flag of trigger stage samplerStage (0..3); the
+' per-stage fields are consecutive longs in the struct.
+samplerLoadStage        MOV     t1,                 samplerStage
+                        SHL     t1,                 #2
+                        ADD     t1,                 PAR
+                        ADD     t1,                 #TRIG1MASK_OFF
+                        RDLONG  samplerTrigMask,    t1
+                        ADD     t1,                 #TRIG1VAL_OFF - TRIG1MASK_OFF
+                        RDLONG  samplerTrigVal,     t1
+                        ADD     t1,                 #ISTRIG1START_OFF - TRIG1VAL_OFF
+                        RDLONG  samplerTrigStart,   t1
+samplerLoadStage_ret    RET
+
 ' Normal capture: pack 4 samples (24 bits each) into 3 longs, so the 4 KB buffer
 ' holds MAX_PACKED_SAMPLES. Sample k lands in bytes 3k..3k+2. Each phase starts
 ' with WAITCNT and reads INA right after it, so samples stay evenly spaced; every
@@ -629,6 +574,7 @@ samplerBaseA            RES 1
 samplerPreLeft          RES 1
 samplerPostLeft         RES 1
 samplerHold             RES 1
+samplerStage            RES 1
 samplerAcc              RES 1
 
                         FIT   ' make sure all instructions/data fit within the cog's RAM
