@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build OpenSpin
         run: |
@@ -36,7 +36,7 @@ jobs:
           grep -aq "ID Tracker ${version}" "out/JTAGulator-IDTracker-${version}.binary"
           ls -l out
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           draft: true
           name: "JTAGulator firmware ID Tracker ${{ steps.build.outputs.version }}"
