@@ -3,6 +3,14 @@ JTAGulator ID Tracker Change Log
 
 Visit the JTAGulator [GitHub repository](https://github.com/grandideastudio/jtagulator/commits/master) for full commit comments.
 
+<a id="idt_1_4"></a>ID Tracker 1.4
+----
+
+Release date: **unreleased**
+
+* Logic analyzer: Captures hold 1364 samples instead of 1024. Samples are packed four to every three longs (24 bits each) instead of one per long, which wasted a quarter of the 4 KB buffer. The maximum sample rate is unchanged. Pre-trigger captures still store one long per sample and stay at 1024.
+
+
 <a id="idt_1_3"></a>ID Tracker 1.3
 ----
 

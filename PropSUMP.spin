@@ -19,7 +19,6 @@ logic analyzer functionality (http://sigrok.org/wiki/Openbench_Logic_Sniffer#Pro
 and http://dangerousprototypes.com/docs/Logic_Analyzer_core:_Background#2.3_The_SUMP_Protocol)
 
 TODOs:
-* don't waste 1024B of the 4096B buffer
 * support trigger delays
 * support serial trigger mode
 * support RLE
@@ -40,7 +39,8 @@ CON
   MAX_SAMPLE_BYTES              = 4096
   MAX_PROBES                    = 24
   MAX_CH_GROUPS                 = MAX_PROBES / 8
-  MAX_SAMPLE_PERIODS            = MAX_SAMPLE_BYTES / 4 'We capture 32bits at a time keep the sampler cog fast(er than it would be otherwise)
+  MAX_SAMPLE_PERIODS            = MAX_SAMPLE_BYTES / 4 ' Size of the shared buffer in longs; also the pre-trigger limit (whole longs per sample)
+  MAX_PACKED_SAMPLES            = 1364                 ' Normal captures pack 4 samples into 3 longs: 4096 / 3, rounded down to a multiple of 4
                                                        'TODO: don't waste 25% of the buffer *AND* get a >1Msps max sample rate :)
   MAX_RX_DELAY_MS               = 100                  'Wait time (in ms) for the each byte in long commands to be sent before aborting
 
@@ -70,7 +70,7 @@ CON
   CMD_TRIG4_CONF                = $CE
 
   DEFAULT_CLOCKS_WAIT           = 66     '1.2 MHz
-  DEFAULT_READ_PERIODS          = MAX_SAMPLE_PERIODS 
+  DEFAULT_READ_PERIODS          = MAX_PACKED_SAMPLES
   DEFAULT_DELAY_PERIODS         = DEFAULT_READ_PERIODS
   DEFAULT_DISABLE_FLAGS         = %00100000  ' disable ch group 4
 
@@ -235,10 +235,13 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
       CMD_RUN:
         ' Asking for more samples than after the trigger means "keep the rest from
         ' before it". That needs a stage 1 trigger that starts the capture.
+        ' The pre-trigger ring stores one long per sample, so it holds MAX_SAMPLE_PERIODS.
+        prePeriods := 0
         if (readReq > delayReq) and (trig1Mask <> 0) and (isTrig1Start <> 0)
-          prePeriods := readReq - delayReq
-          delayPeriods := readReq         ' Ring buffer size
-          readPeriods := readReq
+          prePeriods := (readReq <# MAX_SAMPLE_PERIODS) - delayReq #> 0
+        if prePeriods
+          readPeriods := readReq <# MAX_SAMPLE_PERIODS
+          delayPeriods := readPeriods     ' Ring buffer size
           clocksWait #>= PRE_MIN_CLOCKS_WAIT
         else
           prePeriods := 0
@@ -354,8 +357,10 @@ PRI SendAllSamples | i, e   'NB: OLS sends samples in reverse
       SendSamples(long[sampleBuffer][e])
       ++i
   else
+    ' Packed: sample k is the three bytes at 3k (little endian)
     repeat while i < readPeriods
-      SendSamples(long[sampleBuffer][delayPeriods - 1 - i])
+      e := (delayPeriods - 1 - i) * 3
+      SendSamples(byte[sampleBuffer][e] | byte[sampleBuffer][e + 1] << 8 | byte[sampleBuffer][e + 2] << 16)
       ++i
 
     
@@ -386,7 +391,7 @@ ID            byte "1ALS"
 
 METADATA      byte $01, "JTAGulator", $00 ' device name
               byte $21
-              byte $00, $00, $0c, $00     ' sample memory 3072 in MSB -- must match MAX_SAMPLE_PERIODS*MAX_CH_GROUPS
+              byte $00, $00, $0F, $FC     ' sample memory 4092 in MSB -- MAX_PACKED_SAMPLES * MAX_CH_GROUPS
               byte $23
               byte $00, $12, $4F, $80     ' 1_200_000 in MSB (1.2MHz) -- highest stable sample rate 
               byte $40
@@ -510,19 +515,57 @@ samplerArmed4           CMP     samplerTrigMask,    #0                  WZ
                         MOVS    samplerTramp,       #samplerStart
                         JMP     #samplerCommon
                                   
-samplerStart            MOVS    samplerTramp,       #samplerSampling
+' Normal capture: pack 4 samples (24 bits each) into 3 longs, so the 4 KB buffer
+' holds MAX_PACKED_SAMPLES. Sample k lands in bytes 3k..3k+2. Each phase starts
+' with WAITCNT and reads INA right after it, so samples stay evenly spaced; every
+' phase runs well under the minimum 66-clock period (longest: ~55 clocks).
+samplerStart            MOV     t1,                 samplerLimitA       ' limit = base + 3 * count
+                        SUB     t1,                 samplerTargetA
+                        SHR     t1,                 #2
+                        MOV     samplerLimitA,      t1
+                        SHL     samplerLimitA,      #1
+                        ADD     samplerLimitA,      t1
+                        ADD     samplerLimitA,      samplerTargetA
                         MOV     samplerStamp,       CNT
                         ADD     samplerStamp,       samplerWait
-                        JMP     #samplerCommon
 
-samplerSampling         MOV     t1,                 INA
-                        WRLONG  t1,                 samplerTargetA       'the rate-limiting step in the sampler
-                        ADD     samplerTargetA,     #4                   'TODO: inc by 3 here (and waste a byte before the buffer) to reclaim wasted 1/4 of 4096 buffer
-                        
+samplerPh0              WAITCNT samplerStamp,       samplerWait
+                        MOV     samplerHold,        INA
+                        AND     samplerHold,        samplerMask24
+
+samplerPh1              WAITCNT samplerStamp,       samplerWait
+                        MOV     t1,                 INA
+                        AND     t1,                 samplerMask24
+                        MOV     samplerAcc,         t1
+                        SHL     samplerAcc,         #24
+                        OR      samplerAcc,         samplerHold         ' s1[7..0] : s0
+                        WRLONG  samplerAcc,         samplerTargetA
+                        ADD     samplerTargetA,     #4
+                        SHR     t1,                 #8
+                        MOV     samplerHold,        t1                  ' s1[23..8]
+
+samplerPh2              WAITCNT samplerStamp,       samplerWait
+                        MOV     t1,                 INA
+                        AND     t1,                 samplerMask24
+                        MOV     samplerAcc,         t1
+                        SHL     samplerAcc,         #16
+                        OR      samplerAcc,         samplerHold         ' s2[15..0] : s1[23..8]
+                        WRLONG  samplerAcc,         samplerTargetA
+                        ADD     samplerTargetA,     #4
+                        SHR     t1,                 #16
+                        MOV     samplerHold,        t1                  ' s2[23..16]
+
+samplerPh3              WAITCNT samplerStamp,       samplerWait
+                        MOV     t1,                 INA
+                        AND     t1,                 samplerMask24
+                        SHL     t1,                 #8
+                        OR      t1,                 samplerHold         ' s3 : s2[23..16]
+                        WRLONG  t1,                 samplerTargetA
+                        ADD     samplerTargetA,     #4
                         CMP     samplerTargetA,     samplerLimitA       WZ
-              IF_E      MOVS    samplerTramp,       #samplerFinish
+              IF_NE     JMP     #samplerPh0
+                        JMP     #samplerFinish
 
-              IF_NE     WAITCNT samplerStamp,       samplerWait
 samplerCommon           JMP     samplerTramp
 
 ' Pre-trigger capture: sample continuously into a ring buffer while polling the
@@ -569,6 +612,8 @@ samplerFinish           MOVS    samplerTramp,       #samplerOff
                         WRLONG  t1,                 samplerRunningA      'NB always sets Z
                         JMP     #samplerCommon
 
+samplerMask24           LONG    $00FF_FFFF
+
 ' VARIABLES stored in cog RAM (uninitialized)
 t1                      RES 1
 samplerTramp            RES 1
@@ -583,6 +628,8 @@ samplerWait             RES 1
 samplerBaseA            RES 1
 samplerPreLeft          RES 1
 samplerPostLeft         RES 1
+samplerHold             RES 1
+samplerAcc              RES 1
 
                         FIT   ' make sure all instructions/data fit within the cog's RAM
 
