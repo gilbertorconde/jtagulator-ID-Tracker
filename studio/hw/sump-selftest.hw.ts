@@ -79,3 +79,33 @@ describe("pre-trigger ring ordering", () => {
     });
   }
 });
+
+describe("multi-stage trigger chain", () => {
+  it("waits for CH7 high, then CH7 low, then starts", async () => {
+    const cap = await sump.capture({
+      sampleRateHz: 1_200_000,
+      samples: 256,
+      channels: [],
+      stages: [
+        { mask: 1 << 7, value: 1 << 7 },
+        { mask: 1 << 7, value: 0, start: true },
+      ],
+      timeoutMs: 8000,
+    });
+    checkCounter(cap.samples);
+    // CH7 falls when the count wraps 255 -> 0, so the capture starts near 0.
+    expect(cap.samples[0] & 0xff).toBeLessThan(16);
+  });
+
+  it("the 4th stage always starts", async () => {
+    const cap = await sump.capture({
+      sampleRateHz: 1_200_000,
+      samples: 64,
+      channels: [],
+      stages: [{ mask: 1 << 7, value: 1 << 7 }, { mask: 1 << 7, value: 0 }, { mask: 1 << 6, value: 1 << 6 }, { mask: 1 << 5, value: 1 << 5 }],
+      timeoutMs: 8000,
+    });
+    checkCounter(cap.samples);
+    expect(cap.samples[0] & 0x20).toBe(0x20);
+  });
+});

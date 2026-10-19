@@ -103,6 +103,12 @@ export interface CaptureOptions {
   trigger?: Trigger;
   /** Samples to keep from before the trigger (needs the preTrigger option). */
   preTriggerSamples?: number;
+  /**
+   * Multi-stage trigger (up to 4 stages, replaces `trigger`): each stage waits for
+   * its pattern; a stage with `start` (or the 4th) starts the capture, otherwise
+   * the next stage is armed. No pre-trigger samples with stages.
+   */
+  stages?: (Trigger & { start?: boolean })[];
   signal?: AbortSignal;
   /**
    * Give up after this long (ms). Defaults to the expected capture + transfer
@@ -439,8 +445,11 @@ export class SumpClient {
     if (!groups) throw new SumpError("No channel group enabled");
     const trig = opts.trigger && opts.trigger.mask ? opts.trigger : undefined;
     const tmask = this.triggerChannelMask;
-    if (trig && trig.mask & ~tmask)
+    const stages = opts.stages?.length ? opts.stages.slice(0, 4) : trig ? [{ ...trig, start: true }] : [];
+    if (opts.stages?.length && pre) throw new SumpError("Pre-trigger samples need a single-stage trigger");
+    if (stages.some((st) => st.mask & ~tmask))
       throw new SumpError("This firmware can only trigger on CH0-7 (update to ID Tracker 1.3 for all channels)");
+    const triggered = stages.some((st) => st.mask);
     const bps = popcount3(groups);
     const expectBytes = count * bps;
     const n = count / 4 - 1;
@@ -450,15 +459,21 @@ export class SumpClient {
       long(SUMP.FLAGS, flagsForGroups(groups)),
       long(SUMP.DIV, rate.divider),
       long(SUMP.CNT, (n & 0xffff) | ((d & 0xffff) << 16)),
-      long(SUMP.TRIG_MASK[0], trig ? trig.mask & tmask : 0),
-      long(SUMP.TRIG_VAL[0], trig ? trig.value & trig.mask & tmask : 0),
-      // Stage 1 starts the capture (bit 27 = byte 4 bit 3).
-      long(SUMP.TRIG_CONF[0], 0x08000000),
+      ...[0, 1, 2, 3].flatMap((i) => {
+        const st = stages[i];
+        // Unused stages: empty mask. A stage's "start" flag is bit 27 (byte 4 bit 3);
+        // without stages, stage 1 starts an untriggered capture at once.
+        return [
+          long(SUMP.TRIG_MASK[i], st ? st.mask & tmask : 0),
+          long(SUMP.TRIG_VAL[i], st ? st.value & st.mask & tmask : 0),
+          long(SUMP.TRIG_CONF[i], (st ? st.start : i === 0) ? 0x08000000 : 0),
+        ];
+      }),
       new Uint8Array([SUMP.RUN]),
     ];
     const timeout =
       opts.timeoutMs ??
-      (trig ? 0 : captureDurationMs(rate.actualHz, count) + transferDurationMs(count, groups) + 3000);
+      (triggered ? 0 : captureDurationMs(rate.actualHz, count) + transferDurationMs(count, groups) + 3000);
 
     return this.session.exclusive(async () => {
       const r = this.reader();
@@ -476,7 +491,7 @@ export class SumpClient {
           sampleRateHz: rate.actualHz,
           samples: unpackSamples(r.bytes, count, groups),
           channelMask: groupMaskToChannelMask(groups),
-          triggerIndex: trig ? pre : null,
+          triggerIndex: triggered ? pre : null,
           capturedAt: Date.now(),
         } satisfies Capture;
       } catch (e) {
