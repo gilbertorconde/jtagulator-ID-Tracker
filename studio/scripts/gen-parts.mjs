@@ -49,6 +49,9 @@ for (const m of hpp.matchAll(/\{\s*(0x[0-9a-fA-F]{8}),\s*\{\s*"([^"]+)",\s*"([^"
 for (const m of hpp.matchAll(/\{\s*(0x[0-9a-fA-F]{8}),\s*\{\s*"([^"]+)",\s*\d+\s*\}\s*\}/g)) {
   const raw = parseInt(m[1], 16) >>> 0;
   if (raw === 0xfffffffe) continue;
+  // Generic ARM debug port IDs (manufacturer ARM, ...477) are shared by many cores;
+  // openFPGALoader names them after its own boards. OpenOCD's "seen on" lists cover them.
+  if ((raw & 0xfff) === 0x477) continue;
   add({ id: hex(raw), mask: "0xFFFFFFFF", name: m[2], vendor: "", family: "", kind: "any", source: "openFPGALoader" });
 }
 
@@ -98,6 +101,7 @@ if (openocd) {
       family: `seen on ${list.slice(0, 5).join(", ")}${list.length > 5 ? ` and ${list.length - 5} more` : ""}`,
       kind: "any",
       source: "OpenOCD",
+      seenOn: list,
     });
   }
 }

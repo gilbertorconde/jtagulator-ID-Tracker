@@ -6,24 +6,6 @@
  },
  "parts": [
   {
-   "id": "0x5BA00477",
-   "mask": "0xFFFFFFFF",
-   "name": "ARM cortex A53",
-   "vendor": "",
-   "family": "",
-   "kind": "any",
-   "source": "openFPGALoader"
-  },
-  {
-   "id": "0x4BA00477",
-   "mask": "0xFFFFFFFF",
-   "name": "ARM cortex A9",
-   "vendor": "",
-   "family": "",
-   "kind": "any",
-   "source": "openFPGALoader"
-  },
-  {
    "id": "0x1000563D",
    "mask": "0xFFFFFFFF",
    "name": "GD32VF103",
@@ -363,7 +345,11 @@
    "vendor": "ARM",
    "family": "seen on lpc4350, lpc4370",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "lpc4350",
+    "lpc4370"
+   ]
   },
   {
    "id": "0x0BA04477",
@@ -372,7 +358,10 @@
    "vendor": "ARM",
    "family": "seen on stm32x5x_common",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "stm32x5x_common"
+   ]
   },
   {
    "id": "0x0BB11477",
@@ -381,7 +370,15 @@
    "vendor": "ARM",
    "family": "seen on bluenrg-x, lpc1xxx, psoc4, stm32f0x, swm050 and 1 more",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "bluenrg-x",
+    "lpc1xxx",
+    "psoc4",
+    "stm32f0x",
+    "swm050",
+    "xmc1xxx"
+   ]
   },
   {
    "id": "0x0BC11477",
@@ -390,7 +387,15 @@
    "vendor": "ARM",
    "family": "seen on bluenrg-x, ke0x, klx, stm32c0x, stm32g0x and 1 more",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "bluenrg-x",
+    "ke0x",
+    "klx",
+    "stm32c0x",
+    "stm32g0x",
+    "stm32l0"
+   ]
   },
   {
    "id": "0x0BD11477",
@@ -399,7 +404,10 @@
    "vendor": "ARM",
    "family": "seen on atsamv",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "atsamv"
+   ]
   },
   {
    "id": "0x0BE11477",
@@ -408,7 +416,10 @@
    "vendor": "ARM",
    "family": "seen on stm32wba2x",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "stm32wba2x"
+   ]
   },
   {
    "id": "0x0BE12477",
@@ -417,7 +428,11 @@
    "vendor": "ARM",
    "family": "seen on stm32wba2x, stm32x5x_common",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "stm32wba2x",
+    "stm32x5x_common"
+   ]
   },
   {
    "id": "0x0BF11477",
@@ -426,7 +441,10 @@
    "vendor": "ARM",
    "family": "seen on atsaml1x",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "atsaml1x"
+   ]
   },
   {
    "id": "0x1BA00477",
@@ -435,7 +453,12 @@
    "vendor": "ARM",
    "family": "seen on em357, imx51, imx53",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "em357",
+    "imx51",
+    "imx53"
+   ]
   },
   {
    "id": "0x1BA01477",
@@ -444,7 +467,11 @@
    "vendor": "ARM",
    "family": "seen on stm32f1x, stm32w108xx",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "stm32f1x",
+    "stm32w108xx"
+   ]
   },
   {
    "id": "0x2BA01477",
@@ -453,7 +480,30 @@
    "vendor": "ARM",
    "family": "seen on 1986ве1т, aducm360, eos_s3, fm4, k1921vk01t and 16 more",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "1986ве1т",
+    "aducm360",
+    "eos_s3",
+    "fm4",
+    "k1921vk01t",
+    "kx",
+    "lpc1xxx",
+    "lpc4350",
+    "lpc4370",
+    "mdr32f9q2i",
+    "qn908x",
+    "rk3308",
+    "rk3588",
+    "rsl10",
+    "stm32f2x",
+    "stm32f3x",
+    "stm32f4x",
+    "stm32g4x",
+    "stm32l1",
+    "stm32l4x",
+    "xmc4xxx"
+   ]
   },
   {
    "id": "0x2BA06477",
@@ -462,7 +512,10 @@
    "vendor": "ARM",
    "family": "seen on ampere_qs_mq",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "ampere_qs_mq"
+   ]
   },
   {
    "id": "0x3BA00477",
@@ -471,7 +524,12 @@
    "vendor": "ARM",
    "family": "seen on em357, stm32f1x, stm32w108xx",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "em357",
+    "stm32f1x",
+    "stm32w108xx"
+   ]
   },
   {
    "id": "0x3BA02477",
@@ -480,7 +538,11 @@
    "vendor": "ARM",
    "family": "seen on adsp-sc58x, vybrid_vf6xx",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "adsp-sc58x",
+    "vybrid_vf6xx"
+   ]
   },
   {
    "id": "0x3BA06477",
@@ -489,7 +551,90 @@
    "vendor": "ARM",
    "family": "seen on ampere_qs_mq",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "ampere_qs_mq"
+   ]
+  },
+  {
+   "id": "0x4BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on 1986ве1т, altera_fpgasoc, altera_fpgasoc_arria10, ampere_emag, ampere_qs_mq and 39 more",
+   "kind": "any",
+   "source": "OpenOCD",
+   "seenOn": [
+    "1986ве1т",
+    "altera_fpgasoc",
+    "altera_fpgasoc_arria10",
+    "ampere_emag",
+    "ampere_qs_mq",
+    "armada370",
+    "at91sam3XXX",
+    "at91sam3nXX",
+    "at91sam4XXX",
+    "at91samdXX",
+    "atsame5x",
+    "bcm2711",
+    "bcm281xx",
+    "bcm2836",
+    "bcm2837",
+    "bluefield",
+    "eos_s3",
+    "exynos5250",
+    "fm3",
+    "fm4",
+    "hi6220",
+    "imx6",
+    "imx6sx",
+    "imx6ul",
+    "k1921vk01t",
+    "kx",
+    "lpc1850",
+    "lpc1xxx",
+    "lpc4350",
+    "lpc4370",
+    "mdr32f9q2i",
+    "psoc5lp",
+    "renesas_r7s72100",
+    "renesas_rcar_gen2",
+    "sim3x",
+    "stm32f2x",
+    "stm32f3x",
+    "stm32f4x",
+    "stm32g4x",
+    "stm32l1",
+    "stm32l4x",
+    "u8500",
+    "vybrid_vf6xx",
+    "xmc4xxx"
+   ]
+  },
+  {
+   "id": "0x5BA00477",
+   "mask": "0xFFFFFFFF",
+   "name": "ARM debug port",
+   "vendor": "ARM",
+   "family": "seen on allwinner_h618, allwinner_v3s, at91sama5d2, hi3798, imx7 and 9 more",
+   "kind": "any",
+   "source": "OpenOCD",
+   "seenOn": [
+    "allwinner_h618",
+    "allwinner_v3s",
+    "at91sama5d2",
+    "hi3798",
+    "imx7",
+    "imx8m",
+    "imx8mp",
+    "ls1012a",
+    "ls1046a",
+    "ls1088a",
+    "renesas_rcar_gen3",
+    "renesas_s7g2",
+    "stm32f7x",
+    "xilinx_zynqmp"
+   ]
   },
   {
    "id": "0x5BA02477",
@@ -498,7 +643,13 @@
    "vendor": "ARM",
    "family": "seen on at91sama5d2, renesas_s7g2, rk3399, stm32f7x",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "at91sama5d2",
+    "renesas_s7g2",
+    "rk3399",
+    "stm32f7x"
+   ]
   },
   {
    "id": "0x6BA00477",
@@ -507,7 +658,19 @@
    "vendor": "ARM",
    "family": "seen on ls1028a, ngultra, renesas_rz, stm32h7rsx, stm32h7x and 5 more",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "ls1028a",
+    "ngultra",
+    "renesas_rz",
+    "stm32h7rsx",
+    "stm32h7x",
+    "stm32n6x",
+    "stm32wba5x",
+    "stm32wba6x",
+    "stm32wbx",
+    "stm32wlx"
+   ]
   },
   {
    "id": "0x6BA02477",
@@ -516,7 +679,18 @@
    "vendor": "ARM",
    "family": "seen on rtl872xd, stm32h7rsx, stm32h7x, stm32n6x, stm32u0x and 4 more",
    "kind": "any",
-   "source": "OpenOCD"
+   "source": "OpenOCD",
+   "seenOn": [
+    "rtl872xd",
+    "stm32h7rsx",
+    "stm32h7x",
+    "stm32n6x",
+    "stm32u0x",
+    "stm32wba5x",
+    "stm32wba6x",
+    "stm32wbx",
+    "stm32wlx"
+   ]
   },
   {
    "id": "0x01E8203F",

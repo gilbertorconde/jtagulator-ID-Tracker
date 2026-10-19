@@ -54,6 +54,7 @@ interface PartEntry {
   family: string;
   kind: "jtag" | "swd" | "any";
   source: string;
+  seenOn?: string[];
 }
 
 export interface KnownPart {
@@ -62,6 +63,8 @@ export interface KnownPart {
   family: string;
   source: string;
   sourceUrl: string | null;
+  /** For shared IDs (ARM debug ports): every OpenOCD target that uses it. */
+  seenOn: string[];
 }
 
 const PARTS_DATA = parts as { sources: Record<string, string>; parts: PartEntry[] };
@@ -82,7 +85,14 @@ export function findPart(raw: number, kind: "jtag" | "swd"): KnownPart | null {
     if (!best || p.bits > best.bits) best = p;
   }
   if (!best) return null;
-  return { name: best.name, vendor: best.vendor, family: best.family, source: best.source, sourceUrl: PARTS_DATA.sources[best.source] ?? null };
+  return {
+    name: best.name,
+    vendor: best.vendor,
+    family: best.family,
+    source: best.source,
+    sourceUrl: PARTS_DATA.sources[best.source] ?? null,
+    seenOn: best.seenOn ?? [],
+  };
 }
 
 /** Number of known IDs in the table. */

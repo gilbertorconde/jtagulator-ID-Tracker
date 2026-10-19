@@ -13,10 +13,15 @@ describe("known parts table", () => {
     expect(decodeJtag(0x41111043).part).toBe("LFE5U-25 (ECP5)");
   });
 
-  it("prefers an exact match over a masked one and links the source", () => {
+  it("links each part to its source", () => {
+    expect(findPart(0x0362d093, "jtag")?.sourceUrl).toMatch(/^https:\/\/github.com\/trabucayre\/openFPGALoader/);
+  });
+
+  it("doesn't name generic ARM debug ports after one board", () => {
+    // 0x4BA00477 is used by Cortex-A9 and by Cortex-M chips such as STM32F4.
     const p = findPart(0x4ba00477, "jtag");
-    expect(p?.name).toBe("ARM cortex A9");
-    expect(p?.sourceUrl).toMatch(/^https:\/\/github.com\/trabucayre\/openFPGALoader/);
+    expect(p?.name).toBe("ARM debug port");
+    expect(p?.seenOn).toContain("stm32f4x");
   });
 
   it("names ARM debug ports from OpenOCD and falls back to the ARM spec", () => {
