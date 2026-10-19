@@ -1589,7 +1589,7 @@ PRI Display_Device_ID(value, num, details,jtagorswd) | temp_details
     ' JTAG MODE
     pst.Str(String(CR, LF, "-> Manufacturer ID: 0x"))
     pst.Hex(Get_Bit_Field(value, 11, 1), 3)
-    report_manufacturer_name(Get_Bit_Field(value, 11, 1)) 
+    report_manufacturer_name(Get_Bit_Field(value, 11, 8)*126+Get_Bit_Field(value, 7, 1))   ' JEP106 table holds 126 entries per bank
     pst.Str(String(CR, LF, "-> Part Number: 0x"))
     pst.Hex(Get_Bit_Field(value, 27, 12), 4)
     pst.Str(String(CR, LF, "-> Version: 0x"))
