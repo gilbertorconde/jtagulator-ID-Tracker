@@ -54,7 +54,7 @@ jobs:
         with:
           projectPath: studio
           tagName: ${{ github.ref_name }}
-          releaseName: "JTAGulator Studio ${{ github.ref_name }}"
+          releaseName: "JTAGulator Studio __VERSION__"
           releaseBody: "Installers for Windows, macOS and Linux. See studio/README.md."
           releaseDraft: true
           args: ${{ matrix.args }}
