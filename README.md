@@ -115,6 +115,24 @@ pnpm dev            # browser at http://localhost:1420
 
 More detail is in [studio/README.md](studio/README.md).
 
+### Command-line tool
+
+`jtagulator-cli` runs the same scans and scripts from a terminal, on the same code as Studio. It's handy for automation and CI; add `--json` for machine-readable output.
+
+```sh
+cd studio
+pnpm install && pnpm build:cli
+node dist-cli/jtagulator-cli.mjs ports                       # FTDI ports are marked *
+node dist-cli/jtagulator-cli.mjs -v 3.3 scan jtag --start 0 --end 7
+node dist-cli/jtagulator-cli.mjs -v 3.3 --json ids jtag --tdo 5 --tck 2 --tms 4
+node dist-cli/jtagulator-cli.mjs -v 3.3 run my-script.js     # the Studio script API
+node dist-cli/jtagulator-cli.mjs firmware probe              # manufacturer database status
+node dist-cli/jtagulator-cli.mjs --sim -v 3.3 scan jtag      # no hardware: the simulator
+```
+
+Opening the port restarts the JTAGulator, which clears the target voltage, so pass `-v` with every command that drives the target. `--help` lists every command: `info`, `voltage`, `scan jtag|idcode|bypass|rtck|swd|uart|txd`, `ids`, `bypass`, `gpio`, `run`, `firmware install|test|probe|db` and `exit-mode`.
+
+
 ---
 
 ## Installing the firmware

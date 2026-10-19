@@ -448,6 +448,8 @@ JTAGulator Studio (`studio/` in this repository) is a desktop app (Windows, macO
 
 It also has a built-in simulator, a software JTAGulator with a fake target, so you can learn the tool without hardware. See the [README](README.md) for installation.
 
+The same code also ships as a command-line tool, `jtagulator-cli`, for scripted and automated use: for example, `jtagulator-cli -v 3.3 scan jtag --start 0 --end 7`, or `jtagulator-cli -v 3.3 run script.js` to run a Studio script from a terminal. Add `--json` for machine-readable output. See the [README](README.md#command-line-tool).
+
 ---
 *Manual written by Chaoschaos1024; translated to English and updated for ID Tracker 1.3 and JTAGulator Studio.*
 *Last updated: October 2026*

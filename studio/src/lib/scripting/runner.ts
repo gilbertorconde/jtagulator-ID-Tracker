@@ -1,7 +1,7 @@
 // App side of script execution: spawns the worker and serves its device calls.
-import { PROMPT } from "../core/jtagulator";
 import { app } from "../stores/app.svelte";
-import { CALLS, HandleTable, type CallName } from "./api";
+import { CALLS, HandleTable } from "./api";
+import { serveScriptCall } from "./host";
 import type { FromWorker, ToWorker } from "./protocol";
 
 export interface ScriptLog {
@@ -14,13 +14,6 @@ export interface ScriptRun {
   done: Promise<void>;
   stop: () => void;
 }
-
-type Wire = { source: string; flags: string; __re?: boolean };
-const toRegExp = (p: unknown): RegExp => {
-  if (typeof p === "string") return new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  const w = p as Wire;
-  return new RegExp(w.source, w.flags.replace("g", ""));
-};
 
 export function runScript(code: string, onLog: (l: ScriptLog) => void): ScriptRun {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
@@ -41,78 +34,17 @@ export function runScript(code: string, onLog: (l: ScriptLog) => void): ScriptRu
     finish();
   };
 
-  async function serve(name: string, args: unknown[]): Promise<unknown> {
-    const dev = app.dev;
-    if (name === "target.get") return JSON.parse(JSON.stringify(app.target));
-    if (!dev) throw new Error("Not connected to a JTAGulator");
-    switch (name) {
-      case "uart.passthrough": {
-        const h = await dev.uartPassthrough(args[0] as never, { signal: ctl.signal });
-        return handles.addPassthrough(h);
-      }
-      case "uart.send": {
-        const p = handles.passthrough.get(args[0] as number);
-        if (!p) throw new Error("Unknown passthrough handle");
-        await p.h.write(args[1] as string | Uint8Array);
-        return;
-      }
-      case "uart.read": {
-        const p = handles.passthrough.get(args[0] as number);
-        if (!p) throw new Error("Unknown passthrough handle");
-        const out = p.buf;
-        p.buf = "";
-        return out;
-      }
-      case "uart.expect": {
-        const p = handles.passthrough.get(args[0] as number);
-        if (!p) throw new Error("Unknown passthrough handle");
-        const re = toRegExp(args[1]);
-        const timeout = (args[2] as number | undefined) ?? 5000;
-        const t0 = Date.now();
-        for (;;) {
-          const m = re.exec(p.buf);
-          if (m) {
-            const before = p.buf.slice(0, m.index);
-            p.buf = p.buf.slice(m.index + m[0].length);
-            return { match: m[0], groups: [...m].slice(1), before };
-          }
-          const left = timeout - (Date.now() - t0);
-          if (left <= 0) throw new Error(`uart.expect timed out waiting for ${re}`);
-          await new Promise<void>((resolve) => {
-            const timer = setTimeout(resolve, left);
-            p.waiters.push(() => (clearTimeout(timer), resolve()));
-          });
-          if (ctl.signal.aborted) throw new Error("Stopped");
-        }
-      }
-      case "uart.close": {
-        await handles.passthrough.get(args[0] as number)?.h.close();
-        return;
-      }
-      case "gpio.drive": {
-        const h = await dev.gpioWrite(args[0] as number, {}, { signal: ctl.signal });
-        return handles.addOutput(h);
-      }
-      case "gpio.release": {
-        await handles.outputs.get(args[0] as number)?.release();
-        return;
-      }
-      case "term.send": {
-        dev.invalidateMenu();
-        await dev.raw(args[0] as string);
-        return;
-      }
-      case "term.expect": {
-        const s = dev.session;
-        const r = await s.exclusive(() => s.expect(toRegExp(args[0]), { timeout: (args[1] as number) ?? 5000, signal: ctl.signal }));
-        if (PROMPT.test(r.match[0])) dev.invalidateMenu();
-        return { match: r.match[0], groups: [...r.match].slice(1), before: r.before };
-      }
-    }
-    if (!(name in CALLS)) throw new Error(`Unknown function ${name}`);
-    log("call", name);
-    return app.call(name as CallName, args, { source: "script", signal: ctl.signal });
-  }
+  const serve = (name: string, args: unknown[]) =>
+    serveScriptCall(name, args, {
+      dev: app.dev,
+      handles,
+      signal: ctl.signal,
+      target: () => JSON.parse(JSON.stringify(app.target)),
+      call: (n, a) => {
+        log("call", n);
+        return app.call(n, a, { source: "script", signal: ctl.signal });
+      },
+    });
 
   worker.onmessage = async (ev: MessageEvent<FromWorker>) => {
     const m = ev.data;

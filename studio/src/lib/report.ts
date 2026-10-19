@@ -4,7 +4,8 @@ import type { TargetProfile } from "./stores/app.svelte";
 
 const ch = (v: number | null | undefined) => (v === null || v === undefined || v < 0 ? "—" : `CH${v}`);
 
-function describe(f: Finding): string {
+/** One-line Markdown description of a finding. */
+export function describeFinding(f: Finding): string {
   switch (f.kind) {
     case "jtag": {
       const pins = `TDI ${ch(f.tdi)}, TDO ${ch(f.tdo)}, TCK ${ch(f.tck)}, TMS ${ch(f.tms)}${f.trst.length ? `, TRST# ${f.trst.map(ch).join("/")}` : ""}`;
@@ -44,7 +45,7 @@ export function markdownReport(t: TargetProfile): string {
     ...(names.length ? ["## Channel labels", "", ...names.map(([k, n]) => `- CH${k}: ${n}`), ""] : []),
     "## Findings",
     "",
-    ...(t.findings.length ? t.findings.map((f) => `${describe(f.finding)}  _(${new Date(f.at).toLocaleString()}, ${f.op})_`) : ["None yet."]),
+    ...(t.findings.length ? t.findings.map((f) => `${describeFinding(f.finding)}  _(${new Date(f.at).toLocaleString()}, ${f.op})_`) : ["None yet."]),
     "",
   ].join("\n");
 }

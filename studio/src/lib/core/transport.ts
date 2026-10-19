@@ -14,7 +14,7 @@ export interface PortInfo {
 }
 
 export interface Transport {
-  readonly kind: "tauri" | "webserial" | "sim";
+  readonly kind: "tauri" | "webserial" | "sim" | "node";
   readonly name: string;
   open(): Promise<void>;
   close(): Promise<void>;

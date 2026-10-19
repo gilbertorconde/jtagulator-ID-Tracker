@@ -21,6 +21,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
 - **Firmware page**: shows the installed version, loads firmware into RAM for a test run or programs the EEPROM, checks GitHub releases for updates, and checks for or writes the manufacturer database. It uses a built-in Propeller loader (`src/lib/firmware/loader.ts`), so no external tools are needed.
 - **Device terminal**: raw view of the firmware's own menu.
 - **Simulator**: a built-in software JTAGulator with a fake target, so you can try everything without hardware.
+- **Command-line tool**: `jtagulator-cli` (`cli/`), built with `pnpm build:cli` into `dist-cli/`. Same core and script API, `--json` output, and `--sim` for the simulator. Tested against the simulator in CI and on a real JTAGulator.
 
 ## Develop
 
@@ -31,6 +32,7 @@ pnpm dev                # browser only (simulator, or Web Serial in Chrome)
 pnpm test               # API + logic analyzer tests against the simulator
 pnpm check              # svelte-check
 pnpm tauri build        # installers
+pnpm build:cli          # command-line tool -> dist-cli/jtagulator-cli.mjs
 npx vitest run --config hw/vitest.config.ts   # against a real JTAGulator (JTAGULATOR_PORT, default /dev/ttyUSB0)
 scripts/build-firmware.sh                     # rebuild bundled firmware images (needs OpenSpin)
 ```
@@ -44,6 +46,7 @@ On Linux you need `webkit2gtk-4.1` installed. Opening the serial port resets the
 | Path | Contents |
 | --- | --- |
 | `src/lib/core` | Serial transports, session and expect engine, output parser, `JTAGulator` API, IDCODE decoding |
+| `cli` | `jtagulator-cli`: argument parsing, Node serial transport, script runner |
 | `src/lib/sim` | Firmware simulator |
 | `src/lib/logic` | SUMP client, decoders, export |
 | `src/lib/scripting` | Shared call registry (used by the UI, scripts and recorder), worker runtime, script library |

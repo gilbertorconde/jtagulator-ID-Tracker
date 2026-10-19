@@ -69,8 +69,8 @@ export function parseProbe(text: string): DatabaseStatus | null {
 }
 
 /** Run the probe from RAM (nothing is written), read the result, reset the board. */
-export async function probeDatabase(t: DtrTransport, onProgress?: (p: LoadProgress) => void): Promise<DatabaseStatus> {
-  const image = await fetchAsset(BUNDLED.probe);
+export async function probeDatabase(t: DtrTransport, onProgress?: (p: LoadProgress) => void, probeImage?: Uint8Array): Promise<DatabaseStatus> {
+  const image = probeImage ?? (await fetchAsset(BUNDLED.probe));
   const out = collect(t, /JTS-PROBE .* end/, 8000);
   try {
     await loadPropeller(t, image, "ram", onProgress);
@@ -102,8 +102,9 @@ export async function writeDatabase(
   t: DtrTransport,
   onProgress: (p: DatabaseProgress) => void,
   signal?: AbortSignal,
+  updaterImage?: Uint8Array,
 ): Promise<{ result: "success" | "errors" | "already"; log: string }> {
-  const image = await fetchAsset(BUNDLED.updater);
+  const image = updaterImage ?? (await fetchAsset(BUNDLED.updater));
   onProgress({ phase: "loading", percent: 0, log: "" });
   let log = "";
   const done = new Promise<string>((resolve, reject) => {
