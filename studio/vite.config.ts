@@ -17,6 +17,11 @@ export default defineConfig({
     hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
     watch: { ignored: ["**/src-tauri/**"] },
   },
-  build: { target: "es2022", chunkSizeWarningLimit: 1500 },
+  build: {
+    target: "es2022",
+    chunkSizeWarningLimit: 1500,
+    // Firmware images stay separate files (never data: URLs), loaded with fetch().
+    assetsInlineLimit: (file) => (file.endsWith(".binary") ? false : undefined),
+  },
   test: { include: ["tests/**/*.test.ts"], environment: "node" },
 });
