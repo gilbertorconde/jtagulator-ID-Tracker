@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "paths": { "$lib/*": ["./src/lib/*"] }
   },
   "include": ["src/**/*.ts", "src/**/*.svelte", "tests/**/*.ts"]

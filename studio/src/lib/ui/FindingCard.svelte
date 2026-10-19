@@ -3,6 +3,8 @@
   import type { Finding } from "../core/types";
   import CopyButton from "./CopyButton.svelte";
   import IdBits from "./IdBits.svelte";
+  import { instructionNames } from "../bsdl/parser";
+  import { app } from "../stores/app.svelte";
   import { ROLE_COLOR, ROLE_LABEL, fmtBaud, type Role } from "./signals";
 
   let { finding, actions }: { finding: Finding; actions?: import("svelte").Snippet<[Finding]> } = $props();
@@ -58,6 +60,10 @@
         <span class="badge accent">BSR bit {finding.bit}</span>
       {:else if finding.kind === "irdr"}
         <span class="mono">IR <b>0x{finding.ir.toString(16).toUpperCase()}</b> <span class="faint">{finding.irBits}</span></span>
+        {#if app.activeBsdlFile}
+          {@const names = instructionNames(app.activeBsdlFile, finding.ir, finding.irBits.length)}
+          {#if names.length}<span class="badge ok">{names.join(" / ")}</span>{/if}
+        {/if}
         <ArrowRight size={13} />
         <span class="badge accent">DR {finding.dr} bits</span>
       {/if}
@@ -75,6 +81,7 @@
             <CopyButton text={d.idcode.hex} />
             <span class="mf">{d.idcode.manufacturer ?? "Unknown manufacturer"}</span>
             {#if d.idcode.part}<span class="badge info">{d.idcode.part}</span>{/if}
+            {#each app.bsdlFor(d.idcode.raw) as b (b.name)}<span class="badge ok" title={b.name}>BSDL: {b.file.entity}</span>{/each}
           </div>
           <div class="meta mono faint">
             part 0x{d.idcode.partNumber.toString(16).toUpperCase().padStart(4, "0")} · ver {d.idcode.version} · JEP106 bank {d.idcode.bank} code 0x{d.idcode.code

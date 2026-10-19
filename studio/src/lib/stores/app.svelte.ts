@@ -11,6 +11,8 @@ import { CALLS, callToCode, type CallName } from "../scripting/api";
 import { DEFAULT_TARGET } from "../sim/firmware";
 import { untrack } from "svelte";
 import { canLoad, type DtrTransport } from "../firmware/loader";
+import { loadLibrary, type BsdlEntry } from "../bsdl/library";
+import { matchesIdcode } from "../bsdl/parser";
 
 export type View = "overview" | "jtag" | "swd" | "uart" | "gpio" | "logic" | "all" | "scripts" | "findings" | "firmware" | "settings";
 
@@ -192,6 +194,7 @@ class AppState {
 
   constructor() {
     if (!this.target.id) this.target.id = newId();
+    queueMicrotask(() => void this.reloadBsdl());
     $effect.root(() => {
       $effect(() => {
         const json = JSON.stringify(this.target);
@@ -520,6 +523,27 @@ class AppState {
   importTarget(t: TargetProfile) {
     const known = this.targets.some((x) => x.id === t.id);
     this.target = { ...blankTarget(), ...t, id: t.id && !known ? t.id : newId() };
+  }
+
+  // ---------------------------------------------------------------------- BSDL
+
+  /** Saved BSDL files. */
+  bsdl = $state.raw<BsdlEntry[]>([]);
+  /** BSDL used for IR/DR names, the EXTEST opcode and pin-mapper labels. */
+  activeBsdl = $state<string | null>(null);
+  readonly activeBsdlFile = $derived(this.bsdl.find((b) => b.name === this.activeBsdl)?.file ?? null);
+
+  async reloadBsdl() {
+    try {
+      this.bsdl = await loadLibrary();
+    } catch (e) {
+      this.error(e, "BSDL library");
+    }
+  }
+
+  /** Saved BSDL files whose IDCODE matches. */
+  bsdlFor(raw: number): BsdlEntry[] {
+    return this.bsdl.filter((b) => matchesIdcode(b.file, raw));
   }
 
   // ------------------------------------------------------------------ firmware

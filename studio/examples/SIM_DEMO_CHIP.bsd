@@ -1,0 +1,125 @@
+-- Demo BSDL for the JTAGulator Studio simulator.
+-- It describes the simulator's fake target chip (IDCODE 0x06413041, IR length 4,
+-- a 64-cell boundary register). It is NOT a vendor file and matches no real chip
+-- apart from sharing that IDCODE value with the simulator.
+
+entity SIM_DEMO_CHIP is
+  generic (PHYSICAL_PIN_MAP : string := "TQFP48");
+
+  port (
+    TCK  : in    bit;
+    TMS  : in    bit;
+    TDI  : in    bit;
+    TDO  : out   bit;
+    PA0  : inout bit;
+    PA1  : inout bit;
+    PB5  : inout bit;
+    VDD  : linkage bit_vector (1 to 2);
+    VSS  : linkage bit_vector (1 to 2)
+  );
+
+  use STD_1149_1_2001.all;
+
+  attribute COMPONENT_CONFORMANCE of SIM_DEMO_CHIP : entity is "STD_1149_1_2001";
+  attribute PIN_MAP of SIM_DEMO_CHIP : entity is PHYSICAL_PIN_MAP;
+
+  constant TQFP48 : PIN_MAP_STRING :=
+    "TCK : 37, TMS : 34, TDI : 38, TDO : 39, " &
+    "PA0 : 10, PA1 : 11, PB5 : 41, " &
+    "VDD : (24, 48), VSS : (23, 47)";
+
+  attribute TAP_SCAN_IN    of TDI : signal is true;
+  attribute TAP_SCAN_MODE  of TMS : signal is true;
+  attribute TAP_SCAN_OUT   of TDO : signal is true;
+  attribute TAP_SCAN_CLOCK of TCK : signal is (10.0e6, BOTH);
+
+  attribute INSTRUCTION_LENGTH of SIM_DEMO_CHIP : entity is 4;
+
+  attribute INSTRUCTION_OPCODE of SIM_DEMO_CHIP : entity is
+    "EXTEST  (0000)," &
+    "SAMPLE  (0010)," &
+    "PRELOAD (0010)," &
+    "ABORT   (1000)," &   -- debug port registers, 35 bits
+    "DPACC   (1010)," &
+    "APACC   (1011)," &
+    "IDCODE  (1110)," &
+    "BYPASS  (1111, 0XX1)";
+
+  attribute INSTRUCTION_CAPTURE of SIM_DEMO_CHIP : entity is "0001";
+
+  attribute IDCODE_REGISTER of SIM_DEMO_CHIP : entity is
+    "XXXX" &              -- version
+    "0110010000010011" &  -- part number
+    "00000100000" &       -- manufacturer
+    "1";                  -- required by 1149.1
+
+  attribute BOUNDARY_LENGTH of SIM_DEMO_CHIP : entity is 64;
+
+  attribute BOUNDARY_REGISTER of SIM_DEMO_CHIP : entity is
+  -- num  (cell, port, function, safe [, ccell, disval, rslt])
+  "  0 (BC_1, *, internal, X)," &
+  "  1 (BC_1, *, internal, X)," &
+  "  2 (BC_1, *, internal, X)," &
+  "  3 (BC_1, *, internal, X)," &
+  "  4 (BC_1, *, internal, X)," &
+  "  5 (BC_1, *, internal, X)," &
+  "  6 (BC_1, *, internal, X)," &
+  "  7 (BC_1, *, internal, X)," &
+  "  8 (BC_1, *, internal, X)," &
+  "  9 (BC_1, *, internal, X)," &
+  " 10 (BC_1, PA0, output3, X, 11, 0, Z)," &
+  " 11 (BC_1, *, control, 0)," &
+  " 12 (BC_1, PA0, input, X)," &
+  " 13 (BC_1, *, internal, X)," &
+  " 14 (BC_1, *, internal, X)," &
+  " 15 (BC_1, *, internal, X)," &
+  " 16 (BC_1, *, internal, X)," &
+  " 17 (BC_1, *, internal, X)," &
+  " 18 (BC_1, *, internal, X)," &
+  " 19 (BC_1, *, internal, X)," &
+  " 20 (BC_1, *, internal, X)," &
+  " 21 (BC_1, *, internal, X)," &
+  " 22 (BC_1, *, internal, X)," &
+  " 23 (BC_1, PA1, output3, X, 24, 0, Z)," &
+  " 24 (BC_1, *, control, 0)," &
+  " 25 (BC_1, PA1, input, X)," &
+  " 26 (BC_1, *, internal, X)," &
+  " 27 (BC_1, *, internal, X)," &
+  " 28 (BC_1, *, internal, X)," &
+  " 29 (BC_1, *, internal, X)," &
+  " 30 (BC_1, *, internal, X)," &
+  " 31 (BC_1, *, internal, X)," &
+  " 32 (BC_1, *, internal, X)," &
+  " 33 (BC_1, *, internal, X)," &
+  " 34 (BC_1, *, internal, X)," &
+  " 35 (BC_1, *, internal, X)," &
+  " 36 (BC_1, *, internal, X)," &
+  " 37 (BC_1, *, internal, X)," &
+  " 38 (BC_1, *, internal, X)," &
+  " 39 (BC_1, *, internal, X)," &
+  " 40 (BC_1, PB5, output3, X, 41, 0, Z)," &
+  " 41 (BC_1, *, control, 0)," &
+  " 42 (BC_1, PB5, input, X)," &
+  " 43 (BC_1, *, internal, X)," &
+  " 44 (BC_1, *, internal, X)," &
+  " 45 (BC_1, *, internal, X)," &
+  " 46 (BC_1, *, internal, X)," &
+  " 47 (BC_1, *, internal, X)," &
+  " 48 (BC_1, *, internal, X)," &
+  " 49 (BC_1, *, internal, X)," &
+  " 50 (BC_1, *, internal, X)," &
+  " 51 (BC_1, *, internal, X)," &
+  " 52 (BC_1, *, internal, X)," &
+  " 53 (BC_1, *, internal, X)," &
+  " 54 (BC_1, *, internal, X)," &
+  " 55 (BC_1, *, internal, X)," &
+  " 56 (BC_1, *, internal, X)," &
+  " 57 (BC_1, *, internal, X)," &
+  " 58 (BC_1, *, internal, X)," &
+  " 59 (BC_1, *, internal, X)," &
+  " 60 (BC_1, *, internal, X)," &
+  " 61 (BC_1, *, internal, X)," &
+  " 62 (BC_1, *, internal, X)," &
+  " 63 (BC_1, *, internal, X)";
+
+end SIM_DEMO_CHIP;

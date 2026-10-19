@@ -4,6 +4,8 @@
   import { app } from "../../stores/app.svelte";
   import Field from "../Field.svelte";
   import OpenOcdPanel from "../OpenOcdPanel.svelte";
+  import BsdlPanel from "../BsdlPanel.svelte";
+  import { describeCell, opcodeOf } from "../../bsdl/parser";
   import OpResults from "../OpResults.svelte";
   import Panel from "../Panel.svelte";
   import PinHeader from "../PinHeader.svelte";
@@ -83,6 +85,11 @@
   );
   const unique = $derived(new Set([pins.tdi, pins.tdo, pins.tck, pins.tms]).size === 4);
   const irValid = $derived(/^[0-9a-fA-F]{1,8}$/.test(extestIr));
+  const bsdlExtest = $derived(app.activeBsdlFile ? opcodeOf(app.activeBsdlFile, "EXTEST") : null);
+  // Use the selected BSDL's EXTEST opcode when one is chosen.
+  $effect(() => {
+    if (bsdlExtest !== null) extestIr = bsdlExtest.toString(16).toUpperCase();
+  });
 
   function usePins(f: Finding) {
     if (f.kind !== "jtag") return;
@@ -190,7 +197,7 @@
 
       <Panel title="Pin mapper (EXTEST)" subtitle="Walk a bit through the Boundary Scan Register and see which channel each bit drives.">
         <div class="row3">
-          <Field label="EXTEST opcode (hex)">
+          <Field label="EXTEST opcode (hex)" hint={bsdlExtest !== null ? `From ${app.activeBsdlFile?.entity}` : undefined}>
             <input class="input mono" bind:value={extestIr} />
           </Field>
           <Field label="Fill">
@@ -208,7 +215,20 @@
             {@const x = r as { findings: { channel: number; bit: number }[]; bsrLength: number | null } | undefined}
             {#if x}
               <div class="muted small">Boundary Scan Register: {x.bsrLength ?? "n/a"} bits</div>
+              {#if app.activeBsdlFile && x.bsrLength !== null && app.activeBsdlFile.bsrLength !== null && x.bsrLength !== app.activeBsdlFile.bsrLength}
+                <div class="bad">The chip's register is {x.bsrLength} bits, but {app.activeBsdlFile.entity} describes {app.activeBsdlFile.bsrLength}. Is this the right BSDL file?</div>
+              {/if}
               <PinHeader compact roles={pinMap(x.findings.map((f) => ["bsr", f.channel] as ["bsr", number]))} />
+              {#if app.activeBsdlFile && x.findings.length}
+                <table class="data">
+                  <thead><tr><th>Channel</th><th>Bit</th><th>In {app.activeBsdlFile.entity}</th></tr></thead>
+                  <tbody>
+                    {#each x.findings as f (f.channel + ":" + f.bit)}
+                      <tr><td class="mono">CH{f.channel}</td><td class="mono">{f.bit}</td><td>{describeCell(app.activeBsdlFile, f.bit)?.label ?? "not in the file"}</td></tr>
+                    {/each}
+                  </tbody>
+                </table>
+              {/if}
             {/if}
           {/snippet}
         </OpResults>
@@ -221,6 +241,7 @@
         {/snippet}
       </Panel>
 
+      <BsdlPanel />
       <OpenOcdPanel {pins} valid={unique} />
     </div>
   {/if}
