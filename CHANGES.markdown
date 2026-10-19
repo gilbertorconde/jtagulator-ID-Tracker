@@ -12,6 +12,8 @@ Release date: **October 19, 2026**
 
 * Logic analyzer: Fixed parsing of the trigger mask and value commands, which kept only the first parameter byte. Triggers now work on all 24 channels instead of CH0-7.
 
+* Logic analyzer: Added pre-trigger capture. When the client asks for more samples than it wants after the trigger (read count > delay count) with a stage 1 trigger, the sampler records into a ring buffer while polling the trigger and returns the remaining samples from before it. The trigger is polled in software, so the sample rate is limited to 909 kHz (80 MHz / 88) in this mode.
+
 
 <a id="v1_12"></a>ID Tracker 1.0
 ----

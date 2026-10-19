@@ -20,7 +20,6 @@ and http://dangerousprototypes.com/docs/Logic_Analyzer_core:_Background#2.3_The_
 
 TODOs:
 * don't waste 1024B of the 4096B buffer
-* capture pre-trigger samples
 * support trigger delays
 * support serial trigger mode
 * support RLE
@@ -106,6 +105,12 @@ CON 'offsets of the structure below
   ISTRIG4START_OFF            = 60
   SAMPLERRUNNING_OFF          = 64
   SAMPLEBUFFER_OFF            = 68
+  PREPERIODS_OFF              = 72
+  SAMPLEREND_OFF              = 76
+
+  ' Pre-trigger capture polls the trigger in software, which needs more clocks per
+  ' sample than WAITPEQ (worst case ~73), so its sample period is at least this.
+  PRE_MIN_CLOCKS_WAIT         = 88
 
   
 VAR 'This is a struct used by the sampler cog; its layout and the offsets above must be in sync
@@ -132,6 +137,13 @@ VAR 'This is a struct used by the sampler cog; its layout and the offsets above 
   long samplerRunning
 
   long sampleBuffer        ' Address of global buffer from top object
+  long prePeriods          ' Samples kept from before the trigger (0 = no pre-trigger capture)
+  long samplerEnd          ' Pre-trigger capture: address after the last sample written (oldest sample)
+
+
+VAR
+  long readReq             ' Counts requested with CMD_CNT
+  long delayReq
 
   
 OBJ
@@ -165,6 +177,9 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
   clocksWait:=DEFAULT_CLOCKS_WAIT
   readPeriods:=DEFAULT_READ_PERIODS 
   delayPeriods:=DEFAULT_DELAY_PERIODS
+  readReq:=DEFAULT_READ_PERIODS
+  delayReq:=DEFAULT_DELAY_PERIODS
+  prePeriods:=0
   disableFlags:=DEFAULT_DISABLE_FLAGS
 
   trig1Mask:=0
@@ -218,6 +233,17 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
         SendSamples(ina[23..0])
 
       CMD_RUN:
+        ' Asking for more samples than after the trigger means "keep the rest from
+        ' before it". That needs a stage 1 trigger that starts the capture.
+        if (readReq > delayReq) and (trig1Mask <> 0) and (isTrig1Start <> 0)
+          prePeriods := readReq - delayReq
+          delayPeriods := readReq         ' Ring buffer size
+          readPeriods := readReq
+          clocksWait #>= PRE_MIN_CLOCKS_WAIT
+        else
+          prePeriods := 0
+          delayPeriods := delayReq
+          readPeriods := readReq <# delayReq
         u.LEDYellow
         i:=0
         repeat while i < MAX_SAMPLE_PERIODS ' Clear buffer before starting capture
@@ -253,20 +279,17 @@ PUB Go(bufPtr) | coggood, i, isSendSamples
         larg:=vCmd[2]
         larg<<=8
         larg|=vCmd[1]
-        readPeriods:=(larg+1)*4   'the protocol doesn't indicate the +1 is needed; but sigrok's OLS API does
-        if readPeriods > DEFAULT_READ_PERIODS  
-          readPeriods:=DEFAULT_READ_PERIODS 
+        readReq:=(larg+1)*4   'the protocol doesn't indicate the +1 is needed; but sigrok's OLS API does
+        if readReq > DEFAULT_READ_PERIODS
+          readReq:=DEFAULT_READ_PERIODS
 
         larg:=vCmd[4]
         larg<<=8
         larg|=vCmd[3]
-        delayPeriods:=(larg+1)*4  'the protocol doesn't indicate the +1 is needed; but sigrok's OLS API does
-        if delayPeriods > DEFAULT_DELAY_PERIODS
-          delayPeriods:=DEFAULT_DELAY_PERIODS 
-
-        'TODO: support readPeriods > delayPeriods (i.e. capturing pre-trigger window)
-        if readPeriods > delayPeriods
-          readPeriods := delayPeriods
+        delayReq:=(larg+1)*4  'the protocol doesn't indicate the +1 is needed; but sigrok's OLS API does
+        if delayReq > DEFAULT_DELAY_PERIODS
+          delayReq:=DEFAULT_DELAY_PERIODS
+        ' The read/delay split is resolved when the capture starts (CMD_RUN)
                           
       CMD_DIV:
         if (GetFourMoreParamBytes == -1)
@@ -321,11 +344,19 @@ PRI GetFourMoreParamBytes : val
     val:=-1
   
                  
-PRI SendAllSamples | i   'NB: OLS sends samples in reverse
+PRI SendAllSamples | i, e   'NB: OLS sends samples in reverse
   i := 0
-  repeat while i < readPeriods
-    SendSamples(long[sampleBuffer][delayPeriods - 1 - i])
-    ++i
+  if prePeriods
+    ' Ring buffer of delayPeriods samples; samplerEnd points at the oldest one
+    e := (samplerEnd - sampleBuffer) >> 2
+    repeat while i < readPeriods
+      e := (e + delayPeriods - 1) // delayPeriods
+      SendSamples(long[sampleBuffer][e])
+      ++i
+  else
+    repeat while i < readPeriods
+      SendSamples(long[sampleBuffer][delayPeriods - 1 - i])
+      ++i
 
     
 PRI SendSamples(value) | b
@@ -405,7 +436,18 @@ samplerArm              MOVS    samplerTramp,       #samplerArmed1
                         MOV     t1,                 PAR
                         ADD     t1,                 #ISTRIG1START_OFF
                         RDLONG  samplerTrigStart,   t1
-                        
+
+                        ' Pre-trigger capture? (Spin only sets prePeriods with a stage 1 start trigger)
+                        MOV     samplerBaseA,       samplerTargetA
+                        MOV     t1,                 PAR
+                        ADD     t1,                 #PREPERIODS_OFF
+                        RDLONG  samplerPreLeft,     t1                  WZ
+              IF_Z      JMP     #samplerCommon
+                        MOV     samplerPostLeft,    samplerLimitA       ' post-trigger samples = ring size - pre
+                        SUB     samplerPostLeft,    samplerBaseA
+                        SHR     samplerPostLeft,    #2
+                        SUB     samplerPostLeft,    samplerPreLeft
+                        MOVS    samplerTramp,       #samplerPreStart
                         JMP     #samplerCommon
 
 samplerArmed1           CMP     samplerTrigMask,    #0                  WZ
@@ -483,6 +525,44 @@ samplerSampling         MOV     t1,                 INA
               IF_NE     WAITCNT samplerStamp,       samplerWait
 samplerCommon           JMP     samplerTramp
 
+' Pre-trigger capture: sample continuously into a ring buffer while polling the
+' trigger. The trigger is only checked once prePeriods samples of history exist;
+' the triggering sample is the first post-trigger sample.
+samplerPreStart         MOVS    samplerTramp,       #samplerPre
+                        MOV     samplerStamp,       CNT
+                        ADD     samplerStamp,       samplerWait
+                        JMP     #samplerCommon
+
+samplerPre              MOV     t1,                 INA
+                        WRLONG  t1,                 samplerTargetA
+                        ADD     samplerTargetA,     #4
+                        CMP     samplerTargetA,     samplerLimitA       WZ
+              IF_E      MOV     samplerTargetA,     samplerBaseA
+                        CMP     samplerPreLeft,     #0                  WZ
+              IF_NZ     SUB     samplerPreLeft,     #1
+                        AND     t1,                 samplerTrigMask
+              IF_Z      CMP     t1,                 samplerTrigVal      WZ
+              IF_Z      MOVS    samplerTramp,       #samplerPost
+              IF_Z      SUB     samplerPostLeft,    #1
+                        WAITCNT samplerStamp,       samplerWait
+                        JMP     samplerTramp
+
+samplerPost             CMP     samplerPostLeft,    #0                  WZ
+              IF_Z      JMP     #samplerPreDone
+                        MOV     t1,                 INA
+                        WRLONG  t1,                 samplerTargetA
+                        ADD     samplerTargetA,     #4
+                        CMP     samplerTargetA,     samplerLimitA       WZ
+              IF_E      MOV     samplerTargetA,     samplerBaseA
+                        SUB     samplerPostLeft,    #1
+                        WAITCNT samplerStamp,       samplerWait
+                        JMP     samplerTramp
+
+samplerPreDone          MOV     t1,                 PAR
+                        ADD     t1,                 #SAMPLEREND_OFF
+                        WRLONG  samplerTargetA,     t1
+                        JMP     #samplerFinish
+
 samplerFinish           MOVS    samplerTramp,       #samplerOff
 
                         MOV     t1,                 #0
@@ -500,6 +580,9 @@ samplerTargetA          RES 1
 samplerLimitA           RES 1
 samplerStamp            RES 1
 samplerWait             RES 1
+samplerBaseA            RES 1
+samplerPreLeft          RES 1
+samplerPostLeft         RES 1
 
                         FIT   ' make sure all instructions/data fit within the cog's RAM
 
