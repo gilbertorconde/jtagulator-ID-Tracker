@@ -7,8 +7,10 @@
 //    decide how many bytes each sample takes on the wire (1..3, group 0 first).
 //  - Samples are stored 32 bits at a time: at most 1024 samples per capture,
 //    regardless of how many groups are enabled (metadata claims 3072 bytes).
-//  - 0x81 counts are 16-bit little endian: periods = (n + 1) * 4, capped at 1024;
-//    read count is capped to the delay count. No pre-trigger capture.
+//  - 0x81 counts are 16-bit little endian: periods = (n + 1) * 4, capped at 1024.
+//    Before ID Tracker 1.3 the read count is capped to the delay count (no
+//    pre-trigger capture). From 1.3, read > delay with a stage-1 trigger keeps
+//    read - delay samples from before the trigger, at <= 80 MHz / 88.
 //  - 0x80 divider is 24-bit little endian in OLS 100 MHz units; the firmware
 //    converts it to 80 MHz Propeller clocks: wait = floor((div + 1) * 4 / 5),
 //    minimum 66 clocks (1.212 MHz).
@@ -59,6 +61,8 @@ export const SUMP_LIMITS = {
   triggerChannelMask: 0xff,
   /** Trigger channels on fixed firmware. */
   fullTriggerChannelMask: 0xffffff,
+  /** Fastest rate with pre-trigger capture (firmware PRE_MIN_CLOCKS_WAIT = 88). */
+  preTriggerMaxRateHz: 80_000_000 / 88,
   /** Serial link speed (bytes/s ~ baud / 10). */
   baud: 115_200,
 } as const;
@@ -95,6 +99,8 @@ export interface CaptureOptions {
   /** Channels of interest; every group containing one is enabled. Empty = all. */
   channels: number[];
   trigger?: Trigger;
+  /** Samples to keep from before the trigger (needs the preTrigger option). */
+  preTriggerSamples?: number;
   signal?: AbortSignal;
   /**
    * Give up after this long (ms). Defaults to the expected capture + transfer
@@ -246,10 +252,13 @@ export class SumpError extends Error {
 }
 
 export class SumpClient {
-  /** fullTriggers: the firmware parses all 24 trigger channels (ID Tracker 1.3+). */
+  /**
+   * fullTriggers: the firmware parses all 24 trigger channels (ID Tracker 1.3+).
+   * preTrigger: the firmware can keep samples from before the trigger (1.3+).
+   */
   constructor(
     public readonly session: Session,
-    public readonly opts: { fullTriggers?: boolean } = {},
+    public readonly opts: { fullTriggers?: boolean; preTrigger?: boolean } = {},
   ) {}
 
   get triggerChannelMask() {
@@ -411,7 +420,11 @@ export class SumpClient {
   /** Run one capture. */
   capture(opts: CaptureOptions): Promise<Capture> {
     const count = clampSamples(opts.samples);
-    const rate = planSampleRate(opts.sampleRateHz);
+    const wantPre = opts.trigger?.mask && this.opts.preTrigger ? (opts.preTriggerSamples ?? 0) : 0;
+    const pre = Math.min(count - SUMP_LIMITS.sampleStep, Math.max(0, Math.round(wantPre / 4) * 4));
+    // Pre-trigger capture polls the trigger in software: the firmware enforces a
+    // longer sample period (PRE_MIN_CLOCKS_WAIT).
+    const rate = planSampleRate(pre ? Math.min(opts.sampleRateHz, SUMP_LIMITS.preTriggerMaxRateHz) : opts.sampleRateHz);
     const groups = groupsForChannels(opts.channels);
     if (!groups) throw new SumpError("No channel group enabled");
     const trig = opts.trigger && opts.trigger.mask ? opts.trigger : undefined;
@@ -421,11 +434,12 @@ export class SumpClient {
     const bps = popcount3(groups);
     const expectBytes = count * bps;
     const n = count / 4 - 1;
+    const d = (count - pre) / 4 - 1;
     const cmds = [
       this.resetBytes(),
       long(SUMP.FLAGS, flagsForGroups(groups)),
       long(SUMP.DIV, rate.divider),
-      long(SUMP.CNT, (n & 0xffff) | ((n & 0xffff) << 16)),
+      long(SUMP.CNT, (n & 0xffff) | ((d & 0xffff) << 16)),
       long(SUMP.TRIG_MASK[0], trig ? trig.mask & tmask : 0),
       long(SUMP.TRIG_VAL[0], trig ? trig.value & trig.mask & tmask : 0),
       // Stage 1 starts the capture (bit 27 = byte 4 bit 3).
@@ -452,7 +466,7 @@ export class SumpClient {
           sampleRateHz: rate.actualHz,
           samples: unpackSamples(r.bytes, count, groups),
           channelMask: groupMaskToChannelMask(groups),
-          triggerIndex: trig ? 0 : null,
+          triggerIndex: trig ? pre : null,
           capturedAt: Date.now(),
         } satisfies Capture;
       } catch (e) {

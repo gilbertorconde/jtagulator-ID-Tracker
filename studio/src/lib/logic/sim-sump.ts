@@ -82,6 +82,9 @@ export class SimSump implements SumpHandler {
   clocksWait = DEFAULT_CLOCKS_WAIT;
   readPeriods = MAX_PERIODS;
   delayPeriods = MAX_PERIODS;
+  /** Counts as requested (resolved at run, like ID Tracker 1.3). */
+  readReq = MAX_PERIODS;
+  delayReq = MAX_PERIODS;
   disableFlags = 0b0010_0000;
   trigMask = [0, 0, 0, 0];
   trigVal = [0, 0, 0, 0];
@@ -123,6 +126,8 @@ export class SimSump implements SumpHandler {
     this.clocksWait = DEFAULT_CLOCKS_WAIT;
     this.readPeriods = MAX_PERIODS;
     this.delayPeriods = MAX_PERIODS;
+    this.readReq = MAX_PERIODS;
+    this.delayReq = MAX_PERIODS;
     this.disableFlags = 0b0010_0000;
     this.trigMask = [0, 0, 0, 0];
     this.trigVal = [0, 0, 0, 0];
@@ -280,8 +285,10 @@ export class SimSump implements SumpHandler {
     const stage = (c: number) => (c >> 2) & 3;
     switch (v[0]) {
       case 0x81: {
-        this.readPeriods = Math.min(MAX_PERIODS, (((v[2] << 8) | v[1]) + 1) * 4);
-        this.delayPeriods = Math.min(MAX_PERIODS, (((v[4] << 8) | v[3]) + 1) * 4);
+        this.readReq = Math.min(MAX_PERIODS, (((v[2] << 8) | v[1]) + 1) * 4);
+        this.delayReq = Math.min(MAX_PERIODS, (((v[4] << 8) | v[3]) + 1) * 4);
+        this.readPeriods = this.readReq;
+        this.delayPeriods = this.delayReq;
         if (this.readPeriods > this.delayPeriods) this.readPeriods = this.delayPeriods;
         break;
       }
@@ -331,6 +338,25 @@ export class SimSump implements SumpHandler {
 
   private run() {
     const t0 = this.now();
+    // ID Tracker 1.3: read > delay with a stage-1 start trigger keeps samples from
+    // before the trigger, sampling no faster than 80 MHz / 88.
+    if (!this.opts.legacyTriggers && this.readReq > this.delayReq && this.trigMask[0] && this.trigStart[0]) {
+      const pre = this.readReq - this.delayReq;
+      const period = Math.max(this.clocksWait, 88) / CLK;
+      const tt = this.waitPeq(t0 + pre * period, this.trigMask[0], this.trigVal[0]);
+      const state: { timer: ReturnType<typeof setTimeout> | null } = { timer: null };
+      this.running = state;
+      if (tt === null) return;
+      const send: number[] = [];
+      for (let i = this.readReq - 1; i >= 0; i--) send.push(this.levels(tt + (i - pre) * period));
+      state.timer = setTimeout(() => {
+        if (this.running !== state) return;
+        this.running = null;
+        const data = this.encode(send);
+        for (let o = 0; o < data.length; o += 512) this.out?.(data.subarray(o, o + 512));
+      }, 0);
+      return;
+    }
     // The sampler's trigger chain: stages 1-3 may hand over to the next; stage 4 always starts.
     let t: number | null = t0;
     for (let s = 0; s < 4 && t !== null; s++) {

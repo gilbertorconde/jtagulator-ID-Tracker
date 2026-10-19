@@ -285,3 +285,26 @@ describe("SPI and I2C decoders", () => {
     expect(ev.filter((e) => e.kind === "byte").map((b) => b.kind === "byte" && b.value)).toEqual(SIM_I2C_BYTES);
   });
 });
+
+describe("pre-trigger capture (ID Tracker 1.3)", () => {
+  it("keeps samples from before the trigger", async () => {
+    const client = new SumpClient(session, { fullTriggers: true, preTrigger: true });
+    const cs = 1 << SIM_SIGNALS.spi.cs;
+    simSump.opts.clock = () => 1 - 0.0004; // the SPI burst (CS# low) is 0.4 ms away
+    const cap = await client.capture({ sampleRateHz: 1_200_000, samples: 512, channels: [20, 21, 22, 23], trigger: { mask: cs, value: 0 }, preTriggerSamples: 128 });
+    expect(cap.triggerIndex).toBe(128);
+    expect(cap.sampleRateHz).toBeLessThanOrEqual(80e6 / 88);
+    // CS# is high before the trigger and low from the trigger on.
+    expect(cap.samples[127] & cs).toBe(cs);
+    expect(cap.samples[128] & cs).toBe(0);
+    const words = decodeSpi(cap, { ...SIM_SIGNALS.spi, mode: 0 });
+    expect(words[0].mosi).toBe(0x9f);
+  });
+
+  it("is ignored without the capability (older firmware)", async () => {
+    const client = new SumpClient(session, { fullTriggers: true });
+    simSump.opts.clock = () => 1 - 0.0004;
+    const cap = await client.capture({ sampleRateHz: 1_200_000, samples: 256, channels: [20], trigger: { mask: 1 << 20, value: 0 }, preTriggerSamples: 128 });
+    expect(cap.triggerIndex).toBe(0);
+  });
+});

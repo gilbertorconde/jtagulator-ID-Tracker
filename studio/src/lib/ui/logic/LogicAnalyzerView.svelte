@@ -51,7 +51,7 @@
     fullTriggers = false,
   }: { dev: JTAGulator; session: Session; onError?: (e: unknown) => void; fullTriggers?: boolean } = $props();
 
-  const sump = $derived(new SumpClient(session, { fullTriggers }));
+  const sump = $derived(new SumpClient(session, { fullTriggers, preTrigger: fullTriggers }));
 
   // ------------------------------------------------------------------ mode
   let mode = $state<DeviceMode>("unknown");
@@ -122,6 +122,8 @@
   let samplesN = $state(1024);
   let groups = $state([true, true, true]);
   let trigOn = $state(false);
+  /** Fraction of the capture kept from before the trigger (ID Tracker 1.3+). */
+  let preFraction = $state(0);
   /** Per trigger channel: null = don't care, 0 / 1 = level. */
   let trig = $state<(0 | 1 | null)[]>(Array(24).fill(null));
   const trigChannels = $derived(fullTriggers ? 24 : 8);
@@ -175,6 +177,7 @@
         samples: nClamped,
         channels,
         trigger,
+        preTriggerSamples: trigger && fullTriggers ? Math.round((nClamped * preFraction) / 4) * 4 : 0,
         signal: ctl.signal,
         onProgress: (f) => (progress = f),
       });
@@ -510,9 +513,24 @@
             </button>
           {/each}
         </div>
+        {#if fullTriggers}
+          <label class="pre">
+            <span class="label sub">Keep before trigger</span>
+            <select class="input" bind:value={preFraction} disabled={!trigOn}>
+              <option value={0}>None (start at the trigger)</option>
+              <option value={0.1}>10 % of the capture</option>
+              <option value={0.25}>25 % of the capture</option>
+              <option value={0.5}>50 % of the capture</option>
+              <option value={0.75}>75 % of the capture</option>
+            </select>
+          </label>
+          {#if trigOn && preFraction > 0 && rateHz > 80_000_000 / 88}
+            <span class="hint warn-t">With pre-trigger samples the rate is limited to 909 kHz.</span>
+          {/if}
+        {/if}
         <span class="hint">
-          Level trigger; capture starts at the trigger (no pre-trigger).
-          {#if !fullTriggers}This firmware only honours CH0–7 in triggers; ID Tracker 1.3 can trigger on all 24.{/if}
+          Level trigger{fullTriggers ? "" : "; capture starts at the trigger (no pre-trigger)"}.
+          {#if !fullTriggers}This firmware only honours CH0–7 in triggers and can't keep pre-trigger samples; ID Tracker 1.3 can do both.{/if}
           {#if trigOn && !trigger}<br /><span class="warn-t">Set at least one channel to 0 or 1.</span>{/if}
         </span>
       </section>
@@ -1057,6 +1075,12 @@
     min-height: 0;
     overflow: auto;
     padding: 12px;
+  }
+  .pre {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
   }
   .chsel {
     display: inline-flex;
