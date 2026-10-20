@@ -9,6 +9,10 @@ hero:
       text: Get started
       link: /guide/introduction
     - theme: alt
+      text: Open in your browser
+      link: https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/
+      target: _self
+    - theme: alt
       text: JTAGulator Studio
       link: /studio/
     - theme: alt

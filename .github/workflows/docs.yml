@@ -1,10 +1,14 @@
-name: Docs
+name: Site
 
-# Builds the manual site in docs/ and deploys it to GitHub Pages.
+# Builds the GitHub Pages site: the manual (docs/) at the root and the web
+# version of JTAGulator Studio under /app/, with a copy of every firmware
+# release (a browser page can't download GitHub release files itself).
 on:
   push:
     branches: [master]
-    paths: ["docs/**", "media/**", "image/**", "studio/src/lib/scripting/api.ts", ".github/workflows/docs.yml"]
+    paths: ["docs/**", "media/**", "image/**", "studio/**", ".github/workflows/docs.yml"]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -16,16 +20,14 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
-defaults:
-  run:
-    working-directory: docs
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
+          # Release events point at the tag; the site always comes from master.
+          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0 # "last updated" dates come from git history
       - uses: pnpm/action-setup@v6
         with:
@@ -34,9 +36,24 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: docs/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+          cache-dependency-path: |
+            docs/pnpm-lock.yaml
+            studio/pnpm-lock.yaml
+      - name: Manual
+        working-directory: docs
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Web app
+        working-directory: studio
+        env:
+          STUDIO_BASE: /${{ github.event.repository.name }}/app/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          node scripts/mirror-firmware.mjs ${{ github.repository }} dist/firmware
+          cp -r dist ../docs/.vitepress/dist/app
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

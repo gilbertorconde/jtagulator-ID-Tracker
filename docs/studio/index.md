@@ -1,6 +1,6 @@
 # JTAGulator Studio
 
-JTAGulator Studio is a desktop app for Windows, macOS and Linux that drives the JTAGulator for you. It answers every prompt of the firmware's serial menu from form inputs and shows the results as structured cards instead of terminal text. It works with the stock firmware and with ID Tracker, and also runs in Chrome or Edge.
+JTAGulator Studio is a desktop app for Windows, macOS and Linux that drives the JTAGulator for you. It also runs in Chrome, Edge or Opera with nothing to install: [open the web app](https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/){target="_self"} (see [Web version](/studio/web)). It answers every prompt of the firmware's serial menu from form inputs and shows the results as structured cards instead of terminal text. It works with the stock firmware and with ID Tracker, and also runs in Chrome or Edge.
 
 ![A JTAG scan in Studio](/image/studio-jtag.png)
 

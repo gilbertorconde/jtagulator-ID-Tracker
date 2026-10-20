@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress";
 
 const repo = "https://github.com/gilbertorconde/jtagulator-ID-Tracker";
+const site = "https://gilbertorconde.github.io/jtagulator-ID-Tracker/";
 
 export default defineConfig({
   title: "JTAGulator ID Tracker",
@@ -14,6 +15,7 @@ export default defineConfig({
     nav: [
       { text: "Guide", link: "/guide/introduction" },
       { text: "Studio", link: "/studio/" },
+      { text: "Open the web app", link: `${site}app/`, target: "_self" },
       { text: "Downloads", link: `${repo}/releases` },
     ],
     sidebar: [
@@ -42,6 +44,7 @@ export default defineConfig({
         text: "JTAGulator Studio",
         items: [
           { text: "Overview", link: "/studio/" },
+          { text: "Web version", link: "/studio/web" },
           { text: "Logic analyzer", link: "/studio/logic-analyzer" },
           { text: "OpenOCD and GDB", link: "/studio/openocd" },
           { text: "Targets and chip IDs", link: "/studio/targets" },
