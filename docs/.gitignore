@@ -1,0 +1,6 @@
+public/media/
+public/image/
+studio/_api-reference.md
+.vitepress/dist/
+.vitepress/cache/
+node_modules/
