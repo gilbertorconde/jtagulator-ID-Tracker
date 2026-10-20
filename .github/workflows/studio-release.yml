@@ -60,7 +60,7 @@ jobs:
           projectPath: studio
           tagName: ${{ github.ref_name }}
           releaseName: "JTAGulator Studio __VERSION__"
-          releaseBody: "Installers for Windows, macOS and Linux. See studio/README.md."
+          releaseBody: "Installers for Windows, macOS and Linux. No install needed: the same app runs in Chrome, Edge or Opera at https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/ . Documentation: https://gilbertorconde.github.io/jtagulator-ID-Tracker/"
           releaseDraft: true
           uploadUpdaterJson: true
           args: ${{ matrix.args }}

@@ -4,6 +4,8 @@ Enhanced firmware for the [JTAGulator](https://github.com/grandideastudio/jtagul
 
 *Hardware security testing · JTAG/SWD/UART interface discovery · Chip manufacturer identification*
 
+**Try JTAGulator Studio in your browser: [gilbertorconde.github.io/jtagulator-ID-Tracker/app](https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/)** (Chrome, Edge or Opera on a computer; nothing to install). Installers for Windows, macOS and Linux are on the [releases page](https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases/latest).
+
 The full documentation is at **[gilbertorconde.github.io/jtagulator-ID-Tracker](https://gilbertorconde.github.io/jtagulator-ID-Tracker/)**: every command, wiring, troubleshooting, Studio, scripting and the command-line tool.
 
 ---
