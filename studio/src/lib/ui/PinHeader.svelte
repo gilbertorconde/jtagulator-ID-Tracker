@@ -1,6 +1,7 @@
 <script lang="ts">
   // The JTAGulator's 24 channels drawn as its three 8-channel headers. Shows
-  // assigned roles and lets you drag-select a channel range.
+  // assigned roles and lets you pick a channel range: click the first channel,
+  // then the last one, or drag across them.
   import { ROLE_COLOR, ROLE_LABEL, type PinMap } from "./signals";
 
   interface Props {
@@ -11,19 +12,22 @@
     names?: Record<number, string>;
     compact?: boolean;
     onpin?: (ch: number) => void;
+    /** First channel clicked while picking a range (waiting for the last one). */
+    anchor?: number | null;
   }
-  let { roles = {}, range = null, onrange, levels = null, names = {}, compact = false, onpin }: Props = $props();
+  let { roles = {}, range = null, onrange, levels = null, names = {}, compact = false, onpin, anchor = $bindable(null) }: Props = $props();
 
   let dragFrom = $state<number | null>(null);
   let hover = $state<number | null>(null);
 
-  const inRange = (ch: number) => {
-    if (dragFrom !== null && hover !== null) {
-      const [a, b] = dragFrom < hover ? [dragFrom, hover] : [hover, dragFrom];
-      return ch >= a && ch <= b;
-    }
-    return !!range && ch >= range.start && ch <= range.end;
-  };
+  const span = (a: number, b: number) => (a < b ? [a, b] : [b, a]);
+  /** The range being picked (drag in progress, or first click made), else the current one. */
+  const preview = $derived.by(() => {
+    const from = dragFrom ?? anchor;
+    if (from !== null) return span(from, hover ?? from);
+    return range ? [range.start, range.end] : null;
+  });
+  const inRange = (ch: number) => !!preview && ch >= preview[0] && ch <= preview[1];
 
   function down(ch: number) {
     if (!onrange) return onpin?.(ch);
@@ -31,15 +35,32 @@
     hover = ch;
   }
   function up() {
-    if (dragFrom !== null && hover !== null && onrange) {
-      const [a, b] = dragFrom < hover ? [dragFrom, hover] : [hover, dragFrom];
+    if (dragFrom === null || !onrange) return;
+    const to = hover ?? dragFrom;
+    if (to !== dragFrom) {
+      // Dragged across channels: that's the range.
+      const [a, b] = span(dragFrom, to);
       onrange({ start: a, end: b });
+      anchor = null;
+    } else if (anchor === null) {
+      // First click: remember it and wait for the last channel.
+      anchor = to;
+    } else {
+      const [a, b] = span(anchor, to);
+      onrange({ start: a, end: b });
+      anchor = null;
     }
     dragFrom = null;
   }
+  function key(e: KeyboardEvent) {
+    if (e.key === "Escape" && anchor !== null) {
+      anchor = null;
+      e.stopPropagation();
+    }
+  }
 </script>
 
-<svelte:window onpointerup={up} />
+<svelte:window onpointerup={up} onkeydown={key} />
 
 <div class="header" class:compact class:selectable={!!onrange}>
   {#each [0, 1, 2] as bank (bank)}
@@ -52,6 +73,7 @@
             type="button"
             class="pin"
             class:in-range={inRange(ch)}
+            class:anchor={anchor === ch}
             class:assigned={r.length > 0}
             class:high={levels?.[ch] === true}
             class:low={levels?.[ch] === false}
@@ -59,6 +81,7 @@
             title={`CH${ch}${names[ch] ? ` (${names[ch]})` : ""}${r.length ? " — " + r.map((x) => ROLE_LABEL[x]).join(", ") : ""}`}
             onpointerdown={() => down(ch)}
             onpointerenter={() => (hover = ch)}
+            onpointerleave={() => hover === ch && dragFrom === null && (hover = null)}
           >
             <span class="dot"></span>
             <span class="num">{ch}</span>
@@ -124,6 +147,10 @@
   .selectable .pin,
   .pin:hover {
     cursor: pointer;
+  }
+  .pin.anchor {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
   }
   .pin.in-range {
     background: var(--accent-soft);
