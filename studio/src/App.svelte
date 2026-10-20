@@ -5,6 +5,18 @@
   import TopBar from "./lib/ui/TopBar.svelte";
   import OverviewView from "./lib/ui/views/OverviewView.svelte";
   import { app, type View } from "./lib/stores/app.svelte";
+  import { onMount } from "svelte";
+
+  // Daily update check in the desktop app; the result shows as a toast.
+  onMount(() => {
+    if (!app.tauri || !app.settings.autoUpdateCheck || Date.now() - app.settings.lastUpdateCheck < 24 * 3600 * 1000) return;
+    const timer = setTimeout(async () => {
+      const { updates } = await import("./lib/stores/updates.svelte");
+      if (await updates.check()) app.toast("info", `JTAGulator Studio ${updates.version} is available`, "Install it from Settings → Updates.", 12000);
+      if (updates.status !== "error") app.settings.lastUpdateCheck = Date.now();
+    }, 3000);
+    return () => clearTimeout(timer);
+  });
 
   // Pages other than the overview load on first use to keep startup small.
   type Lazy = () => Promise<{ default: Component<any> }>;

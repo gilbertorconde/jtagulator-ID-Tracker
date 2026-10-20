@@ -1,8 +1,17 @@
 <script lang="ts">
+  import { Download, RefreshCw } from "@lucide/svelte";
   import { app } from "../../stores/app.svelte";
+  import { updates } from "../../stores/updates.svelte";
   import Field from "../Field.svelte";
   import Panel from "../Panel.svelte";
-  import { version } from "../../../../package.json";
+  import { getVersion } from "@tauri-apps/api/app";
+  import { version as webVersion } from "../../../../package.json";
+
+  // The desktop app reports its own version (it changes with in-app updates).
+  let version = $state(webVersion);
+  $effect(() => {
+    if (app.tauri) void getVersion().then((v) => (version = v));
+  });
 
   const SPEEDS = [
     { value: 0.2, label: "Instant (~0.2 s)" },
@@ -57,6 +66,41 @@
     </table>
   </Panel>
 
+  {#if app.tauri}
+    <Panel title="Updates" subtitle="New Studio releases install from GitHub, verified with the release signing key.">
+      <div class="small">
+        {#if updates.status === "checking"}
+          <p class="muted">Checking…</p>
+        {:else if updates.status === "none"}
+          <p>You have the latest version ({version}).</p>
+        {:else if updates.status === "available"}
+          <p><b>Version {updates.version} is available</b> (you have {version}).</p>
+          {#if updates.notes}<pre class="notes">{updates.notes}</pre>{/if}
+        {:else if updates.status === "downloading"}
+          <p>Downloading {updates.version}… {updates.progress !== null ? `${Math.round(updates.progress * 100)}%` : ""}</p>
+        {:else if updates.status === "installing"}
+          <p>Installing {updates.version}. The app will restart.</p>
+        {:else if updates.status === "error"}
+          <p class="warn">Update failed: {updates.error}</p>
+        {:else}
+          <p class="muted">Version {version}.</p>
+        {/if}
+      </div>
+      <label class="check">
+        <input type="checkbox" bind:checked={app.settings.autoUpdateCheck} />
+        Check for updates when the app starts (at most once a day)
+      </label>
+      {#snippet footer()}
+        <button class="btn" onclick={() => updates.check()} disabled={updates.status === "checking" || updates.status === "downloading" || updates.status === "installing"}>
+          <RefreshCw size={13} /> Check for updates
+        </button>
+        {#if updates.status === "available"}
+          <button class="btn primary" onclick={() => updates.install()}><Download size={13} /> Install {updates.version} and restart</button>
+        {/if}
+      {/snippet}
+    </Panel>
+  {/if}
+
   <Panel title="About">
     <div class="small">
       <p><b>JTAGulator Studio</b> {version} — a desktop frontend for the <a href="https://jtagulator.com" target="_blank" rel="noreferrer">JTAGulator</a> by Joe Grand.</p>
@@ -86,5 +130,19 @@
   }
   p {
     margin: 0 0 8px;
+  }
+  .warn {
+    color: var(--warn);
+  }
+  .notes {
+    white-space: pre-wrap;
+    font-size: 12px;
+    max-height: 160px;
+    overflow: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 0;
   }
 </style>

@@ -20,6 +20,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
   - A **macro recorder** turns UI actions into a script.
 - **Firmware page**: shows the installed version, loads firmware into RAM for a test run or programs the EEPROM, checks GitHub releases for updates, and checks for or writes the manufacturer database. It uses a built-in Propeller loader (`src/lib/firmware/loader.ts`), so no external tools are needed.
 - **Device terminal**: raw view of the firmware's own menu.
+- **In-app updates**: the desktop app checks the latest GitHub release (`latest.json`, published by the release workflow), downloads the installer for its platform, verifies it against the public key in `tauri.conf.json`, installs it and restarts. The signing key lives in the `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` repository secrets.
 - **Simulator**: a built-in software JTAGulator with a fake target, so you can try everything without hardware.
 - **Command-line tool**: `jtagulator-cli` (`cli/`), built with `pnpm build:cli` into `dist-cli/`. Same core and script API, `--json` output, and `--sim` for the simulator. Tested against the simulator in CI and on a real JTAGulator.
 

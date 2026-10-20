@@ -99,7 +99,7 @@ for (const d of ids.devices) log(d.idcode.hex, d.idcode.manufacturer);
 
 ### Running Studio
 
-Pushing a `studio-v*` tag makes CI build installers for Windows, macOS and Linux and attach them to a draft release. To run from source you need [Node.js](https://nodejs.org) 20+ and [pnpm](https://pnpm.io). The desktop app also needs [Rust](https://rustup.rs) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) (on Linux, `webkit2gtk-4.1`).
+Pushing a `studio-v*` tag makes CI build signed installers for Windows, macOS and Linux and attach them to a draft release. Once a release is published, installed copies of the desktop app offer it in **Settings → Updates** (and check at startup, at most daily); each update is verified against the project's signing key before it installs. To run from source you need [Node.js](https://nodejs.org) 20+ and [pnpm](https://pnpm.io). The desktop app also needs [Rust](https://rustup.rs) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) (on Linux, `webkit2gtk-4.1`).
 
 ```sh
 cd studio

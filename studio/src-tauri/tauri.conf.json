@@ -35,7 +35,19 @@
       "icons/icon.ico"
     ],
     "category": "DeveloperTool",
-    "shortDescription": "Desktop frontend for the JTAGulator"
+    "shortDescription": "Desktop frontend for the JTAGulator",
+    "createUpdaterArtifacts": true
   },
-  "mainBinaryName": "jtagulator-studio"
+  "mainBinaryName": "jtagulator-studio",
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM3NkFFOTJBRUI2NkYyNUIKUldSYjhtYnJLdWxxTjlsM0ltT1dXNFluaG9ESzFyTkNOSnJLSHFJSXI3Vk5Cakx3VCtycTFNR2UK",
+      "endpoints": [
+        "https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
 }

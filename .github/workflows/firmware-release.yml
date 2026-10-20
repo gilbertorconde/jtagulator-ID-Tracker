@@ -39,6 +39,8 @@ jobs:
       - uses: softprops/action-gh-release@v3
         with:
           draft: true
+          # Studio's updater reads releases/latest, so firmware releases never take that slot.
+          make_latest: false
           name: "JTAGulator firmware ID Tracker ${{ steps.build.outputs.version }}"
           body: |
             Install with JTAGulator Studio (Firmware page) or Propeller Tool.

@@ -75,6 +75,9 @@ export interface Settings {
   wiringHidden: Record<string, boolean>;
   /** GitHub repository ("owner/name") checked for firmware releases. */
   firmwareRepo: string;
+  /** Check for a new Studio release at startup (desktop app, at most daily). */
+  autoUpdateCheck: boolean;
+  lastUpdateCheck: number;
 }
 
 
@@ -144,6 +147,8 @@ class AppState {
       lastPort: null,
       wiringHidden: {},
       firmwareRepo: "gilbertorconde/jtagulator-ID-Tracker",
+      autoUpdateCheck: true,
+      lastUpdateCheck: 0,
     } as Settings),
   );
 

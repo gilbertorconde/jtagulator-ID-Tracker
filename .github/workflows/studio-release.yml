@@ -1,7 +1,10 @@
 name: Studio release
 
 # Push a tag like studio-v0.2.0 to build installers for every platform and
-# attach them to a draft GitHub release.
+# attach them to a draft GitHub release. The installers are signed for the
+# in-app updater, and the release gets a latest.json describing them; once the
+# draft is published, installed apps find it at
+# releases/latest/download/latest.json.
 on:
   push:
     tags: ["studio-v*"]
@@ -51,10 +54,13 @@ jobs:
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: studio
           tagName: ${{ github.ref_name }}
           releaseName: "JTAGulator Studio __VERSION__"
           releaseBody: "Installers for Windows, macOS and Linux. See studio/README.md."
           releaseDraft: true
+          uploadUpdaterJson: true
           args: ${{ matrix.args }}
