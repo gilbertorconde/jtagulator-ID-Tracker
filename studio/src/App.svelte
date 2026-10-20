@@ -2,6 +2,7 @@
   import type { Component } from "svelte";
   import Sidebar from "./lib/ui/Sidebar.svelte";
   import Toasts from "./lib/ui/Toasts.svelte";
+  import BrowserNotice from "./lib/ui/BrowserNotice.svelte";
   import TopBar from "./lib/ui/TopBar.svelte";
   import OverviewView from "./lib/ui/views/OverviewView.svelte";
   import { app, type View } from "./lib/stores/app.svelte";
@@ -61,6 +62,7 @@
   {#if app.navOpen}<div class="scrim" role="presentation" onclick={() => (app.navOpen = false)}></div>{/if}
   <div class="main">
     <TopBar />
+    <BrowserNotice />
     <div class="content" class:fill={app.view === "scripts"}>
       {#if app.view === "overview"}
         <OverviewView />

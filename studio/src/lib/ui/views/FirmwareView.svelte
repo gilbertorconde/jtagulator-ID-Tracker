@@ -180,7 +180,7 @@
 
 <div class="view">
   {#if why}
-    <div class="note warn">{why} Firmware tools need a real JTAGulator over USB{app.tauri ? "" : " (Chrome or Edge in a browser)"}.</div>
+    <div class="note warn">{why} Firmware tools need a real JTAGulator over USB{app.tauri ? "" : " (Chrome, Edge or Opera in a browser)"}.</div>
   {/if}
 
   <div class="cols">

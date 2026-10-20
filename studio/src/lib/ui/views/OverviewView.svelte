@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { DOWNLOAD_URL } from "../DesktopOnly.svelte";
   import { Cable, Cpu, FlaskConical, Layers, RefreshCw, RotateCcw, Unplug, Usb, Waves, Zap, Code2 } from "@lucide/svelte";
   import { app, type View } from "../../stores/app.svelte";
   import Panel from "../Panel.svelte";
@@ -63,7 +64,7 @@
         {:else if app.webSerial}
           <button class="btn primary" disabled={app.status === "connecting"} onclick={() => app.connect("webserial")}><Usb size={14} /> Choose serial port…</button>
         {:else}
-          <div class="muted">Serial access needs the desktop app (or Chrome/Edge in a browser).</div>
+          <div class="muted nousb">No USB access in this browser. Use Chrome, Edge or Opera, or the <a href={DOWNLOAD_URL} target="_blank" rel="noreferrer">desktop app</a>.</div>
         {/if}
         <div class="or faint">or</div>
         <button class="btn" disabled={app.status === "connecting"} onclick={() => app.connect("sim")}><FlaskConical size={14} /> Try the simulator</button>
@@ -267,5 +268,9 @@
   }
   .dot.aborted {
     background: var(--warn);
+  }
+  .nousb {
+    font-size: 12.5px;
+    max-width: 300px;
   }
 </style>

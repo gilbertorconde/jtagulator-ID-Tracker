@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
+  // The web version on GitHub Pages lives under /<repo>/app/; the desktop app uses "/".
+  base: process.env.STUDIO_BASE ?? "/",
   plugins: [svelte()],
   resolve: {
     alias: { $lib: fileURLToPath(new URL("./src/lib", import.meta.url)) },

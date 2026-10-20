@@ -4,6 +4,7 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { spawn, which, type ProcessHandle } from "../core/process";
   import { app } from "../stores/app.svelte";
+  import DesktopOnly from "./DesktopOnly.svelte";
   import { onDestroy } from "svelte";
 
   let { port, ocdRunning }: { port: number; ocdRunning: boolean } = $props();
@@ -105,7 +106,7 @@
     <span class="faint small">connects to OpenOCD on localhost:{port}</span>
   </div>
   {#if !app.tauri}
-    <div class="faint small">Starting GDB needs the desktop app. In a terminal: <code>gdb-multiarch -ex "target extended-remote localhost:{port}"</code></div>
+    <DesktopOnly feature="Starting GDB" />
   {:else if found && !found.length}
     <div class="warn small">
       No GDB found on your PATH (looked for {CANDIDATES.join(", ")}). Install <code>gdb-multiarch</code> (Debian/Ubuntu), <code>gdb</code> with multiarch support (Arch, Fedora),

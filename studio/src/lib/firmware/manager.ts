@@ -159,9 +159,31 @@ async function httpGet(url: string, accept?: string): Promise<Uint8Array> {
   return new Uint8Array(await r.arrayBuffer());
 }
 
+/**
+ * The web version on GitHub Pages carries a copy of every firmware release
+ * (scripts/mirror-firmware.mjs): a browser page can't fetch GitHub release
+ * downloads, but it can fetch files from its own site.
+ */
+async function mirroredReleases(repo: string): Promise<FirmwareRelease[] | null> {
+  try {
+    const r = await fetch(`${import.meta.env.BASE_URL}firmware/releases.json`, { cache: "no-cache" });
+    if (!r.ok) return null;
+    const m = (await r.json()) as { repo: string; releases: FirmwareRelease[] };
+    if (m.repo.toLowerCase() !== repo.toLowerCase()) return null;
+    const base = new URL(import.meta.env.BASE_URL, location.href);
+    return m.releases.map((rel) => ({ ...rel, assets: rel.assets.map((a) => ({ ...a, url: new URL(a.url, base).href })) }));
+  } catch {
+    return null;
+  }
+}
+
 /** Releases of `repo` ("owner/name") that carry a .binary or .eeprom file, newest first. */
 export async function listFirmwareReleases(repo: string): Promise<FirmwareRelease[]> {
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error("Repository must look like owner/name");
+  if (!isTauri()) {
+    const mirrored = await mirroredReleases(repo);
+    if (mirrored) return mirrored;
+  }
   const body = await httpGet(`https://api.github.com/repos/${repo}/releases?per_page=20`, "application/vnd.github+json");
   const list = JSON.parse(new TextDecoder().decode(body)) as {
     tag_name: string;
@@ -188,8 +210,15 @@ export async function listFirmwareReleases(repo: string): Promise<FirmwareReleas
     .filter((r) => r.assets.length);
 }
 
-export function downloadAsset(a: ReleaseAsset) {
-  return httpGet(a.url, "application/octet-stream");
+export async function downloadAsset(a: ReleaseAsset) {
+  try {
+    return await httpGet(a.url, "application/octet-stream");
+  } catch (e) {
+    // A browser can only download release files the site mirrors (same origin).
+    if (!isTauri() && new URL(a.url, location.href).origin !== location.origin)
+      throw new Error(`The browser blocked downloading ${a.name} from GitHub. Download it from the release page and use "From file", or use the desktop app.`);
+    throw e;
+  }
 }
 
 /** -1 / 0 / 1 comparing dotted versions ("1.12" > "1.3"). */

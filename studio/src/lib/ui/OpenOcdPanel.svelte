@@ -9,6 +9,7 @@
   import { app } from "../stores/app.svelte";
   import Field from "./Field.svelte";
   import GdbConsole from "./GdbConsole.svelte";
+  import DesktopOnly from "./DesktopOnly.svelte";
   import Panel from "./Panel.svelte";
   import RunButton from "./RunButton.svelte";
   import { onDestroy } from "svelte";
@@ -132,8 +133,8 @@
 
   <ol class="steps">
     <li class:done={inOcd || !!proc}>Enter OpenOCD mode with the pinout above. The mode survives resets until you exit it.</li>
-    <li class:done={!!proc}>Launch OpenOCD. The app releases the serial port first.</li>
-    <li>Optionally start GDB below to debug the target. When done, stop OpenOCD and go back to the menu.</li>
+    {#if app.tauri}<li class:done={!!proc}>Launch OpenOCD. The app releases the serial port first.</li>
+    <li>Optionally start GDB below to debug the target. When done, stop OpenOCD and go back to the menu.</li>{/if}
   </ol>
 
   <div class="grid">
@@ -148,16 +149,24 @@
         <option value="fast">Fast (about 1 MHz)</option>
       </select>
     </Field>
-    <Field label="Extra arguments" wide>
-      <input class="input mono" placeholder={'-c "init; scan_chain; targets"'} bind:value={extra} />
-    </Field>
+    {#if app.tauri}
+      <Field label="Extra arguments" wide>
+        <input class="input mono" placeholder={'-c "init; scan_chain; targets"'} bind:value={extra} />
+      </Field>
+    {/if}
   </div>
 
-  <div class="cmd">
-    <code>{command}</code>
-    <button class="btn ghost sm icon" title="Copy" onclick={() => navigator.clipboard.writeText(command)}><Copy size={13} /></button>
-    <button class="btn ghost sm" title="Save these settings as an OpenOCD config file (openocd -f file.cfg)" onclick={saveConfig}><FileCode size={13} /> Save .cfg</button>
-  </div>
+  {#if app.tauri}
+    <div class="cmd">
+      <code>{command}</code>
+      <button class="btn ghost sm icon" title="Copy" onclick={() => navigator.clipboard.writeText(command)}><Copy size={13} /></button>
+      <button class="btn ghost sm" title="Save these settings as an OpenOCD config file (openocd -f file.cfg)" onclick={saveConfig}><FileCode size={13} /> Save .cfg</button>
+    </div>
+  {:else}
+    <div class="cfgrow">
+      <button class="btn sm" title="Save these settings as an OpenOCD config file (openocd -f file.cfg)" onclick={saveConfig}><FileCode size={13} /> Save OpenOCD .cfg</button>
+    </div>
+  {/if}
   {#if !target && taps.length}
     <div class="faint small">
       Chain: {taps.map((t) => (t.idcode !== null ? `0x${t.idcode.toString(16).toUpperCase().padStart(8, "0")}` : "BYPASS") + (t.irLength ? ` (IR ${t.irLength})` : "")).join(" → ")}.
@@ -168,7 +177,7 @@
   {#if app.tauri && found === null}
     <div class="warn">OpenOCD isn't on your PATH. Install it (Linux: your package manager, macOS: <code>brew install open-ocd</code>, Windows: the xPack build), or run the command above in a terminal.</div>
   {:else if !app.tauri}
-    <div class="faint small">Launching OpenOCD needs the desktop app. In a browser, disconnect and run the command above in a terminal.</div>
+    <DesktopOnly feature="Launching OpenOCD" />
   {/if}
 
   {#if lines.length}
@@ -227,6 +236,9 @@
     white-space: pre-wrap;
     word-break: break-all;
     font-size: 12px;
+  }
+  .cfgrow {
+    display: flex;
   }
   .warn {
     font-size: 12.5px;
