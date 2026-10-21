@@ -8,14 +8,14 @@
 //  - Samples are stored 32 bits at a time: at most 1024 samples per capture,
 //    regardless of how many groups are enabled (metadata claims 3072 bytes).
 //  - 0x81 counts are 16-bit little endian: periods = (n + 1) * 4, capped at 1024.
-//    Before ID Tracker 1.3 the read count is capped to the delay count (no
+//    Before PinHound 1.3 the read count is capped to the delay count (no
 //    pre-trigger capture). From 1.3, read > delay with a stage-1 trigger keeps
 //    read - delay samples from before the trigger, at <= 80 MHz / 88.
 //  - 0x80 divider is 24-bit little endian in OLS 100 MHz units; the firmware
 //    converts it to 80 MHz Propeller clocks: wait = floor((div + 1) * 4 / 5),
 //    minimum 66 clocks (1.212 MHz).
 //  - Samples are sent newest first (buffer[delay - 1 - i]).
-//  - Trigger masks/values: before ID Tracker 1.3 a parsing bug kept only the
+//  - Trigger masks/values: before PinHound 1.3 a parsing bug kept only the
 //    first parameter byte, so only CH0-7 could participate in a trigger. Triggers are level (WAITPEQ)
 //    and sampling starts at the trigger, so the trigger is sample 0.
 //  - Trigger config: only the "start" bit (byte 4 bit 3) is honoured.
@@ -52,7 +52,7 @@ export const SUMP_LIMITS = {
   advertisedMaxSampleRateHz: 1_200_000,
   minSampleRateHz: 80_000_000 / Math.floor((0x1000000 * 4) / 5),
   maxSamples: 1024,
-  /** ID Tracker 1.4 packs samples (4 per 3 longs): normal captures go up to this. */
+  /** PinHound 1.4 packs samples (4 per 3 longs): normal captures go up to this. */
   packedMaxSamples: 1364,
   /** Fastest rate with run-length encoding (firmware RLE_MIN_CLOCKS_WAIT = 160). */
   rleMaxRateHz: 80_000_000 / 160,
@@ -61,7 +61,7 @@ export const SUMP_LIMITS = {
   sampleStep: 4,
   channels: 24,
   groups: 3,
-  /** Trigger channels on firmware with the old parsing bug (before ID Tracker 1.3). */
+  /** Trigger channels on firmware with the old parsing bug (before PinHound 1.3). */
   triggerChannelMask: 0xff,
   /** Trigger channels on fixed firmware. */
   fullTriggerChannelMask: 0xffffff,
@@ -146,7 +146,7 @@ export function planSampleRate(hz: number): RatePlan {
   return { divider, clocksWait, actualHz: L.clockHz / clocksWait };
 }
 
-/** Clamp a sample count to a multiple of 4 in [4, max] (max 1024, or 1364 on ID Tracker 1.4). */
+/** Clamp a sample count to a multiple of 4 in [4, max] (max 1024, or 1364 on PinHound 1.4). */
 export function clampSamples(n: number, max: number = SUMP_LIMITS.maxSamples): number {
   const L = SUMP_LIMITS;
   if (!Number.isFinite(n)) return max;
@@ -296,7 +296,7 @@ export class SumpError extends Error {
 
 export class SumpClient {
   /**
-   * fullTriggers: the firmware parses all 24 trigger channels (ID Tracker 1.3+).
+   * fullTriggers: the firmware parses all 24 trigger channels (PinHound 1.3+).
    * preTrigger: the firmware can keep samples from before the trigger (1.3+).
    * longCaptures: the firmware packs samples, allowing 1364 instead of 1024 (1.4+).
    * rle: the firmware supports run-length encoded captures (1.4+).
@@ -491,7 +491,7 @@ export class SumpClient {
     const stages = opts.stages?.length ? opts.stages.slice(0, 4) : trig ? [{ ...trig, start: true }] : [];
     if (opts.stages?.length && pre) throw new SumpError("Pre-trigger samples need a single-stage trigger");
     if (stages.some((st) => st.mask & ~tmask))
-      throw new SumpError("This firmware can only trigger on CH0-7 (update to ID Tracker 1.3 for all channels)");
+      throw new SumpError("This firmware can only trigger on CH0-7 (update to PinHound 1.3 for all channels)");
     const triggered = stages.some((st) => st.mask);
     const bps = popcount3(groups);
     const expectBytes = count * bps;

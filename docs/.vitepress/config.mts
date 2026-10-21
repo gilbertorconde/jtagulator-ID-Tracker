@@ -1,16 +1,16 @@
 import { defineConfig } from "vitepress";
 
-const repo = "https://github.com/gilbertorconde/jtagulator-ID-Tracker";
-const site = "https://gilbertorconde.github.io/jtagulator-ID-Tracker/";
+const repo = "https://github.com/gilbertorconde/pinhound";
+const site = "https://gilbertorconde.github.io/pinhound/";
 
 export default defineConfig({
-  title: "JTAGulator ID Tracker",
-  description: "Manual for the JTAGulator, the ID Tracker firmware and JTAGulator Studio",
-  base: "/jtagulator-ID-Tracker/",
+  title: "PinHound",
+  description: "PinHound: enhanced firmware and tools for the JTAGulator. Manual for the firmware, PinHound Studio and the command-line tool",
+  base: "/pinhound/",
   cleanUrls: true,
   lastUpdated: true,
   srcExclude: ["**/_*.md", "README.md"],
-  head: [["link", { rel: "icon", href: "/jtagulator-ID-Tracker/favicon.png" }]],
+  head: [["link", { rel: "icon", href: "/pinhound/favicon.png" }]],
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/introduction" },
@@ -41,7 +41,7 @@ export default defineConfig({
         ],
       },
       {
-        text: "JTAGulator Studio",
+        text: "PinHound Studio",
         items: [
           { text: "Overview", link: "/studio/" },
           { text: "Web version", link: "/studio/web" },
@@ -52,12 +52,21 @@ export default defineConfig({
           { text: "Command-line tool", link: "/studio/cli" },
         ],
       },
-      { text: "Development", items: [{ text: "Building and contributing", link: "/development" }] },
+      {
+        text: "Project",
+        items: [
+          { text: "Building and contributing", link: "/development" },
+          { text: "Credits", link: "/credits" },
+        ],
+      },
     ],
     socialLinks: [{ icon: "github", link: repo }],
     editLink: { pattern: `${repo}/edit/master/docs/:path`, text: "Edit this page on GitHub" },
     search: { provider: "local" },
     outline: { level: [2, 3] },
-    footer: { message: "MIT licensed. The original JTAGulator firmware is CC BY 3.0 US.", copyright: "JTAGulator by Joe Grand, Grand Idea Studio" },
+    footer: {
+      message: "PinHound is MIT licensed and independent of Grand Idea Studio. The original JTAGulator firmware is CC BY 3.0 US.",
+      copyright: "JTAGulator by Joe Grand, Grand Idea Studio · Manufacturer ID database by Weiao (Chaoschaos1024)",
+    },
   },
 });

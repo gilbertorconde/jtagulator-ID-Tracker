@@ -31,5 +31,5 @@ Type `U` to enter UART mode, then `H` for its commands.
    ![ ](/media/image37.png " ")
    - **Local echo:** turn it off (`N`) for interactive shells (e.g. a Linux console), which echo by themselves. Turn it on (`Y`) for devices that don't echo.
    - **Leave** with `Ctrl+X`.
-   - In JTAGulator Studio, the UART page has a full terminal for this. Its scripts can wait for target output with `uart.expect()`, e.g. to stop U-Boot's autoboot.
+   - In PinHound Studio, the UART page has a full terminal for this. Its scripts can wait for target output with `uart.expect()`, e.g. to stop U-Boot's autoboot.
 

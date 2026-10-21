@@ -18,7 +18,7 @@ for (const d of ids.devices) log(`#${d.index} ${d.idcode.hex} ${d.idcode.manufac
 - **Macro recorder.** Click **Record macro**, use the UI, then stop: your actions become a script.
 - **Library.** Scripts are saved as files in the app's data folder. Examples cover finding JTAG, trying every interface, interrupting U-Boot and sweeping voltages for SWD.
 - **Return values** are shown when the script finishes. `Ctrl+Enter` runs the script.
-- **Command line.** `jtagulator-cli run script.js` runs the same scripts from a terminal (see [Command-line tool](/studio/cli)).
+- **Command line.** `pinhound run script.js` runs the same scripts from a terminal (see [Command-line tool](/studio/cli)).
 
 ## Device functions
 

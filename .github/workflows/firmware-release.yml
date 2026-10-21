@@ -1,7 +1,7 @@
 name: Firmware release
 
 # Push a tag like fw-v1.3 to build the firmware with OpenSpin and attach the
-# images to a draft GitHub release. JTAGulator Studio's Firmware page lists
+# images to a draft GitHub release. PinHound Studio's Firmware page lists
 # these releases under "GitHub releases".
 on:
   push:
@@ -29,11 +29,11 @@ jobs:
           version="${GITHUB_REF_NAME#fw-v}"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           mkdir -p out
-          openspin -q -b -o "out/JTAGulator-IDTracker-${version}.binary" JTAGulator.spin
-          openspin -q -e -o "out/JTAGulator-IDTracker-${version}.eeprom" JTAGulator.spin
+          openspin -q -b -o "out/PinHound-${version}.binary" JTAGulator.spin
+          openspin -q -e -o "out/PinHound-${version}.eeprom" JTAGulator.spin
           openspin -q -b -o out/EEPROM_Update.binary eepromupdate/EEPROM_Update.spin
           # The firmware must report the version in the tag.
-          grep -aq "ID Tracker ${version}" "out/JTAGulator-IDTracker-${version}.binary"
+          grep -aq "PinHound ${version}" "out/PinHound-${version}.binary"
           ls -l out
 
       - uses: softprops/action-gh-release@v3
@@ -41,13 +41,14 @@ jobs:
           draft: true
           # Studio's updater reads releases/latest, so firmware releases never take that slot.
           make_latest: false
-          name: "JTAGulator firmware ID Tracker ${{ steps.build.outputs.version }}"
+          name: "PinHound firmware ${{ steps.build.outputs.version }}"
           body: |
-            Install with JTAGulator Studio (Firmware page) or Propeller Tool.
+            PinHound firmware for the JTAGulator. Install it with PinHound Studio
+            (Firmware page, also in the browser) or Propeller Tool.
 
-            - `JTAGulator-IDTracker-*.binary` / `.eeprom`: the firmware.
+            - `PinHound-*.binary` / `.eeprom`: the firmware.
             - `EEPROM_Update.binary`: writes the manufacturer database (run it
-              from RAM; JTAGulator Studio does this for you).
+              from RAM; PinHound Studio does this for you).
 
             See CHANGES.markdown for what changed.
           files: out/*

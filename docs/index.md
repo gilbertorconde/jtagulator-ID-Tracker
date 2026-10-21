@@ -1,23 +1,23 @@
 ---
 layout: home
 hero:
-  name: JTAGulator ID Tracker
+  name: PinHound
   text: Find debug interfaces. Name the chips behind them.
-  tagline: Enhanced JTAGulator firmware with a manufacturer database, and JTAGulator Studio, a desktop app and command-line tool that drive it.
+  tagline: Enhanced firmware and tools for the JTAGulator. A manufacturer database, a better logic analyzer, and PinHound Studio, a desktop and browser app with a command-line tool.
   actions:
     - theme: brand
       text: Get started
       link: /guide/introduction
     - theme: alt
       text: Open in your browser
-      link: https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/
+      link: https://gilbertorconde.github.io/pinhound/app/
       target: _self
     - theme: alt
-      text: JTAGulator Studio
+      text: PinHound Studio
       link: /studio/
     - theme: alt
       text: Downloads
-      link: https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases
+      link: https://github.com/gilbertorconde/pinhound/releases
 features:
   - title: Interface discovery
     details: Find JTAG, SWD and UART pinouts by brute force across 24 channels, at 1.4 to 3.3 V.
@@ -31,6 +31,6 @@ features:
 
 <div class="vp-doc" style="max-width: 1152px; margin: 48px auto 0; padding: 0 24px;">
 
-![JTAGulator Studio: a JTAG scan with each IDCODE decoded](/image/studio-jtag.png)
+![PinHound Studio: a JTAG scan with each IDCODE decoded](/image/studio-jtag.png)
 
 </div>

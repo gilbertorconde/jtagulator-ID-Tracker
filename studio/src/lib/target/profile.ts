@@ -61,7 +61,7 @@ export const JTARGET_VERSION = 1;
 const FINDING_KINDS = new Set(["jtag", "rtck", "swd", "uart", "uart-txd", "extest", "irdr"]);
 
 /** A target as a .jtarget file (JSON). */
-export function serializeTarget(t: TargetProfile, app = "JTAGulator Studio"): string {
+export function serializeTarget(t: TargetProfile, app = "PinHound Studio"): string {
   return JSON.stringify({ format: JTARGET_FORMAT, version: JTARGET_VERSION, exportedBy: app, exportedAt: new Date().toISOString(), target: t }, null, 2);
 }
 
@@ -85,10 +85,10 @@ export function parseTarget(text: string): { target: TargetProfile; skipped: num
   }
   if (isObj(data) && data.format === JTARGET_FORMAT) {
     if (typeof data.version !== "number" || data.version > JTARGET_VERSION)
-      throw new Error(`This target file is format version ${String(data.version)}; this app reads up to version ${JTARGET_VERSION}. Update JTAGulator Studio.`);
+      throw new Error(`This target file is format version ${String(data.version)}; this app reads up to version ${JTARGET_VERSION}. Update PinHound Studio.`);
     data = data.target;
   }
-  if (!isObj(data) || !isObj(data.jtag) || !Array.isArray(data.findings)) throw new Error("Not a JTAGulator Studio target file");
+  if (!isObj(data) || !isObj(data.jtag) || !Array.isArray(data.findings)) throw new Error("Not a PinHound Studio target file");
   const d = data;
   const sub = (k: string) => (isObj(d[k]) ? (d[k] as Record<string, unknown>) : {});
   const j = sub("jtag");

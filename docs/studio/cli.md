@@ -1,6 +1,6 @@
 # Command-line tool
 
-`jtagulator-cli` runs the same scans, device-ID reads and scripts as Studio from a terminal, on the same code. Use it for automation, CI and quick checks; `--json` gives machine-readable output, and `--sim` uses the built-in simulator instead of hardware.
+`pinhound` runs the same scans, device-ID reads and scripts as Studio from a terminal, on the same code. Use it for automation, CI and quick checks; `--json` gives machine-readable output, and `--sim` uses the built-in simulator instead of hardware.
 
 ## Installing
 
@@ -9,8 +9,8 @@ It needs [Node.js](https://nodejs.org) 20 or later and [pnpm](https://pnpm.io):
 ```sh
 cd studio
 pnpm install
-pnpm build:cli                         # -> dist-cli/jtagulator-cli.mjs
-node dist-cli/jtagulator-cli.mjs --help
+pnpm build:cli                         # -> dist-cli/pinhound.mjs
+node dist-cli/pinhound.mjs --help
 ```
 
 ## Commands
@@ -26,7 +26,7 @@ node dist-cli/jtagulator-cli.mjs --help
 | `bypass --tdi N --tdo N --tck N --tms N` | Check TDI/TDO with a BYPASS shift |
 | `gpio read` / `gpio monitor --duration MS` / `gpio write VALUE --hold MS` | Read, watch or drive the channels |
 | `run SCRIPT.js` | Run a script with the [scripting API](/studio/scripting) |
-| `firmware install [FILE] --yes` | Program firmware into EEPROM (bundled ID Tracker by default) |
+| `firmware install [FILE] --yes` | Program firmware into EEPROM (bundled PinHound firmware by default) |
 | `firmware test [FILE]` | Load firmware into RAM only, until the next reset |
 | `firmware probe` | Check the manufacturer database (reads only) |
 | `firmware db --yes` | Write the manufacturer database (about 20 minutes) |
@@ -49,9 +49,9 @@ Opening the port restarts the JTAGulator, which clears the target voltage, so pa
 ## Examples
 
 ```sh
-jtagulator-cli -v 3.3 scan jtag --start 0 --end 7
-jtagulator-cli -v 3.3 --json ids jtag --tdo 5 --tck 2 --tms 4 | jq '.devices[].idcode.hex'
-jtagulator-cli -v 1.8 scan swd --end 11
-jtagulator-cli -v 3.3 run find-everything.js
-jtagulator-cli firmware probe
+pinhound -v 3.3 scan jtag --start 0 --end 7
+pinhound -v 3.3 --json ids jtag --tdo 5 --tck 2 --tms 4 | jq '.devices[].idcode.hex'
+pinhound -v 1.8 scan swd --end 11
+pinhound -v 3.3 run find-everything.js
+pinhound firmware probe
 ```

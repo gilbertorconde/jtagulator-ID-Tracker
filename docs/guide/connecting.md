@@ -59,5 +59,5 @@ If the banner doesn't appear, press Enter.
 
 ![ ](/media/image14.png " ")
 
-> **Tip:** a convenient setup is to plug the JTAGulator into a Raspberry Pi or another Linux box and work over SSH. You can also run JTAGulator Studio's browser version there and reach it through an SSH tunnel.
+> **Tip:** a convenient setup is to plug the JTAGulator into a Raspberry Pi or another Linux box and work over SSH. You can also run PinHound Studio's browser version there and reach it through an SSH tunnel.
 

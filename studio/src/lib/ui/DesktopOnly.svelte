@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  export const DOWNLOAD_URL = "https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases/latest";
+  export const DOWNLOAD_URL = "https://github.com/gilbertorconde/pinhound/releases/latest";
 </script>
 
 <script lang="ts">
@@ -13,7 +13,7 @@
   <MonitorDown size={15} />
   <span>
     <b>{feature}</b> needs the desktop app: {why}.
-    <a href={DOWNLOAD_URL} target="_blank" rel="noreferrer">Download JTAGulator Studio</a> for Windows, macOS or Linux.
+    <a href={DOWNLOAD_URL} target="_blank" rel="noreferrer">Download PinHound Studio</a> for Windows, macOS or Linux.
   </span>
 </div>
 

@@ -26,7 +26,7 @@ afterAll(async () => {
 
 describe("Propeller loader (RAM only)", () => {
   it("describes bundled images", () => {
-    expect(describeImage(asset("jtagulator.binary"))).toMatchObject({ idTracker: true, version: "1.4" });
+    expect(describeImage(asset("jtagulator.binary"))).toMatchObject({ pinhound: true, version: "1.4" });
   });
 
   it("runs the EEPROM probe from RAM", async () => {
@@ -42,7 +42,7 @@ describe("Propeller loader (RAM only)", () => {
     expect(out).toMatch(/JTS-PROBE flag=[0-9A-F]{2} .* end/);
   });
 
-  it("runs ID Tracker 1.3 from RAM and the API talks to it", async () => {
+  it("runs PinHound 1.3 from RAM and the API talks to it", async () => {
     await loadPropeller(t, asset("jtagulator.binary"), "ram");
     const s = new Session(t);
     await s.connect();

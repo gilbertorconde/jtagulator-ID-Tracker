@@ -36,7 +36,7 @@ export function toVCD(cap: Capture, o: ExportOptions & { comment?: string } = {}
   const ids = chans.map((_, i) => vcdId(i));
   const lines: string[] = [];
   lines.push(`$date ${new Date(cap.capturedAt).toISOString()} $end`);
-  lines.push("$version JTAGulator Studio logic analyzer $end");
+  lines.push("$version PinHound Studio logic analyzer $end");
   lines.push(
     `$comment ${o.comment ?? `${cap.samples.length} samples at ${cap.sampleRateHz} Hz` + (cap.triggerIndex !== null ? `, trigger at sample ${cap.triggerIndex}` : "")} $end`,
   );

@@ -29,7 +29,7 @@ describe("idcode", () => {
 describe("general", () => {
   it("reads version info", async () => {
     const info = await dev.info();
-    expect(info.idTracker).toBe(true);
+    expect(info.pinhound).toBe(true);
     expect(info.version).toBe("1.4");
   });
 
@@ -100,7 +100,7 @@ describe("JTAG", () => {
   it("rejects pin collisions before talking to the device", async () => {
     await expect(dev.testBypass({ tdi: 3, tdo: 3, tck: 2, tms: 4 })).rejects.toThrow(/unique/);
     // Session is still usable afterwards.
-    expect((await dev.info()).idTracker).toBe(true);
+    expect((await dev.info()).pinhound).toBe(true);
   });
 
   it("IR/DR discovery needs a single device", async () => {
@@ -133,7 +133,7 @@ describe("JTAG", () => {
     const r = await p;
     expect(r.aborted).toBe(true);
     sim.fw.scanSeconds = 0.05;
-    expect((await dev.info()).idTracker).toBe(true);
+    expect((await dev.info()).pinhound).toBe(true);
   });
 });
 

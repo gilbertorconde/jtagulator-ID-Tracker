@@ -5,7 +5,7 @@ import type { SimFirmware, SumpHandler } from "../sim/firmware";
 
 const CAN = 0x18;
 const CLK = 80_000_000;
-const MAX_PERIODS = 1364; // ID Tracker 1.4 packs samples; pre-trigger captures stay at 1024
+const MAX_PERIODS = 1364; // PinHound 1.4 packs samples; pre-trigger captures stay at 1024
 const MAX_PRE_PERIODS = 1024;
 const DEFAULT_CLOCKS_WAIT = 66;
 const DISABLE_FLAGS_MASK = 0b0011_1100;
@@ -83,11 +83,11 @@ export class SimSump implements SumpHandler {
   clocksWait = DEFAULT_CLOCKS_WAIT;
   readPeriods = MAX_PERIODS;
   delayPeriods = MAX_PERIODS;
-  /** Counts as requested (resolved at run, like ID Tracker 1.3). */
+  /** Counts as requested (resolved at run, like PinHound 1.3). */
   readReq = MAX_PERIODS;
   delayReq = MAX_PERIODS;
   disableFlags = 0b0010_0000;
-  /** OLS flag bit 8: run-length encoding (ID Tracker 1.4). */
+  /** OLS flag bit 8: run-length encoding (PinHound 1.4). */
   rle = false;
   trigMask = [0, 0, 0, 0];
   trigVal = [0, 0, 0, 0];
@@ -305,7 +305,7 @@ export class SimSump implements SumpHandler {
         this.disableFlags = v[1] & DISABLE_FLAGS_MASK;
         this.rle = !this.opts.legacyTriggers && (v[2] & 1) === 1;
         break;
-      // Before ID Tracker 1.3, `larg:=vCmd[n]` (not `|=`) left only the first byte.
+      // Before PinHound 1.3, `larg:=vCmd[n]` (not `|=`) left only the first byte.
       case 0xc0:
       case 0xc4:
       case 0xc8:
@@ -332,7 +332,7 @@ export class SimSump implements SumpHandler {
     return out;
   }
 
-  /** Run-length encoded capture, as ID Tracker 1.4's samplerRle + SendAllSamples do it. */
+  /** Run-length encoded capture, as PinHound 1.4's samplerRle + SendAllSamples do it. */
   private runRle(t: number, t0: number, state: { timer: ReturnType<typeof setTimeout> | null }) {
     const groups = [0, 1, 2].filter((g) => !(this.disableFlags & (1 << (2 + g))));
     const rleMax = 2 ** (groups.length * 8 - 1) - 1;
@@ -381,7 +381,7 @@ export class SimSump implements SumpHandler {
 
   private run() {
     const t0 = this.now();
-    // ID Tracker 1.3: read > delay with a stage-1 start trigger keeps samples from
+    // PinHound 1.3: read > delay with a stage-1 start trigger keeps samples from
     // before the trigger, sampling no faster than 80 MHz / 88.
     const preRead = Math.min(this.readReq, MAX_PRE_PERIODS);
     if (!this.opts.legacyTriggers && preRead > this.delayReq && this.trigMask[0] && this.trigStart[0]) {

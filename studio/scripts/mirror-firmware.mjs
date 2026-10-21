@@ -7,8 +7,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const [repo = "gilbertorconde/jtagulator-ID-Tracker", out = "dist/firmware"] = process.argv.slice(2);
-const headers = { "User-Agent": "jtagulator-studio-mirror", ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) };
+const [repo = "gilbertorconde/pinhound", out = "dist/firmware"] = process.argv.slice(2);
+const headers = { "User-Agent": "pinhound-mirror", ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) };
 
 const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=50`, { headers: { ...headers, Accept: "application/vnd.github+json" } });
 if (!res.ok) throw new Error(`Listing releases: HTTP ${res.status}`);

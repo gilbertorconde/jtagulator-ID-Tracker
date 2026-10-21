@@ -103,10 +103,10 @@
 
   <Panel title="About">
     <div class="small">
-      <p><b>JTAGulator Studio</b> {version} — a desktop frontend for the <a href="https://jtagulator.com" target="_blank" rel="noreferrer">JTAGulator</a> by Joe Grand.</p>
+      <p><b>PinHound Studio</b> {version}: a desktop and browser frontend for the <a href="https://jtagulator.com" target="_blank" rel="noreferrer">JTAGulator</a>, the hardware tool by Joe Grand (Grand Idea Studio). PinHound is an independent project; its manufacturer ID database comes from <a href="https://github.com/Chaoschaos1024/jtagulator-ID-Tracker" target="_blank" rel="noreferrer">ID Tracker</a> by Weiao (Chaoschaos1024).</p>
       <p class="muted">
-        It drives the stock firmware's text menu over USB serial (115200 8N1), so it works with the original firmware and with ID Tracker. Manufacturer
-        names are decoded locally from the JEP106 table that ships with ID Tracker (1,953 entries), even on firmware without the EEPROM database.
+        It drives the stock firmware's text menu over USB serial (115200 8N1), so it works with PinHound and with the original firmware. Manufacturer
+        names are decoded locally from the JEP106 table that ships with PinHound (1,953 entries), even on firmware without the EEPROM database.
       </p>
     </div>
   </Panel>

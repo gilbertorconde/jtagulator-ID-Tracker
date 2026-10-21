@@ -13,7 +13,7 @@
     if (!app.tauri || !app.settings.autoUpdateCheck || Date.now() - app.settings.lastUpdateCheck < 24 * 3600 * 1000) return;
     const timer = setTimeout(async () => {
       const { updates } = await import("./lib/stores/updates.svelte");
-      if (await updates.check()) app.toast("info", `JTAGulator Studio ${updates.version} is available`, "Install it from Settings → Updates.", 12000);
+      if (await updates.check()) app.toast("info", `PinHound Studio ${updates.version} is available`, "Install it from Settings → Updates.", 12000);
       if (updates.status !== "error") app.settings.lastUpdateCheck = Date.now();
     }, 3000);
     return () => clearTimeout(timer);

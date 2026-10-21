@@ -1,6 +1,6 @@
 # Building and contributing
 
-The repository holds the firmware (Spin and PASM for the Parallax Propeller) at the root, the database writer in `eepromupdate/`, JTAGulator Studio in `studio/`, and this site in `docs/`.
+The repository holds the firmware (Spin and PASM for the Parallax Propeller) at the root, the database writer in `eepromupdate/`, PinHound Studio in `studio/`, and this site in `docs/`.
 
 ## Firmware
 
@@ -25,7 +25,7 @@ The hardware tests need nothing wired to the channels and load firmware into RAM
 ```sh
 cd docs
 pnpm install
-pnpm dev                # http://localhost:5173/jtagulator-ID-Tracker/
+pnpm dev                # http://localhost:5173/pinhound/
 ```
 
 Pages are Markdown under `docs/guide` and `docs/studio`. The script API table is generated from `studio/src/lib/scripting/api.ts`. Every push to `master` that changes `docs/` deploys the site to GitHub Pages.

@@ -139,7 +139,7 @@ describe("SumpClient against the simulator", () => {
     }
   });
 
-  it("triggers on any channel with fixed firmware (ID Tracker 1.3)", async () => {
+  it("triggers on any channel with fixed firmware (PinHound 1.3)", async () => {
     const full = new SumpClient(session, { fullTriggers: true });
     const uart = 1 << 16; // sim UART TX idles high; trigger on a start bit
     const cap = await full.capture({ sampleRateHz: 100_000, samples: 64, channels: [], trigger: { mask: uart, value: 0 } });
@@ -287,7 +287,7 @@ describe("SPI and I2C decoders", () => {
   });
 });
 
-describe("pre-trigger capture (ID Tracker 1.3)", () => {
+describe("pre-trigger capture (PinHound 1.3)", () => {
   it("keeps samples from before the trigger", async () => {
     const client = new SumpClient(session, { fullTriggers: true, preTrigger: true });
     const cs = 1 << SIM_SIGNALS.spi.cs;
@@ -310,7 +310,7 @@ describe("pre-trigger capture (ID Tracker 1.3)", () => {
   });
 });
 
-describe("longer captures (ID Tracker 1.4)", () => {
+describe("longer captures (PinHound 1.4)", () => {
   it("takes 1364 samples when the firmware packs them, 1024 otherwise", async () => {
     const long = new SumpClient(session, { longCaptures: true });
     expect((await long.capture({ sampleRateHz: 100_000, samples: 5000, channels: [] })).samples.length).toBe(1364);
@@ -327,7 +327,7 @@ describe("longer captures (ID Tracker 1.4)", () => {
   });
 });
 
-describe("run-length encoding (ID Tracker 1.4)", () => {
+describe("run-length encoding (PinHound 1.4)", () => {
   it("decodes to the same waveform over a much longer time", async () => {
     const plain = new SumpClient(session, { longCaptures: true });
     const rle = new SumpClient(session, { longCaptures: true, rle: true });

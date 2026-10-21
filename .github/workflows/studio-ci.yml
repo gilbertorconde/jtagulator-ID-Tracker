@@ -33,7 +33,7 @@ jobs:
       - run: pnpm build
       # The command-line tool: bundle it and run it against the simulator.
       - run: pnpm build:cli
-      - run: node dist-cli/jtagulator-cli.mjs --sim -v 3.3 --json scan jtag | tee /dev/stderr | grep -q '"tdo":5'
+      - run: node dist-cli/pinhound.mjs --sim -v 3.3 --json scan jtag | tee /dev/stderr | grep -q '"tdo":5'
 
   rust:
     runs-on: ubuntu-latest

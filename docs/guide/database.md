@@ -1,6 +1,6 @@
 # Manufacturer database
 
-ID Tracker stores the JEDEC **JEP106** manufacturer list in the upper half of the JTAGulator's 64 KB EEPROM, so the firmware prints a manufacturer name next to every JTAG IDCODE and SWD DPIDR it reads. This is the same list behind the manufacturer field of a JTAG IDCODE and the designer field of an ARM DPIDR: a bank number (bits 11..8) and a 7-bit code (bits 7..1).
+PinHound firmware stores the JEDEC **JEP106** manufacturer list in the upper half of the JTAGulator's 64 KB EEPROM, so the firmware prints a manufacturer name next to every JTAG IDCODE and SWD DPIDR it reads. This is the same list behind the manufacturer field of a JTAG IDCODE and the designer field of an ARM DPIDR: a bank number (bits 11..8) and a 7-bit code (bits 7..1).
 
 | Property | Value |
 | :--- | :--- |
@@ -13,8 +13,8 @@ The database survives firmware updates, so you write it once.
 
 ## Writing it
 
-- **JTAGulator Studio:** on the **Firmware** page, click **Check** (runs a read-only probe from RAM), then **Write database** if it's missing. The writer runs from RAM and only touches the upper 32 KB, so the installed firmware stays.
-- **Command line:** `jtagulator-cli firmware probe`, then `jtagulator-cli firmware db --yes`.
+- **PinHound Studio:** on the **Firmware** page, click **Check** (runs a read-only probe from RAM), then **Write database** if it's missing. The writer runs from RAM and only touches the upper 32 KB, so the installed firmware stays.
+- **Command line:** `pinhound firmware probe`, then `pinhound firmware db --yes`.
 - **Propeller Tool:** load `eepromupdate/EEPROM_Update.spin` into RAM (F10) and watch a serial terminal at 115200 8N1 until `Result: Success - Writing completion flag`. If it's interrupted, power-cycle and run it again.
 
 ![Writing the database](/image/running.png)

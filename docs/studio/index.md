@@ -1,6 +1,6 @@
-# JTAGulator Studio
+# PinHound Studio
 
-JTAGulator Studio is a desktop app for Windows, macOS and Linux that drives the JTAGulator for you. It also runs in Chrome, Edge or Opera with nothing to install: [open the web app](https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/){target="_self"} (see [Web version](/studio/web)). It answers every prompt of the firmware's serial menu from form inputs and shows the results as structured cards instead of terminal text. It works with the stock firmware and with ID Tracker, and also runs in Chrome or Edge.
+PinHound Studio is a desktop app for Windows, macOS and Linux that drives the JTAGulator for you. It also runs in Chrome, Edge or Opera with nothing to install: [open the web app](https://gilbertorconde.github.io/pinhound/app/){target="_self"} (see [Web version](/studio/web)). It answers every prompt of the firmware's serial menu from form inputs and shows the results as structured cards instead of terminal text. It works with PinHound and with the stock firmware, and also runs in Chrome or Edge.
 
 ![A JTAG scan in Studio](/image/studio-jtag.png)
 
@@ -24,7 +24,7 @@ A built-in **simulator** (a software JTAGulator with a fake target board) lets y
 
 ## Installing
 
-Download the installer for your system from the [releases page](https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases). The desktop app checks for new versions at startup (at most once a day) and installs them from **Settings → Updates**; every update is verified against the project's signing key before it is installed.
+Download the installer for your system from the [releases page](https://github.com/gilbertorconde/pinhound/releases). The desktop app checks for new versions at startup (at most once a day) and installs them from **Settings → Updates**; every update is verified against the project's signing key before it is installed.
 
 - **Linux permissions.** Serial ports usually belong to a group (`uucp` on Arch, `dialout` on Debian/Ubuntu). Add yourself with `sudo usermod -aG uucp $USER`, then log in again.
 - **Browser.** Run `pnpm dev` in `studio/` and open `http://localhost:1420` in Chrome or Edge to reach a real JTAGulator over Web Serial. Other browsers can only run the simulator.

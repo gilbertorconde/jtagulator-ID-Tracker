@@ -52,7 +52,7 @@ describe(".jtarget files", () => {
   it("refuses files from a newer format and things that aren't targets", () => {
     expect(() => parseTarget(JSON.stringify({ format: "jtagulator-target", version: 9, target: sample() }))).toThrow(/version 9/);
     expect(() => parseTarget("{")).toThrow(/valid JSON/);
-    expect(() => parseTarget(JSON.stringify({ hello: 1 }))).toThrow(/Not a JTAGulator Studio target/);
+    expect(() => parseTarget(JSON.stringify({ hello: 1 }))).toThrow(/Not a PinHound Studio target/);
   });
 });
 

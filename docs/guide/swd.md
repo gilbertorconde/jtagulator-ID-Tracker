@@ -16,6 +16,6 @@ Type `S` to enter SWD mode, then `H` for its commands.
 
 2. **`D` – read the SWD ID**
    - Reads the debug port ID register (DPIDR) of the target.
-   - **With ID Tracker**, the designer's name is shown as well.
+   - **With PinHound firmware**, the designer's name is shown as well.
    - **Note:** many chip makers license ARM's Cortex cores. The designer field of the DPIDR then says "ARM" rather than the chip maker (for example on some STM32 parts).
 

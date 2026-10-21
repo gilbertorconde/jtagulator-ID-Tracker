@@ -12,14 +12,14 @@ async function cli(...argv: string[]) {
   return { code, out, err, json: () => JSON.parse(out) };
 }
 
-describe("jtagulator-cli on the simulator", () => {
+describe("pinhound on the simulator", () => {
   it("prints help and the version", async () => {
-    expect((await cli("--help")).out).toContain("Usage: jtagulator-cli");
+    expect((await cli("--help")).out).toContain("Usage: pinhound");
     expect((await cli("--version")).out).toMatch(/^\d+\.\d+\.\d+\n$/);
   });
 
   it("reads info and sets the voltage", async () => {
-    expect((await cli("info")).out).toContain("ID Tracker 1.4 (simulated)");
+    expect((await cli("info")).out).toContain("PinHound 1.4 (simulated)");
     const r = await cli("--json", "voltage", "3.3");
     expect(r.json()).toEqual({ voltage: 3.3 });
   });

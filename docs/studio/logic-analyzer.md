@@ -9,11 +9,11 @@ The JTAGulator's OLS/SUMP logic analyzer mode samples all 24 channels. Studio's 
 | Setting | Notes |
 | :--- | :--- |
 | Sample rate | Up to 1.2 MHz. The page shows the exact rate the firmware will use. |
-| Samples | Up to 1,364 on ID Tracker 1.4 (1,024 on earlier firmware). |
+| Samples | Up to 1,364 on PinHound 1.4 (1,024 on earlier firmware). |
 | Channel groups | CH0–7, CH8–15, CH16–23. Fewer groups transfer faster. |
-| Compress repeated samples (RLE) | Stores a value and a repeat count instead of identical samples, so slow or bursty signals cover far more time. Up to 500 kHz. ID Tracker 1.4. |
+| Compress repeated samples (RLE) | Stores a value and a repeat count instead of identical samples, so slow or bursty signals cover far more time. Up to 500 kHz. PinHound 1.4. |
 | Trigger | Level trigger on any of the 24 channels, with up to four chained stages. |
-| Keep before trigger | Keeps 10–75 % of the capture from before the trigger (ID Tracker 1.3 and later, up to about 909 kHz). |
+| Keep before trigger | Keeps 10–75 % of the capture from before the trigger (PinHound 1.3 and later, up to about 909 kHz). |
 
 ## Decoders
 

@@ -42,7 +42,7 @@ afterAll(async () => {
   await s.disconnect();
 });
 
-describe("packed captures (ID Tracker 1.4)", () => {
+describe("packed captures (PinHound 1.4)", () => {
   for (const rate of [1_200_000, 100_000, 10_000]) {
     for (const n of [1364, 1024, 64]) {
       it(`${n} samples at ${rate / 1000} kHz`, async () => {
@@ -110,7 +110,7 @@ describe("multi-stage trigger chain", () => {
   });
 });
 
-describe("run-length encoding (ID Tracker 1.4)", () => {
+describe("run-length encoding (PinHound 1.4)", () => {
   /** Lengths of runs of equal samples, ignoring the partial first and last run. */
   const runs = (s: Uint32Array) => {
     const out: number[] = [];

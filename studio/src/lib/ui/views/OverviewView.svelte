@@ -80,7 +80,7 @@
           mode <b>{app.mode}</b>{app.menu ? ` · ${app.menu} menu` : ""} ·
           target I/O {app.voltage === null ? "off" : app.voltage.toFixed(1) + " V"}
         </div>
-        {#if app.info && !app.info.idTracker}
+        {#if app.info && !app.info.pinhound}
           <div class="badge warn">Stock firmware: manufacturer names are decoded by the app instead of the EEPROM database.</div>
         {/if}
       </div>

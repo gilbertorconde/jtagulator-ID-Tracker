@@ -43,7 +43,7 @@
   let dbCtl: AbortController | null = null;
 
   const device = $derived(app.info);
-  const variant = $derived(!device ? null : device.idTracker ? "ID Tracker" : "Stock");
+  const variant = $derived(!device ? null : device.pinhound ? "PinHound" : "Stock");
   const busy = $derived(!!app.firmwareBusy);
   const why = $derived(
     app.status !== "connected"
@@ -55,13 +55,13 @@
           : null,
   );
   const updateAvailable = $derived(
-    !!device?.idTracker && !!device.version && compareVersions(BUNDLED_VERSION, device.version) > 0,
+    !!device?.pinhound && !!device.version && compareVersions(BUNDLED_VERSION, device.version) > 0,
   );
 
   async function pickBundled() {
     try {
       const bytes = await fetchAsset(BUNDLED.firmware);
-      picked = { label: `ID Tracker ${BUNDLED_VERSION} (bundled)`, bytes, info: describeImage(bytes) };
+      picked = { label: `PinHound ${BUNDLED_VERSION} (bundled)`, bytes, info: describeImage(bytes) };
     } catch (e) {
       app.error(e, "Bundled firmware");
     }
@@ -186,7 +186,7 @@
   <div class="cols">
     <Panel title="Your JTAGulator">
       {#snippet aside()}
-        {#if variant}<span class="badge {device?.idTracker ? 'accent' : ''}">{variant}</span>{/if}
+        {#if variant}<span class="badge {device?.pinhound ? 'accent' : ''}">{variant}</span>{/if}
       {/snippet}
       {#if device}
         <div class="big mono">{device.firmware}</div>
@@ -195,10 +195,10 @@
         <div class="muted">{app.status === "connected" ? "Firmware version not read yet." : "Not connected."}</div>
       {/if}
       {#if updateAvailable}
-        <div class="note ok"><HardDriveDownload size={14} /> ID Tracker {BUNDLED_VERSION} is available (you have {device?.version}).</div>
-      {:else if device && !device.idTracker}
+        <div class="note ok"><HardDriveDownload size={14} /> PinHound {BUNDLED_VERSION} is available (you have {device?.version}).</div>
+      {:else if device && !device.pinhound}
         <div class="note info">
-          Stock firmware. ID Tracker adds manufacturer names to JTAG and SWD results; this app decodes them either way.
+          Stock firmware. PinHound firmware adds manufacturer names to JTAG and SWD results; this app decodes them either way.
         </div>
       {/if}
 
@@ -227,7 +227,7 @@
       />
 
       {#if source === "bundled"}
-        <div class="muted small">ID Tracker {BUNDLED_VERSION}, built from this repository and shipped with the app.</div>
+        <div class="muted small">PinHound {BUNDLED_VERSION}, built from this repository and shipped with the app.</div>
         {#if !picked || !picked.label.includes("bundled")}
           <button class="btn sm" onclick={pickBundled}><Package size={13} /> Use bundled firmware</button>
         {/if}
@@ -248,7 +248,7 @@
                 <div class="rel-head">
                   <b>{r.name}</b>
                   <span class="faint small">{new Date(r.published).toLocaleDateString()}</span>
-                  {#if r.version && device?.idTracker && device.version && compareVersions(r.version, device.version) > 0}<span class="badge ok">newer</span>{/if}
+                  {#if r.version && device?.pinhound && device.version && compareVersions(r.version, device.version) > 0}<span class="badge ok">newer</span>{/if}
                   <a class="small" href={r.htmlUrl} target="_blank" rel="noreferrer">notes</a>
                 </div>
                 <div class="assets">
@@ -297,7 +297,7 @@
       {/snippet}
     </Panel>
 
-    <Panel title="Manufacturer database" subtitle="ID Tracker reads manufacturer names from the upper 32 KB of the EEPROM. Write it once; it survives firmware updates.">
+    <Panel title="Manufacturer database" subtitle="PinHound firmware reads manufacturer names from the upper 32 KB of the EEPROM. Write it once; it survives firmware updates.">
       {#if dbProgress && busy}
         <div class="progress">
           <span>{DB_PHASE[dbProgress.phase]} {dbProgress.percent}%</span>
@@ -309,7 +309,7 @@
       {/if}
       <div class="faint small">
         The writer runs from RAM, so you don't have to flash it and then re-flash the main firmware. The
-        names are only shown by ID Tracker firmware; this app shows them for any firmware.
+        names are only shown by PinHound firmware; this app shows them for any firmware.
       </div>
       {#snippet footer()}
         {#if busy && dbProgress}

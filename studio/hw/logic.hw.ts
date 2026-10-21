@@ -1,4 +1,4 @@
-// Logic analyzer on real hardware, running ID Tracker 1.3 from RAM (the board's
+// Logic analyzer on real hardware, running PinHound 1.3 from RAM (the board's
 // installed firmware is untouched). Nothing needs to be connected: the inputs
 // idle at a fixed level, which is enough to check triggers and sample formatting.
 import fs from "node:fs";
@@ -34,7 +34,7 @@ afterAll(async () => {
   await s.disconnect();
 });
 
-describe("SUMP on hardware (ID Tracker 1.3 in RAM)", () => {
+describe("SUMP on hardware (PinHound 1.3 in RAM)", () => {
   it("enters logic analyzer mode and identifies", async () => {
     await dev.enterLogicAnalyzer();
     const sump = new SumpClient(s, { fullTriggers: true });

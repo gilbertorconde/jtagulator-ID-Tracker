@@ -1,4 +1,4 @@
-// jtagulator-cli: the JTAGulator from a terminal, on the same core as the app.
+// pinhound: the JTAGulator from a terminal, on the same core as the app.
 import fs from "node:fs";
 import { parseArgs } from "node:util";
 import { JTAGulator } from "../src/lib/core/jtagulator";
@@ -13,7 +13,7 @@ import { CALLS, HandleTable, type CallName } from "../src/lib/scripting/api";
 import { HOST_CALLS, serveScriptCall } from "../src/lib/scripting/host";
 import { DEFAULT_TARGET } from "../src/lib/sim/firmware";
 
-export const CLI_VERSION = "0.1.3";
+export const CLI_VERSION = "0.2.0";
 
 export interface Io {
   out: (s: string) => void;
@@ -26,9 +26,9 @@ export interface Io {
   signal?: AbortSignal;
 }
 
-const HELP = `jtagulator-cli ${CLI_VERSION}: control a JTAGulator (ID Tracker firmware) from a terminal.
+const HELP = `pinhound ${CLI_VERSION}: control a JTAGulator (PinHound or stock firmware) from a terminal.
 
-Usage: jtagulator-cli [options] <command> [arguments]
+Usage: pinhound [options] <command> [arguments]
 
 Commands
   ports                          List serial ports (JTAGulators first)
@@ -43,7 +43,7 @@ Commands
   gpio read | monitor | write VALUE
                                  Read, watch (--duration ms) or drive channels (--hold ms)
   run SCRIPT.js                  Run a JavaScript file with the app's script API
-  firmware install [FILE]        Program firmware into EEPROM (bundled ID Tracker ${BUNDLED_VERSION} by default; --yes)
+  firmware install [FILE]        Program firmware into EEPROM (bundled PinHound ${BUNDLED_VERSION} by default; --yes)
   firmware test [FILE]           Load firmware into RAM only, until the next reset
   firmware probe                 Check the manufacturer database (reads only)
   firmware db                    Write the manufacturer database (~20 min; --yes)
@@ -68,9 +68,9 @@ Options
       --version       Print the version
 
 Examples
-  jtagulator-cli -v 3.3 scan jtag --start 0 --end 7
-  jtagulator-cli --json ids jtag --tdo 5 --tck 2 --tms 4
-  jtagulator-cli --sim run examples/find-everything.js
+  pinhound -v 3.3 scan jtag --start 0 --end 7
+  pinhound --json ids jtag --tdo 5 --tck 2 --tms 4
+  pinhound --sim run examples/find-everything.js
 `;
 
 class UsageError extends Error {}
@@ -191,7 +191,7 @@ export async function main(argv: string[], io: Io): Promise<number> {
     o = p.values;
     pos = p.positionals;
   } catch (e) {
-    io.err(`${(e as Error).message}\nRun jtagulator-cli --help for usage.\n`);
+    io.err(`${(e as Error).message}\nRun pinhound --help for usage.\n`);
     return 2;
   }
   if (o.version) return io.out(`${CLI_VERSION}\n`), 0;
@@ -233,7 +233,7 @@ export async function main(argv: string[], io: Io): Promise<number> {
         return 0;
       }
       if (mode === "sump" || mode === "ocd")
-        throw new UsageError(`The JTAGulator is in ${mode === "sump" ? "logic analyzer" : "OpenOCD"} mode. Run "jtagulator-cli exit-mode" first.`);
+        throw new UsageError(`The JTAGulator is in ${mode === "sump" ? "logic analyzer" : "OpenOCD"} mode. Run "pinhound exit-mode" first.`);
       if (mode !== "normal") throw new Error("No response from the JTAGulator. Check the port and cable.");
       const ctx = scanContext(o, io, ctl.signal);
       const call = (name: CallName, ...args: unknown[]) => (CALLS[name].run as (...a: unknown[]) => Promise<unknown>)(dev, ctx, ...args);
@@ -322,7 +322,7 @@ export async function main(argv: string[], io: Io): Promise<number> {
           return await runScriptFile(sub, dev, o, io, ctl.signal, ctx);
         }
         default:
-          throw new UsageError(`Unknown command "${cmd}". Run jtagulator-cli --help.`);
+          throw new UsageError(`Unknown command "${cmd}". Run pinhound --help.`);
       }
     } finally {
       await session.disconnect().catch(() => {});
@@ -397,7 +397,7 @@ async function firmware(sub: string | undefined, file: string | undefined, o: Op
     const image = file ? new Uint8Array(fs.readFileSync(file)) : asset(io, "jtagulator.binary");
     await installFirmware(dt, image, sub === "install" ? "eeprom" : "ram", progress);
     emit(
-      `${io.tty && !o.json ? "\r\x1b[K" : ""}${sub === "install" ? "Programmed the EEPROM" : "Loaded into RAM (until the next reset)"}: ${file ?? `ID Tracker ${BUNDLED_VERSION}`}, ${image.length} bytes.`,
+      `${io.tty && !o.json ? "\r\x1b[K" : ""}${sub === "install" ? "Programmed the EEPROM" : "Loaded into RAM (until the next reset)"}: ${file ?? `PinHound ${BUNDLED_VERSION}`}, ${image.length} bytes.`,
       { mode: sub === "install" ? "eeprom" : "ram", bytes: image.length, file: file ?? null },
     );
     return 0;

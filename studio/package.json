@@ -1,11 +1,11 @@
 {
-  "name": "jtagulator-studio",
-  "version": "0.1.3",
-  "description": "Desktop frontend for the JTAGulator (ID Tracker firmware)",
+  "name": "pinhound-studio",
+  "version": "0.2.0",
+  "description": "PinHound Studio: desktop and browser frontend for the JTAGulator (PinHound and stock firmware)",
   "type": "module",
   "private": true,
   "bin": {
-    "jtagulator-cli": "dist-cli/jtagulator-cli.mjs"
+    "pinhound": "dist-cli/pinhound.mjs"
   },
   "scripts": {
     "dev": "vite",
@@ -17,7 +17,7 @@
     "tauri": "tauri",
     "gen:parts": "node scripts/gen-parts.mjs",
     "build:cli": "vite build --config vite.cli.config.ts",
-    "cli": "node dist-cli/jtagulator-cli.mjs"
+    "cli": "node dist-cli/pinhound.mjs"
   },
   "license": "MIT",
   "dependencies": {

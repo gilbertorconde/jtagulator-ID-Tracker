@@ -13,13 +13,14 @@ The hardware design, firmware source and documentation are fully open:
 
 - Official page: http://www.grandideastudio.com/jtagulator/
 - Original firmware: https://github.com/grandideastudio/jtagulator
-- ID Tracker (this project: enhanced firmware and the JTAGulator Studio app): https://github.com/gilbertorconde/jtagulator-ID-Tracker
+- PinHound (this project: enhanced firmware, PinHound Studio and the command-line tool): https://github.com/gilbertorconde/pinhound
+- ID Tracker, the fork PinHound grew from, which added the manufacturer ID database: https://github.com/Chaoschaos1024/jtagulator-ID-Tracker
 - Video tutorials (Chinese): https://space.bilibili.com/39602674
 
 There are two ways to use the JTAGulator:
 
-1. **JTAGulator Studio**, the graphical app in `studio/`. It drives the device for you; see [JTAGulator Studio](/studio/).
+1. **PinHound Studio**, the graphical app in `studio/`. It drives the device for you; see [PinHound Studio](/studio/).
 2. **A serial terminal**, typing the firmware's single-letter commands. Most of this manual describes these commands, because Studio runs exactly the same commands underneath.
 
 
-The JTAGulator's design is worth studying in its own right: the input protection, ESD circuitry and clean layout show Joe Grand's experience in hardware security design. Its core functions are mature, and the community keeps extending it, through enhanced firmware like ID Tracker, apps like JTAGulator Studio, and simple hardware changes such as smaller series resistors.
+The JTAGulator's design is worth studying in its own right: the input protection, ESD circuitry and clean layout show Joe Grand's experience in hardware security design. Its core functions are mature, and the community keeps extending it, through enhanced firmware like ID Tracker and PinHound, apps like PinHound Studio, and simple hardware changes such as smaller series resistors.

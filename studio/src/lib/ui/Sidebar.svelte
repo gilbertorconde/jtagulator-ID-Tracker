@@ -23,7 +23,7 @@
       </svg>
     </div>
     <div>
-      <div class="name">JTAGulator</div>
+      <div class="name">PinHound</div>
       <div class="sub">Studio</div>
     </div>
   </div>

@@ -1,12 +1,14 @@
-# JTAGulator ID Tracker
+# PinHound
 
-Enhanced firmware for the [JTAGulator](https://github.com/grandideastudio/jtagulator), with a 1,953-entry chip manufacturer database, plus **JTAGulator Studio**, a desktop and browser app that drives it.
+**Find debug interfaces. Name the chips behind them.** PinHound is enhanced firmware and tools for the [JTAGulator](https://github.com/grandideastudio/jtagulator) hardware: interface discovery, a 1,953-entry chip manufacturer database, a better logic analyzer, and **PinHound Studio**, a desktop and browser app that drives it all.
 
 *Hardware security testing · JTAG/SWD/UART interface discovery · Chip manufacturer identification*
 
-**Try JTAGulator Studio in your browser: [gilbertorconde.github.io/jtagulator-ID-Tracker/app](https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/)** (Chrome, Edge or Opera on a computer; nothing to install). Installers for Windows, macOS and Linux are on the [releases page](https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases/latest).
+**Try PinHound Studio in your browser: [gilbertorconde.github.io/pinhound/app](https://gilbertorconde.github.io/pinhound/app/)** (Chrome, Edge or Opera on a computer; nothing to install). Installers for Windows, macOS and Linux are on the [releases page](https://github.com/gilbertorconde/pinhound/releases/latest).
 
-The full documentation is at **[gilbertorconde.github.io/jtagulator-ID-Tracker](https://gilbertorconde.github.io/jtagulator-ID-Tracker/)**: every command, wiring, troubleshooting, Studio, scripting and the command-line tool.
+The full documentation is at **[gilbertorconde.github.io/pinhound](https://gilbertorconde.github.io/pinhound/)**: every command, wiring, troubleshooting, Studio, scripting and the command-line tool.
+
+PinHound is an independent project, not affiliated with Grand Idea Studio. It builds on the JTAGulator by Joe Grand and on the manufacturer ID work of Weiao (Chaoschaos1024); see [Credits](#credits).
 
 ---
 
@@ -14,7 +16,7 @@ The full documentation is at **[gilbertorconde.github.io/jtagulator-ID-Tracker](
 
 - [Overview](#overview)
 - [Firmware features](#firmware-features)
-- [JTAGulator Studio](#jtagulator-studio)
+- [PinHound Studio](#pinhound-studio)
 - [Installing the firmware](#installing-the-firmware)
 - [Manufacturer database](#manufacturer-database)
 - [Hardware](#hardware)
@@ -22,6 +24,7 @@ The full documentation is at **[gilbertorconde.github.io/jtagulator-ID-Tracker](
 - [Use cases](#use-cases)
 - [Contributing](#contributing)
 - [Notes and warnings](#notes-and-warnings)
+- [Credits](#credits)
 - [License](#license)
 
 ---
@@ -30,24 +33,27 @@ The full documentation is at **[gilbertorconde.github.io/jtagulator-ID-Tracker](
 
 The JTAGulator, designed by Joe Grand ([@joegrand](https://github.com/joegrand)), finds on-chip debug interfaces (JTAG, SWD, UART) on embedded devices. It uses a Parallax Propeller P8X32A and a 64 KB EEPROM.
 
-This project adds:
+PinHound has two parts:
 
-1. **ID Tracker firmware.** The stock firmware uses only the lower 32 KB of the EEPROM. ID Tracker stores a JEP106 manufacturer table in the upper 32 KB, so JTAG and SWD scans show who made each chip. It also fixes and extends the logic analyzer.
-2. **JTAGulator Studio** (`studio/`). A graphical frontend for both the stock and the ID Tracker firmware. It runs every scan, decodes results, scripts, captures logic, and installs firmware.
+1. **PinHound firmware.** Runs on the JTAGulator and keeps every original feature. The stock firmware uses only the lower 32 KB of the EEPROM; PinHound stores a JEP106 manufacturer database in the upper 32 KB, so JTAG and SWD scans show who made each chip. It also fixes and extends the logic analyzer.
+2. **PinHound Studio** (`studio/`). A graphical frontend, in a desktop app and in the browser, plus the `pinhound` command-line tool. It works with the stock firmware too: it runs every scan, decodes results, scripts, captures logic, debugs through OpenOCD, and installs firmware.
 
 ---
 
 ## Firmware features
 
-| | Stock JTAGulator 1.12 | ID Tracker 1.3 |
+| | Stock JTAGulator 1.12 | PinHound 1.4 |
 | :--- | :--- | :--- |
 | EEPROM used | 32 KB of 64 KB | 64 KB of 64 KB |
 | Manufacturer names in JTAG/SWD results | No | Yes, 1,953 manufacturers |
-| Logic analyzer trigger channels | CH0–7 (parsing bug) | All 24 |
+| Logic analyzer trigger channels | CH0–7 (parsing bug) | All 24, with up to four trigger stages |
 | Logic analyzer pre-trigger capture | No | Yes |
+| Logic analyzer capture length | 1,024 samples | 1,364 samples, far longer with run-length encoding |
 | All original features | Yes | Yes |
 
-What changed in 1.3 (details in [CHANGES.markdown](CHANGES.markdown)):
+PinHound continues the version numbers of the ID Tracker firmware it grew from: releases up to 1.3 were published as "ID Tracker". Changes are listed in [CHANGES.markdown](CHANGES.markdown).
+
+What changed in 1.3:
 
 - **JTAG manufacturer lookup fixed.** Earlier releases used the raw 11-bit manufacturer field as the table index, so every manufacturer outside JEP106 bank 0 showed the wrong name. For example, ARM (`0x43B`) read entry 571 instead of 563. JTAG now uses `bank × 126 + code`, like SWD.
 - **Logic analyzer triggers on all 24 channels.** The trigger mask and value parser kept only the first byte.
@@ -55,10 +61,10 @@ What changed in 1.3 (details in [CHANGES.markdown](CHANGES.markdown)):
 
 ---
 
-## JTAGulator Studio
+## PinHound Studio
 
 <div align="center">
-<img src="image/studio-jtag.png" alt="JTAGulator Studio: JTAG scan" width="90%">
+<img src="image/studio-jtag.png" alt="PinHound Studio: JTAG scan" width="90%">
 <p><em>A JTAG scan: pinout, TRST#, and each IDCODE decoded with its manufacturer</em></p>
 </div>
 
@@ -80,12 +86,12 @@ Studio talks to the JTAGulator's own serial menu. It answers every prompt from y
 | **Layout** | Works in a desktop window and on a phone-sized screen |
 
 <div align="center">
-<img src="image/studio-firmware.png" alt="JTAGulator Studio: firmware page" width="90%">
+<img src="image/studio-firmware.png" alt="PinHound Studio: firmware page" width="90%">
 <p><em>The firmware page, connected to a real JTAGulator</em></p>
 </div>
 
 <div align="center">
-<img src="image/studio-logic.png" alt="JTAGulator Studio: logic analyzer" width="90%">
+<img src="image/studio-logic.png" alt="PinHound Studio: logic analyzer" width="90%">
 <p><em>Logic analyzer capture</em></p>
 </div>
 
@@ -101,7 +107,7 @@ for (const d of ids.devices) log(d.idcode.hex, d.idcode.manufacturer);
 
 ### Running Studio
 
-**In a browser:** open **[the web app](https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/)** in Chrome, Edge or Opera on a desktop computer: nothing to install. Everything works there except launching OpenOCD and GDB, which need the desktop app.
+**In a browser:** open **[the web app](https://gilbertorconde.github.io/pinhound/app/)** in Chrome, Edge or Opera on a desktop computer: nothing to install. Everything works there except launching OpenOCD and GDB, which need the desktop app.
 
 
 Pushing a `studio-v*` tag makes CI build signed installers for Windows, macOS and Linux and attach them to a draft release. Once a release is published, installed copies of the desktop app offer it in **Settings → Updates** (and check at startup, at most daily); each update is verified against the project's signing key before it installs. To run from source you need [Node.js](https://nodejs.org) 20+ and [pnpm](https://pnpm.io). The desktop app also needs [Rust](https://rustup.rs) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) (on Linux, `webkit2gtk-4.1`).
@@ -122,17 +128,17 @@ More detail is in [studio/README.md](studio/README.md).
 
 ### Command-line tool
 
-`jtagulator-cli` runs the same scans and scripts from a terminal, on the same code as Studio. It's handy for automation and CI; add `--json` for machine-readable output.
+`pinhound` runs the same scans and scripts from a terminal, on the same code as Studio. It's handy for automation and CI; add `--json` for machine-readable output.
 
 ```sh
 cd studio
 pnpm install && pnpm build:cli
-node dist-cli/jtagulator-cli.mjs ports                       # FTDI ports are marked *
-node dist-cli/jtagulator-cli.mjs -v 3.3 scan jtag --start 0 --end 7
-node dist-cli/jtagulator-cli.mjs -v 3.3 --json ids jtag --tdo 5 --tck 2 --tms 4
-node dist-cli/jtagulator-cli.mjs -v 3.3 run my-script.js     # the Studio script API
-node dist-cli/jtagulator-cli.mjs firmware probe              # manufacturer database status
-node dist-cli/jtagulator-cli.mjs --sim -v 3.3 scan jtag      # no hardware: the simulator
+node dist-cli/pinhound.mjs ports                       # FTDI ports are marked *
+node dist-cli/pinhound.mjs -v 3.3 scan jtag --start 0 --end 7
+node dist-cli/pinhound.mjs -v 3.3 --json ids jtag --tdo 5 --tck 2 --tms 4
+node dist-cli/pinhound.mjs -v 3.3 run my-script.js     # the Studio script API
+node dist-cli/pinhound.mjs firmware probe              # manufacturer database status
+node dist-cli/pinhound.mjs --sim -v 3.3 scan jtag      # no hardware: the simulator
 ```
 
 Opening the port restarts the JTAGulator, which clears the target voltage, so pass `-v` with every command that drives the target. `--help` lists every command: `info`, `voltage`, `scan jtag|idcode|bypass|rtck|swd|uart|txd`, `ids`, `bypass`, `gpio`, `run`, `firmware install|test|probe|db` and `exit-mode`.
@@ -142,12 +148,12 @@ Opening the port restarts the JTAGulator, which clears the target voltage, so pa
 
 ## Installing the firmware
 
-### With JTAGulator Studio (recommended)
+### With PinHound Studio (recommended)
 
 1. Connect the JTAGulator and open the **Firmware** page.
 2. Click **Check** to see whether the manufacturer database is present. This runs a small program from RAM and writes nothing.
 3. If the database is missing, click **Write database** (about 20 minutes). The writer runs from RAM and only touches the upper 32 KB, so the installed firmware stays.
-4. Under **Install firmware**, choose the bundled ID Tracker build, a GitHub release, or a file.
+4. Under **Install firmware**, choose the bundled PinHound firmware, a GitHub release, or a file.
    - **Test run (RAM)** tries it until the next reset or power cycle.
    - **Install to EEPROM** makes it permanent.
 
@@ -181,7 +187,7 @@ The table follows the JEDEC **JEP106** list, the same list used by the manufactu
 
 <div align="center">
 <img src="image/jtag.png" alt="JTAG scan result in a serial terminal" width="70%">
-<p><em>ID Tracker in a plain serial terminal: the manufacturer name is printed with each JTAG ID</em></p>
+<p><em>The firmware in a plain serial terminal: the manufacturer name is printed with each JTAG ID (shown on ID Tracker 1.3)</em></p>
 </div>
 
 ---
@@ -208,7 +214,7 @@ The table follows the JEDEC **JEP106** list, the same list used by the manufactu
 | :--- | :--- |
 | `JTAGulator.spin`, `Prop*.spin`, … | Firmware (Spin and PASM) |
 | `eepromupdate/` | Manufacturer database writer and the JEP106 table |
-| `studio/` | JTAGulator Studio (Tauri v2, Svelte 5, TypeScript) |
+| `studio/` | PinHound Studio (Tauri v2, Svelte 5, TypeScript) |
 | `studio/hw/` | Tests against a real JTAGulator |
 | `.github/workflows/` | CI, Studio installers (`studio-v*` tags), firmware releases (`fw-v*` tags) |
 
@@ -269,8 +275,19 @@ To add a known part number (so Studio names the exact chip, not just its manufac
 
 - **Why does writing the database take 20 minutes?** EEPROM writes are slow, and every page is verified.
 - **Can more manufacturers be added?** Yes, there is room for one or two hundred more.
-- **Do I need ID Tracker to use Studio?** No. Studio works with the stock firmware and decodes manufacturer names itself.
+- **Do I need PinHound firmware to use Studio?** No. Studio works with the stock firmware and decodes manufacturer names itself.
 - **Can installing firmware brick the JTAGulator?** No. The Propeller boots from ROM and can always be reloaded over USB. Use **Test run (RAM)** first if you're unsure about an image.
+
+---
+
+## Credits
+
+PinHound stands on the work of others:
+
+- **[Joe Grand](https://github.com/joegrand) / [Grand Idea Studio](http://www.grandideastudio.com)** designed the JTAGulator hardware and wrote the original firmware ([grandideastudio/jtagulator](https://github.com/grandideastudio/jtagulator)), which PinHound's firmware is built on. JTAGulator is their product; PinHound is an independent project.
+- **Weiao ([Chaoschaos1024](https://github.com/Chaoschaos1024))** created [ID Tracker](https://github.com/Chaoschaos1024/jtagulator-ID-Tracker), the fork PinHound grew from: the JEP106 manufacturer database in the EEPROM, its writer, the manufacturer lookup in the firmware, and the original user manual.
+- **[openFPGALoader](https://github.com/trabucayre/openFPGALoader), [UrJTAG](https://sourceforge.net/p/urjtag/) and [OpenOCD](https://openocd.org)**, whose device lists are the source of Studio's part-number table.
+- Chip manufacturers, for publishing their technical documentation, and everyone who tested and gave feedback.
 
 ---
 
@@ -278,10 +295,4 @@ To add a known part number (so Studio names the exact chip, not just its manufac
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The original JTAGulator firmware is distributed under the Creative Commons Attribution 3.0 United States license.
-
-**Thanks to:**
-
-- Joe Grand, for creating the JTAGulator
-- Chip manufacturers, for publishing their technical documentation
-- Everyone who tested and gave feedback
+PinHound's own code (PinHound Studio, the command-line tool, the docs site and the firmware changes) is MIT licensed. The original JTAGulator firmware, © Grand Idea Studio, Inc., is distributed under the [Creative Commons Attribution 3.0 United States](http://creativecommons.org/licenses/by/3.0/us/) license, and its source files keep their original headers.

@@ -118,11 +118,15 @@ function linkedController(signal?: AbortSignal) {
   return c;
 }
 
+/** Firmware version lines of PinHound and of the ID Tracker releases (up to 1.3) it continues. */
+export const PINHOUND_FW = /PinHound|ID Tracker/i;
+
 export interface DeviceInfo {
   firmware: string;
   version: string | null;
   lines: string[];
-  idTracker: boolean;
+  /** PinHound firmware, or the ID Tracker releases it continues (manufacturer database, logic analyzer fixes). */
+  pinhound: boolean;
 }
 
 export interface GpioState {
@@ -445,7 +449,7 @@ export class JTAGulator {
         .filter((l) => l && l !== "I");
       const fw = lines.find((l) => /^JTAGulator FW/.test(l)) ?? lines[0] ?? "";
       const v = fw.match(/(\d+\.\d+(?:\.\d+)?)/);
-      return { firmware: fw, version: v ? v[1] : null, lines, idTracker: /ID Tracker/i.test(fw) };
+      return { firmware: fw, version: v ? v[1] : null, lines, pinhound: PINHOUND_FW.test(fw) };
     });
   }
 

@@ -1,6 +1,6 @@
-# JTAGulator Studio
+# PinHound Studio
 
-JTAGulator Studio is a desktop frontend for the [JTAGulator](https://jtagulator.com). It works with the stock firmware and with ID Tracker, and is built with Tauri v2, Svelte 5 and TypeScript.
+PinHound Studio is a desktop frontend for the [JTAGulator](https://jtagulator.com). It works with PinHound and with the stock firmware, and is built with Tauri v2, Svelte 5 and TypeScript.
 
 The app talks to the firmware's text menu over USB serial at 115200 8N1. It answers every prompt from the form values and turns the firmware's text output into structured results.
 
@@ -10,7 +10,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
 - **SWD**: pinout scan, plus reading and decoding the DPIDR.
 - **UART**: active scan, passive TXD scan that measures the baud rate, and a passthrough terminal.
 - **GPIO**: read all channels, monitor them live with a change log, or drive them as outputs.
-- **Logic analyzer**: OLS/SUMP capture client with a 24-channel waveform viewer, triggers (all 24 channels and pre-trigger capture on ID Tracker 1.3), UART, SPI, I2C, 1-Wire, CAN, JTAG and SWD decoders, and VCD, CSV and sigrok (`.sr`, opens in PulseView) export.
+- **Logic analyzer**: OLS/SUMP capture client with a 24-channel waveform viewer, triggers (all 24 channels and pre-trigger capture on PinHound 1.3), UART, SPI, I2C, 1-Wire, CAN, JTAG and SWD decoders, and VCD, CSV and sigrok (`.sr`, opens in PulseView) export.
 - **Scan all**: runs any set of scans one after another.
 - **Chip ID decoding**: IDCODE and DPIDR values are decoded in the app against the 1,953-entry JEP106 manufacturer table, plus a list of known part numbers.
 - **Target profile**: stores known pins, channel labels and every finding for the board you're testing. It saves automatically. Share a board as a `.jtarget` file; opening one lets you add it as a new target, replace the saved copy, or merge it into the current target (your pins and labels win, conflicts are listed). Also exports a Markdown report.
@@ -22,7 +22,7 @@ The app talks to the firmware's text menu over USB serial at 115200 8N1. It answ
 - **Device terminal**: raw view of the firmware's own menu.
 - **In-app updates**: the desktop app checks the latest GitHub release (`latest.json`, published by the release workflow), downloads the installer for its platform, verifies it against the public key in `tauri.conf.json`, installs it and restarts. The signing key lives in the `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` repository secrets.
 - **Simulator**: a built-in software JTAGulator with a fake target, so you can try everything without hardware.
-- **Command-line tool**: `jtagulator-cli` (`cli/`), built with `pnpm build:cli` into `dist-cli/`. Same core and script API, `--json` output, and `--sim` for the simulator. Tested against the simulator in CI and on a real JTAGulator.
+- **Command-line tool**: `pinhound` (`cli/`), built with `pnpm build:cli` into `dist-cli/`. Same core and script API, `--json` output, and `--sim` for the simulator. Tested against the simulator in CI and on a real JTAGulator.
 
 ## Develop
 
@@ -33,7 +33,7 @@ pnpm dev                # browser only (simulator, or Web Serial in Chrome)
 pnpm test               # API + logic analyzer tests against the simulator
 pnpm check              # svelte-check
 pnpm tauri build        # installers
-pnpm build:cli          # command-line tool -> dist-cli/jtagulator-cli.mjs
+pnpm build:cli          # command-line tool -> dist-cli/pinhound.mjs
 npx vitest run --config hw/vitest.config.ts   # against a real JTAGulator (JTAGULATOR_PORT, default /dev/ttyUSB0)
 scripts/build-firmware.sh                     # rebuild bundled firmware images (needs OpenSpin)
 ```
@@ -47,7 +47,7 @@ On Linux you need `webkit2gtk-4.1` installed. Opening the serial port resets the
 | Path | Contents |
 | --- | --- |
 | `src/lib/core` | Serial transports, session and expect engine, output parser, `JTAGulator` API, IDCODE decoding |
-| `cli` | `jtagulator-cli`: argument parsing, Node serial transport, script runner |
+| `cli` | `pinhound`: argument parsing, Node serial transport, script runner |
 | `src/lib/sim` | Firmware simulator |
 | `src/lib/logic` | SUMP client, decoders, export |
 | `src/lib/scripting` | Shared call registry (used by the UI, scripts and recorder), worker runtime, script library |

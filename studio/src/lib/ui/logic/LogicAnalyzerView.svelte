@@ -124,9 +124,9 @@
   let samplesN = $state(1024);
   let groups = $state([true, true, true]);
   let trigOn = $state(false);
-  /** Fraction of the capture kept from before the trigger (ID Tracker 1.3+). */
+  /** Fraction of the capture kept from before the trigger (PinHound 1.3+). */
   let preFraction = $state(0);
-  /** Run-length encoding (ID Tracker 1.4): stores runs, so slow signals cover far more time. */
+  /** Run-length encoding (PinHound 1.4): stores runs, so slow signals cover far more time. */
   let rleOn = $state(false);
   const usingPre = $derived(trigOn && preFraction > 0);
   const usingRle = $derived(longCaptures && rleOn && !usingPre);
@@ -585,7 +585,7 @@
         {/if}
         <span class="hint">
           Level trigger{fullTriggers ? "" : "; capture starts at the trigger (no pre-trigger)"}.
-          {#if !fullTriggers}This firmware only honours CH0–7 in triggers and can't keep pre-trigger samples; ID Tracker 1.3 can do both.{/if}
+          {#if !fullTriggers}This firmware only honours CH0–7 in triggers and can't keep pre-trigger samples; PinHound 1.3 can do both.{/if}
           {#if trigOn && !trigger}<br /><span class="warn-t">Set at least one channel to 0 or 1.</span>{/if}
         </span>
       </section>

@@ -9,7 +9,7 @@ import updaterUrl from "./assets/eeprom-update.binary?url";
 import firmwareUrl from "./assets/jtagulator.binary?url";
 
 export const BUNDLED = { firmware: firmwareUrl, updater: updaterUrl, probe: probeUrl };
-/** Version of the bundled ID Tracker firmware (built from this repository). */
+/** Version of the bundled PinHound firmware (built from this repository). */
 export const BUNDLED_VERSION = "1.4";
 
 export async function fetchAsset(url: string): Promise<Uint8Array> {

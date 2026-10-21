@@ -30,7 +30,7 @@ Type `J` to enter JTAG mode, then `H` for its commands.
    ![ ](/media/image32.png " ")
    - Looks for JTAG interfaces that return an `IDCODE`, the device identification register most chips select after reset. It's fast, but it can't find TDI.
    - **Success:** for the correct pin combination it prints one or more 32-bit `IDCODE` values.
-   - **With ID Tracker**, the manufacturer name appears next to each `IDCODE`. JTAGulator Studio shows the name on any firmware.
+   - **With PinHound firmware**, the manufacturer name appears next to each `IDCODE`. PinHound Studio shows the name on any firmware.
 
 3. **`B` – BYPASS scan**
 
@@ -67,5 +67,5 @@ Type `J` to enter JTAG mode, then `H` for its commands.
 
    - With OpenOCD you can debug, read and write memory, and extract firmware.
    - The mode survives resets until you leave it with `Ctrl+X`.
-   - JTAGulator Studio can do all of this from the JTAG page, and also saves the settings as a `.cfg` file and runs GDB: see [OpenOCD and GDB](/studio/openocd).
+   - PinHound Studio can do all of this from the JTAG page, and also saves the settings as a `.cfg` file and runs GDB: see [OpenOCD and GDB](/studio/openocd).
 

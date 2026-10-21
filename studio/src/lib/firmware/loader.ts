@@ -12,6 +12,7 @@
 //  4. Poll with 0xF9; the chip answers 0xFE when the checksum is good (then, for
 //     EEPROM loads, again after programming and after verifying), 0xFF on failure.
 import type { Transport } from "../core/transport";
+import { PINHOUND_FW } from "../core/jtagulator";
 
 export type LoadMode = "ram" | "eeprom";
 
@@ -87,7 +88,7 @@ export function describeImage(file: Uint8Array) {
     bytes: img.length,
     firmware: fw,
     version: fw?.match(/(\d+\.\d+(?:\.\d+)?)/)?.[1] ?? null,
-    idTracker: !!fw && /ID Tracker/i.test(fw),
+    pinhound: !!fw && PINHOUND_FW.test(fw),
   };
 }
 

@@ -1,6 +1,6 @@
 # Web version
 
-JTAGulator Studio also runs in a browser, with nothing to install: **[open the web app](https://gilbertorconde.github.io/jtagulator-ID-Tracker/app/){target="_self"}**.
+PinHound Studio also runs in a browser, with nothing to install: **[open the web app](https://gilbertorconde.github.io/pinhound/app/){target="_self"}**.
 
 It is the same app as the desktop version, connecting to the JTAGulator through the browser's Web Serial API. It always runs the latest version.
 
@@ -27,4 +27,4 @@ Firmware releases are offered from a copy kept on this site, because a browser p
 
 Scripts, targets and settings are stored in the browser, separately from the desktop app's.
 
-[Download the desktop app](https://github.com/gilbertorconde/jtagulator-ID-Tracker/releases/latest) for Windows, macOS or Linux.
+[Download the desktop app](https://github.com/gilbertorconde/pinhound/releases/latest) for Windows, macOS or Linux.

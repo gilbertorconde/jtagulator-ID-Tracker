@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rebuilds the firmware images bundled with JTAGulator Studio
+# Rebuilds the firmware images bundled with PinHound Studio
 # (src/lib/firmware/assets). Needs OpenSpin: https://github.com/parallaxinc/OpenSpin
 set -eu
 OPENSPIN=${OPENSPIN:-openspin}

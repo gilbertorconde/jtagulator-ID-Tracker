@@ -1,7 +1,7 @@
 name: Site
 
 # Builds the GitHub Pages site: the manual (docs/) at the root and the web
-# version of JTAGulator Studio under /app/, with a copy of every firmware
+# version of PinHound Studio under /app/, with a copy of every firmware
 # release (a browser page can't download GitHub release files itself).
 on:
   push:
