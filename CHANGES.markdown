@@ -1,12 +1,18 @@
-JTAGulator ID Tracker Change Log
-=====================
+PinHound Change Log
+===================
+
+PinHound continues the version numbers of ID Tracker, the fork by Weiao (Chaoschaos1024) it grew from: releases up to 1.3 were published as ID Tracker.
 
 Visit the JTAGulator [GitHub repository](https://github.com/grandideastudio/jtagulator/commits/master) for full commit comments.
 
-<a id="idt_1_4"></a>ID Tracker 1.4
+<a id="ph_1_4"></a>PinHound 1.4
 ----
 
 Release date: **unreleased**
+
+* Renamed from ID Tracker to PinHound. The version line reads `JTAGulator FW PinHound 1.4`; the info screen credits Weiao for the manufacturer ID database and points to the PinHound source. JTAGulator tools that look for `JTAGulator FW` still recognize it.
+
+* Logic analyzer: The four trigger stages run in one loop instead of four copies of the same code, which frees the memory the changes below need. Behavior is unchanged.
 
 * Logic analyzer: Captures hold 1364 samples instead of 1024. Samples are packed four to every three longs (24 bits each) instead of one per long, which wasted a quarter of the 4 KB buffer. The maximum sample rate is unchanged. Pre-trigger captures still store one long per sample and stay at 1024.
 

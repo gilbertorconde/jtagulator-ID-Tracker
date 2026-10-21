@@ -1,21 +1,3 @@
-{
- ************************************************************************************************************
- *                                                                                                          *
- *  AUTO-RECOVER NOTICE: This file was automatically recovered from an earlier Propeller Tool session.      *
- *                                                                                                          *
- *  ORIGINAL FOLDER:     D:\desktop\Open_Source\Jtagylator\jit\jtagulator-ID-Tracker\                       *
- *  TIME AUTO-SAVED:     21 hours, 57 minutes ago (2025/11/30 10:22:58)                                     *
- *                                                                                                          *
- *  OPTIONS:             1)  RESTORE THIS FILE by deleting these comments and selecting File -> Save.       *
- *                           The existing file in the original folder will be replaced by this one.         *
- *                                                                                                          *
- *                           -- OR --                                                                       *
- *                                                                                                          *
- *                       2)  IGNORE THIS FILE by closing it without saving.                                 *
- *                           This file will be discarded and the original will be left intact.              *
- *                                                                                                          *
- ************************************************************************************************************
-.}
 {{
 +-------------------------------------------------+
 | JTAGulator                                      |
@@ -38,6 +20,12 @@ and/or connectors on a target device.
 Refer to the project page for more details:
 
 http://www.jtagulator.com
+
+PinHound: enhanced firmware for the JTAGulator, with a JEP106 manufacturer
+database in the upper EEPROM, logic analyzer fixes and extensions.
+https://github.com/gilbertorconde/pinhound
+Manufacturer ID database and lookup: Weiao (Chaoschaos1024),
+https://github.com/Chaoschaos1024/jtagulator-ID-Tracker
 
 Each interface object contains the low-level routines and operational details
 for that particular on-chip debugging interface. This keeps the main JTAGulator
@@ -2857,11 +2845,11 @@ InitHeader    byte CR, LF, LF
               byte "           Welcome to JTAGulator. Press 'H' for available commands.", CR, LF
               byte "         Warning: Use of this tool may affect target system behavior!", 0
 
-VersionInfo   byte CR, LF, "JTAGulator FW ID Tracker 1.4", CR, LF
+VersionInfo   byte CR, LF, "JTAGulator FW PinHound 1.4", CR, LF
               byte "Designed by Joe Grand, Grand Idea Studio, Inc.", CR, LF
-              byte "Modified by Weiao, 2025.10.30", CR, LF 
+              byte "ID database: Weiao (Chaoschaos1024)", CR, LF 
               byte "Main: jtagulator.com", CR, LF
-              byte "Source: github.com/grandideastudio/jtagulator", 0
+              byte "Source: github.com/gilbertorconde/pinhound", 0
 
 MenuMain      byte CR, LF, "Target Interfaces:", CR, LF
               byte "J   JTAG", CR, LF
