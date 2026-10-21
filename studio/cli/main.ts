@@ -13,7 +13,7 @@ import { CALLS, HandleTable, type CallName } from "../src/lib/scripting/api";
 import { HOST_CALLS, serveScriptCall } from "../src/lib/scripting/host";
 import { DEFAULT_TARGET } from "../src/lib/sim/firmware";
 
-export const CLI_VERSION = "0.1.2";
+export const CLI_VERSION = "0.1.3";
 
 export interface Io {
   out: (s: string) => void;

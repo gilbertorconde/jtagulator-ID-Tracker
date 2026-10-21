@@ -1,6 +1,6 @@
 {
   "name": "jtagulator-studio",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Desktop frontend for the JTAGulator (ID Tracker firmware)",
   "type": "module",
   "private": true,
